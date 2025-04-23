@@ -6,6 +6,10 @@ import { useAuth } from './AuthContext';
 /**
  * Componente para proteger rutas basadas en roles específicos
  * Si el usuario no tiene el rol requerido, redirecciona a su página principal
+ * 
+ * Roles con acceso especial:
+ * - 'Developer' tiene acceso a todas las rutas
+ * - 'Administrator' tiene acceso amplio a la mayoría de las rutas
  */
 const RoleBasedRoute = ({ allowedRoles }) => {
   const { currentUser, isAuthenticated } = useAuth();
@@ -17,7 +21,20 @@ const RoleBasedRoute = ({ allowedRoles }) => {
     return <Navigate to="/" replace />;
   }
   
-  // Verificar si el usuario tiene el rol adecuado
+  // Roles con acceso especial
+  const specialRoles = ['Developer', 'Administrator'];
+  
+  // Verificar si el usuario tiene el rol adecuado o un rol especial
+  const hasSpecialRole = specialRoles.some(role => 
+    currentUser.role.includes(role)
+  );
+  
+  // Si tiene un rol especial, permitir acceso a la ruta
+  if (hasSpecialRole) {
+    return <Outlet />;
+  }
+  
+  // Para otros roles, verificar si están en la lista de roles permitidos
   if (!allowedRoles.includes(currentUser.role)) {
     // Obtener el rol base (para manejar roles compuestos como "PT - Administrator")
     const baseRole = currentUser.role.split(' - ')[0];

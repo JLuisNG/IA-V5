@@ -19,15 +19,6 @@ const PremiumTabs = ({ activeTab, onChangeTab }) => {
         {activeTab === 'Patients' && <div className="active-indicator"></div>}
         <div className="tab-hover-effect"></div>
       </div>
-      <div 
-        className={`tab-button ${activeTab === 'Staffing' ? 'active' : ''}`}
-        onClick={() => onChangeTab('Staffing')}
-      >
-        <div className="tab-icon"><i className="fas fa-user-md"></i></div>
-        <span>Staffing</span>
-        {activeTab === 'Staffing' && <div className="active-indicator"></div>}
-        <div className="tab-hover-effect"></div>
-      </div>
     </div>
   );
 };
@@ -1009,42 +1000,7 @@ const TPPatientsPage = () => {
                       </div>
                     </div>
                     
-                    <div className="therapist-filter">
-                      <h4>Therapist Filters</h4>
-                      <div className="therapist-type-filter">
-                        <p>Filter by qualification:</p>
-                        <div className="type-buttons">
-                          {therapistTypes.map((type, index) => (
-                            <button 
-                              key={index} 
-                              className={`type-button ${selectedTherapistType === type ? 'active' : ''}`}
-                              onClick={() => !isLoggingOut && handleTherapistTypeSelect(type)}
-                              disabled={isLoggingOut}
-                            >
-                              {type === 'all' ? 'All' : type}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                      
-                      <div className="therapist-list">
-                        <div 
-                          className={`therapist-item ${selectedTherapist === 'all' ? 'active' : ''}`}
-                          onClick={() => !isLoggingOut && handleTherapistSelect('all')}
-                        >
-                          <i className="fas fa-user-md"></i> All Therapists
-                        </div>
-                        {filteredTherapists.map((therapist, index) => (
-                          <div 
-                            key={index} 
-                            className={`therapist-item ${selectedTherapist === therapist ? 'active' : ''}`}
-                            onClick={() => !isLoggingOut && handleTherapistSelect(therapist)}
-                          >
-                            <i className="fas fa-user"></i> {therapist}
-                          </div>
-                        ))}
-                      </div>
-                    </div>
+          
                     
                     <div className="status-filter">
                       <h4>Patient Status</h4>
