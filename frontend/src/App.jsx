@@ -48,6 +48,10 @@ import './styles/Login/ResetPassword.scss';
 // Importar Font Awesome
 import '@fortawesome/fontawesome-free/css/all.min.css';
 
+const THERAPY_ROLES = ['PT', 'OT', 'ST', 'PTA', 'COTA', 'STA'];
+const ADMIN_ROLES = ['Administrator', 'Developer'];
+const ALL_ROLES = [...THERAPY_ROLES, ...ADMIN_ROLES, 'Supportive', 'Support', 'Agency'];
+
 function App() {
   return (
     <GeoRestrictionProvider>

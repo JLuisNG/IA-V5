@@ -1,4 +1,4 @@
-  import React, { useState } from 'react';
+import React, { useState } from 'react';
 import '../../../../styles/developer/Patients/Staffing/AddStaffForm.scss';
 
 const DevAddStaffForm = ({ onCancel }) => {
@@ -85,12 +85,12 @@ const DevAddStaffForm = ({ onCancel }) => {
   };
 
   const roles = [
-    { value: 'PT - Physical Therapist', label: 'PT - Physical Therapist' },
-    { value: 'OT - Occupational Therapist', label: 'OT - Occupational Therapist' },
-    { value: 'ST - Speech Therapist', label: 'ST - Speech Therapist' },
-    { value: 'PTA - Physical Therapist Assistant', label: 'PTA - Physical Therapist Assistant' },
-    { value: 'COTA - Occupational Therapy Assistant', label: 'COTA - Occupational Therapy Assistant' },
-    { value: 'STA - Speech Therapy Assistant', label: 'STA - Speech Therapy Assistant' },
+    { value: 'PT', label: 'PT - Physical Therapist' },
+    { value: 'OT', label: 'OT - Occupational Therapist' },
+    { value: 'ST', label: 'ST - Speech Therapist' },
+    { value: 'PTA', label: 'PTA - Physical Therapist Assistant' },
+    { value: 'COTA', label: 'COTA - Occupational Therapy Assistant' },
+    { value: 'STA', label: 'STA - Speech Therapy Assistant' },
     { value: 'Agency', label: 'Agency' },
     { value: 'Administrator', label: 'Administrator' },
     { value: 'Developer', label: 'Developer' }
@@ -98,15 +98,19 @@ const DevAddStaffForm = ({ onCancel }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('Form submitted', formData); // Debug log
-
+  
     try {
       const baseUrl = 'http://localhost:8000';
       let endpoint;
       let postData;
-
+  
+      if (!formData.role) {
+        alert('Por favor seleccione un rol');
+        return;
+      }
+  
       if (formData.role === 'Agency') {
-        endpoint = `${baseUrl}/agencias/`;
+        endpoint = `${baseUrl}/api/agencias/`;
         postData = {
           agency_name: `${formData.firstName} ${formData.lastName}`,
           email: formData.email,
@@ -115,46 +119,43 @@ const DevAddStaffForm = ({ onCancel }) => {
           password: formData.password
         };
       } else {
-        endpoint = `${baseUrl}/terapistas/`;
+        endpoint = `${baseUrl}/api/terapistas/`;
         postData = {
           therapist_name: `${formData.firstName} ${formData.lastName}`,
           email: formData.email,
           phone: formData.phone,
           birthday: formData.dob,
-          gender: formData.gender,
+          gender: formData.gender?.toUpperCase() || '',
           username: formData.userName,
           password: formData.password,
           rol: formData.role
         };
       }
-
-      console.log('Sending to:', endpoint); // Debug log
-      console.log('Data:', postData); // Debug log
-
+  
       const response = await fetch(endpoint, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Accept': 'application/json'
+          'Accept': 'application/json',
         },
+        mode: 'cors',
         body: JSON.stringify(postData)
       });
-
-      const data = await response.json();
-      console.log('Response:', data); // Debug log
-
+  
+      const responseData = await response.json();
+  
       if (!response.ok) {
-        throw new Error(data.detail || 'Error creating user');
+        throw new Error(`Error HTTP ${response.status}: ${JSON.stringify(responseData)}`);
       }
-
-      alert(formData.role === 'Agency' ? 'Agency created successfully!' : 'Therapist created successfully!');
+  
+      alert('Usuario creado exitosamente!');
       onCancel();
-
+  
     } catch (error) {
-      console.error('Error:', error);
-      alert('Error: ' + error.message);
+      alert(`Error al crear el usuario: ${error.message}`);
     }
   };
+  
 
   const documentsList = [
     { id: 'covidVaccine', name: 'Proof of COVID Vaccine' },

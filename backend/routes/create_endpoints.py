@@ -19,7 +19,7 @@ def crear_paciente(paciente: PacienteCreate, db: Session = Depends(get_db)):
                 detail=f"Disciplina inválida. Debe ser: {', '.join(valid_disciplines)}"
             )
 
-    if paciente.gender not in ["Male", "Female", "M", "F"]:
+    if paciente.gender not in ["Masculino", "Femenino", "Otro"]:
         raise HTTPException(status_code=400, detail="Género debe ser Male o Female")
 
     agencia = db.query(Agencias).filter(Agencias.id_agency == paciente.agency).first()
@@ -88,7 +88,7 @@ def crear_terapeuta(terapeuta: TerapeutaCreate, db: Session = Depends(get_db)):
     if existing_phone:
         raise HTTPException(status_code=400, detail="Número de teléfono ya está registrado")
 
-    valid_roles = ["PT - Physical Therapist", "OT - Occupational Therapist", "ST - Speech Therapist", "PTA - Physical Therapist Assistant", "COTA - Occupational Therapy Assistant", "STA - Speech Therapist Assistant"]
+    valid_roles = ["PT", "OT", "ST", "PTA", "COTA", "STA"]
     if terapeuta.rol not in valid_roles:
         raise HTTPException(
             status_code=400,
