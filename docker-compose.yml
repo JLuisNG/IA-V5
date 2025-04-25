@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   frontend-service:
     container_name: frontend-container
@@ -43,7 +41,7 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - D:/database_data:/var/lib/postgresql/data
 
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]

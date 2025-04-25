@@ -88,7 +88,7 @@ def crear_terapeuta(terapeuta: TerapeutaCreate, db: Session = Depends(get_db)):
     if existing_phone:
         raise HTTPException(status_code=400, detail="Número de teléfono ya está registrado")
 
-    valid_roles = ["PT", "OT", "ST", "PTA", "COTA"]
+    valid_roles = ["PT - Physical Therapist", "OT - Occupational Therapist", "ST - Speech Therapist", "PTA - Physical Therapist Assistant", "COTA - Occupational Therapy Assistant", "STA - Speech Therapist Assistant"]
     if terapeuta.rol not in valid_roles:
         raise HTTPException(
             status_code=400,

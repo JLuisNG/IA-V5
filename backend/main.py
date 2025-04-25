@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 import sys
 from sqlalchemy import inspect, text
 
@@ -6,9 +7,17 @@ sys.path.append("/app")
 
 from database.connection import engine, Base
 from database.models import Agencias, Pacientes, Terapistas, PacienteTerapeuta, CertificationPeriods, Visitas
-from routes import create_router, search_router, update_router  # Import routers
+from routes import create_router, search_router, update_router 
 
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://192.168.1.33:3000", "http://localhost:3000"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"], 
+)
 
 @app.on_event("startup")
 async def startup():

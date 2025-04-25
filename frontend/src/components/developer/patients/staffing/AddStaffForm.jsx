@@ -84,26 +84,77 @@ const DevAddStaffForm = ({ onCancel }) => {
     });
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    // Implementar lógica para enviar los datos
-    console.log('Form data:', formData);
-    console.log('Documents:', documents);
-    // Aquí iría la lógica para enviar al servidor
-  };
-
   const roles = [
-    { value: 'agency', label: 'Agency' },
-    { value: 'support', label: 'Support' },
-    { value: 'developer', label: 'Developer' },
-    { value: 'administrator', label: 'Administrador' },
-    { value: 'pt', label: 'PT - Physical Therapist' },
-    { value: 'pta', label: 'PTA - Physical Therapist Assistant' },
-    { value: 'ot', label: 'OT - Occupational Therapist' },
-    { value: 'cota', label: 'COTA - Occupational Therapy Assistant' },
-    { value: 'st', label: 'ST - Speech Therapist' },
-    { value: 'sta', label: 'STA - Speech Therapy Assistant' },
+    { value: 'PT - Physical Therapist', label: 'PT - Physical Therapist' },
+    { value: 'OT - Occupational Therapist', label: 'OT - Occupational Therapist' },
+    { value: 'ST - Speech Therapist', label: 'ST - Speech Therapist' },
+    { value: 'PTA - Physical Therapist Assistant', label: 'PTA - Physical Therapist Assistant' },
+    { value: 'COTA - Occupational Therapy Assistant', label: 'COTA - Occupational Therapy Assistant' },
+    { value: 'STA - Speech Therapy Assistant', label: 'STA - Speech Therapy Assistant' },
+    { value: 'Agency', label: 'Agency' },
+    { value: 'Administrator', label: 'Administrator' },
+    { value: 'Developer', label: 'Developer' }
   ];
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    console.log('Form submitted', formData); // Debug log
+
+    try {
+      const baseUrl = 'http://localhost:8000';
+      let endpoint;
+      let postData;
+
+      if (formData.role === 'Agency') {
+        endpoint = `${baseUrl}/agencias/`;
+        postData = {
+          agency_name: `${formData.firstName} ${formData.lastName}`,
+          email: formData.email,
+          phone: formData.phone,
+          username: formData.userName,
+          password: formData.password
+        };
+      } else {
+        endpoint = `${baseUrl}/terapistas/`;
+        postData = {
+          therapist_name: `${formData.firstName} ${formData.lastName}`,
+          email: formData.email,
+          phone: formData.phone,
+          birthday: formData.dob,
+          gender: formData.gender,
+          username: formData.userName,
+          password: formData.password,
+          rol: formData.role
+        };
+      }
+
+      console.log('Sending to:', endpoint); // Debug log
+      console.log('Data:', postData); // Debug log
+
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify(postData)
+      });
+
+      const data = await response.json();
+      console.log('Response:', data); // Debug log
+
+      if (!response.ok) {
+        throw new Error(data.detail || 'Error creating user');
+      }
+
+      alert(formData.role === 'Agency' ? 'Agency created successfully!' : 'Therapist created successfully!');
+      onCancel();
+
+    } catch (error) {
+      console.error('Error:', error);
+      alert('Error: ' + error.message);
+    }
+  };
 
   const documentsList = [
     { id: 'covidVaccine', name: 'Proof of COVID Vaccine' },

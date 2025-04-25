@@ -47,10 +47,7 @@ import './styles/Login/GeoRestrictionModal.scss';
 import './styles/Login/ResetPassword.scss';
 // Importar Font Awesome
 import '@fortawesome/fontawesome-free/css/all.min.css';
-// Define therapy roles para simplificar verificaciones
-const THERAPY_ROLES = ['PT', 'OT', 'ST', 'PTA', 'COTA', 'STA'];
-const ADMIN_ROLES = ['Administrator', 'Developer'];
-const ALL_ROLES = [...THERAPY_ROLES, ...ADMIN_ROLES, 'Supportive', 'Support', 'Agency'];
+
 function App() {
   return (
     <GeoRestrictionProvider>
