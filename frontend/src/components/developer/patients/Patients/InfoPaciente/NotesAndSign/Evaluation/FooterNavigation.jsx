@@ -1,6 +1,6 @@
 // components/FooterNavigation.jsx
 import React from 'react';
-import '../../../../../../styles/developer/Patients/InfoPaciente/NotesAndSign/FooterNavigation.scss';
+import '../../../../../../../styles/developer/Patients/InfoPaciente/NotesAndSign/FooterNavigation.scss';
 
 const FooterNavigation = ({
   onSaveAndExit,

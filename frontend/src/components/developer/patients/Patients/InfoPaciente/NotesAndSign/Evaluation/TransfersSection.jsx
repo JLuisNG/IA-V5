@@ -1,6 +1,6 @@
 // components/TransfersSection.jsx
 import React, { useState } from 'react';
-import '../../../../../../styles/developer/Patients/InfoPaciente/NotesAndSign/TransfersSection.scss';
+import '../../../../../../../styles/developer/Patients/InfoPaciente/NotesAndSign/TransfersSection.scss';
 import StandardizedTest from './StandardizedTest';
 
 const TransfersSection = ({ data, onChange }) => {

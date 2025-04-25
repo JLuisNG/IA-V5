@@ -499,3 +499,972 @@
       }
     }
   }
+
+
+  // Estilos premium para la pestaña de vitales
+.vitals-tab {
+  padding: 0;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  
+  .section-title {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    
+    h2 {
+      margin: 0;
+      font-size: 22px;
+      font-weight: 700;
+      color: #1e293b;
+      position: relative;
+      
+      &::after {
+        content: '';
+        position: absolute;
+        bottom: -8px;
+        left: 0;
+        width: 40px;
+        height: 3px;
+        background: linear-gradient(90deg, #4f46e5, #6366f1);
+        border-radius: 3px;
+      }
+    }
+    
+    .autosaved-badge {
+      font-size: 12px;
+      font-weight: 600;
+      color: #10b981;
+      background: rgba(209, 250, 229, 0.8);
+      padding: 4px 10px;
+      border-radius: 20px;
+      border: 1px solid rgba(16, 185, 129, 0.2);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      
+      &.visible {
+        opacity: 1;
+      }
+    }
+  }
+  
+  .vitals-layout {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr) 1fr;
+    gap: 24px;
+    
+    .vitals-section {
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+      overflow: hidden;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      
+      &:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.07);
+      }
+      
+      &.at-rest {
+        border-top: 4px solid #6366f1;
+      }
+      
+      &.after-exertion {
+        border-top: 4px solid #f97316;
+      }
+      
+      .vitals-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 16px 20px;
+        background: #f8fafc;
+        border-bottom: 1px solid rgba(226, 232, 240, 0.7);
+        
+        .title-with-icon {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          
+          i {
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            font-size: 14px;
+            
+            .at-rest & {
+              color: #6366f1;
+              background: rgba(224, 231, 255, 0.6);
+            }
+            
+            .after-exertion & {
+              color: #f97316;
+              background: rgba(255, 237, 213, 0.6);
+            }
+          }
+          
+          h3 {
+            margin: 0;
+            font-size: 16px;
+            font-weight: 700;
+            color: #334155;
+          }
+        }
+        
+        .info-badge {
+          padding: 4px 12px;
+          border-radius: 20px;
+          font-size: 12px;
+          font-weight: 600;
+          
+          .at-rest & {
+            background: rgba(224, 231, 255, 0.5);
+            color: #4f46e5;
+          }
+          
+          .after-exertion & {
+            background: rgba(255, 237, 213, 0.5);
+            color: #ea580c;
+          }
+        }
+      }
+      
+      .vitals-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 16px;
+        padding: 20px;
+        
+        .vital-card {
+          &.wide {
+            grid-column: span 2;
+          }
+          
+          label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            color: #64748b;
+            margin-bottom: 8px;
+          }
+          
+          .input-field {
+            position: relative;
+            
+            input {
+              width: 100%;
+              padding: 12px 16px;
+              padding-right: 70px;
+              border-radius: 10px;
+              border: 1px solid rgba(203, 213, 225, 0.8);
+              background: white;
+              font-size: 15px;
+              color: #334155;
+              font-weight: 500;
+              transition: all 0.2s ease;
+              
+              &:hover {
+                border-color: rgba(165, 180, 252, 0.5);
+              }
+              
+              &:focus {
+                outline: none;
+                border-color: #6366f1;
+                box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+              }
+            }
+            
+            .unit {
+              position: absolute;
+              right: 12px;
+              top: 50%;
+              transform: translateY(-50%);
+              font-size: 13px;
+              font-weight: 600;
+              color: #94a3b8;
+              background: #f8fafc;
+              padding: 2px 8px;
+              border-radius: 6px;
+              pointer-events: none;
+            }
+          }
+          
+          .bp-field {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            
+            input {
+              flex: 1;
+              padding: 12px 16px;
+              border-radius: 10px;
+              border: 1px solid rgba(203, 213, 225, 0.8);
+              background: white;
+              font-size: 15px;
+              color: #334155;
+              font-weight: 500;
+              transition: all 0.2s ease;
+              
+              &:hover {
+                border-color: rgba(165, 180, 252, 0.5);
+              }
+              
+              &:focus {
+                outline: none;
+                border-color: #6366f1;
+                box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+              }
+            }
+            
+            .bp-divider {
+              font-size: 20px;
+              font-weight: 700;
+              color: #94a3b8;
+            }
+            
+            .unit {
+              font-size: 13px;
+              font-weight: 600;
+              color: #94a3b8;
+              background: #f8fafc;
+              padding: 2px 8px;
+              border-radius: 6px;
+              white-space: nowrap;
+            }
+          }
+        }
+      }
+    }
+    
+    .vitals-analytics-section {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      
+      .vitals-summary-card, .vitals-notes-card {
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        overflow: hidden;
+        
+        .card-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 16px 20px;
+          background: #f8fafc;
+          border-bottom: 1px solid rgba(226, 232, 240, 0.7);
+          
+          h4 {
+            margin: 0;
+            font-size: 15px;
+            font-weight: 700;
+            color: #334155;
+          }
+          
+          i {
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            font-size: 13px;
+            color: #6366f1;
+            background: rgba(224, 231, 255, 0.6);
+          }
+        }
+      }
+      
+      .vitals-summary-card {
+        border-top: 4px solid #6366f1;
+        
+        .vital-comparison {
+          padding: 16px 20px;
+          
+          .comparison-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px dashed rgba(226, 232, 240, 0.7);
+            
+            &:last-child {
+              border-bottom: none;
+            }
+            
+            .label {
+              font-size: 14px;
+              font-weight: 600;
+              color: #64748b;
+            }
+            
+            .value {
+              font-size: 15px;
+              font-weight: 700;
+              color: #22c55e;
+              
+              &.negative {
+                color: #ef4444;
+              }
+            }
+          }
+        }
+        
+        .vital-status {
+          padding: 0 20px 16px;
+          
+          .checkbox-alert {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 16px;
+            background: rgba(254, 226, 226, 0.3);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            border-radius: 8px;
+            
+            input[type="checkbox"] {
+              width: 18px;
+              height: 18px;
+              accent-color: #ef4444;
+              cursor: pointer;
+            }
+            
+            label {
+              display: flex;
+              align-items: center;
+              gap: 8px;
+              font-size: 14px;
+              font-weight: 600;
+              color: #ef4444;
+              cursor: pointer;
+              
+              i {
+                font-size: 14px;
+              }
+            }
+          }
+        }
+      }
+      
+      .vitals-notes-card {
+        flex: 1;
+        border-top: 4px solid #94a3b8;
+        display: flex;
+        flex-direction: column;
+        
+        textarea {
+          flex: 1;
+          padding: 16px 20px;
+          border: none;
+          resize: none;
+          font-size: 14px;
+          line-height: 1.6;
+          color: #334155;
+          background: #fbfcfd;
+          
+          &:focus {
+            outline: none;
+            background: white;
+          }
+          
+          &::placeholder {
+            color: #94a3b8;
+          }
+        }
+      }
+    }
+  }
+}
+
+// Responsive styles
+@media (max-width: 1200px) {
+  .vitals-tab {
+    .vitals-layout {
+      grid-template-columns: 1fr 1fr;
+      
+      .vitals-analytics-section {
+        grid-column: span 2;
+        grid-row: 2;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .vitals-tab {
+    .vitals-layout {
+      grid-template-columns: 1fr;
+      
+      .vitals-analytics-section {
+        grid-column: auto;
+        grid-template-columns: 1fr;
+      }
+    }
+  }
+}
+
+// styles/developer/Patients/InfoPaciente/NotesAndSign/VitalsTab.scss
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+
+.vitals-tab {
+  padding: 0;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  
+  .section-title {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 28px;
+    
+    h2 {
+      margin: 0;
+      font-size: 22px;
+      font-weight: 700;
+      color: #1e293b;
+      position: relative;
+      
+      &::after {
+        content: '';
+        position: absolute;
+        bottom: -8px;
+        left: 0;
+        width: 40px;
+        height: 3px;
+        background: linear-gradient(90deg, #4f46e5, #6366f1);
+        border-radius: 3px;
+      }
+    }
+    
+    .autosaved-badge {
+      font-size: 12px;
+      font-weight: 600;
+      color: #10b981;
+      background: rgba(209, 250, 229, 0.8);
+      padding: 4px 10px;
+      border-radius: 20px;
+      border: 1px solid rgba(16, 185, 129, 0.2);
+      opacity: 0;
+      transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+      transform: translateY(5px);
+      
+      &.visible {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+  }
+  
+  .vitals-layout {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr) 1fr;
+    gap: 24px;
+    
+    .vitals-section {
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+      overflow: hidden;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      
+      &:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+      }
+      
+      &.at-rest {
+        border-top: 4px solid #6366f1;
+      }
+      
+      &.after-exertion {
+        border-top: 4px solid #f97316;
+      }
+      
+      .vitals-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 16px 20px;
+        background: #f8fafc;
+        border-bottom: 1px solid rgba(226, 232, 240, 0.7);
+        
+        .title-with-icon {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          
+          i {
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            font-size: 16px;
+            
+            .at-rest & {
+              color: #6366f1;
+              background: rgba(224, 231, 255, 0.6);
+            }
+            
+            .after-exertion & {
+              color: #f97316;
+              background: rgba(255, 237, 213, 0.6);
+            }
+          }
+          
+          h3 {
+            margin: 0;
+            font-size: 16px;
+            font-weight: 700;
+            color: #334155;
+          }
+        }
+        
+        .info-badge {
+          padding: 5px 12px;
+          border-radius: 20px;
+          font-size: 12px;
+          font-weight: 600;
+          
+          .at-rest & {
+            background: rgba(224, 231, 255, 0.5);
+            color: #4f46e5;
+          }
+          
+          .after-exertion & {
+            background: rgba(255, 237, 213, 0.5);
+            color: #ea580c;
+          }
+        }
+      }
+      
+      .vitals-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
+        padding: 20px;
+        
+        .vital-card {
+          position: relative;
+          transition: transform 0.2s ease;
+          
+          &:hover {
+            transform: translateY(-2px);
+          }
+          
+          &.wide {
+            grid-column: span 2;
+          }
+          
+          label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            color: #64748b;
+            margin-bottom: 10px;
+          }
+          
+          .input-field {
+            position: relative;
+            
+            input {
+              width: 100%;
+              padding: 12px 16px;
+              padding-right: 70px;
+              border-radius: 10px;
+              border: 1px solid rgba(203, 213, 225, 0.8);
+              background: white;
+              font-size: 15px;
+              color: #334155;
+              font-weight: 500;
+              transition: all 0.2s ease;
+              
+              &:hover {
+                border-color: rgba(165, 180, 252, 0.5);
+              }
+              
+              &:focus {
+                outline: none;
+                border-color: #6366f1;
+                box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+              }
+              
+              &::-webkit-inner-spin-button,
+              &::-webkit-outer-spin-button {
+                -webkit-appearance: none;
+                margin: 0;
+              }
+            }
+            
+            .unit {
+              position: absolute;
+              right: 12px;
+              top: 50%;
+              transform: translateY(-50%);
+              font-size: 13px;
+              font-weight: 600;
+              color: #94a3b8;
+              background: #f8fafc;
+              padding: 2px 8px;
+              border-radius: 6px;
+              pointer-events: none;
+            }
+          }
+          
+          .bp-field {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            
+            input {
+              flex: 1;
+              padding: 12px 16px;
+              border-radius: 10px;
+              border: 1px solid rgba(203, 213, 225, 0.8);
+              background: white;
+              font-size: 15px;
+              color: #334155;
+              font-weight: 500;
+              transition: all 0.2s ease;
+              
+              &:hover {
+                border-color: rgba(165, 180, 252, 0.5);
+              }
+              
+              &:focus {
+                outline: none;
+                border-color: #6366f1;
+                box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+              }
+              
+              &::-webkit-inner-spin-button,
+              &::-webkit-outer-spin-button {
+                -webkit-appearance: none;
+                margin: 0;
+              }
+            }
+            
+            .bp-divider {
+              font-size: 20px;
+              font-weight: 700;
+              color: #94a3b8;
+            }
+            
+            .unit {
+              font-size: 13px;
+              font-weight: 600;
+              color: #94a3b8;
+              background: #f8fafc;
+              padding: 2px 8px;
+              border-radius: 6px;
+              white-space: nowrap;
+            }
+          }
+        }
+      }
+    }
+    
+    .vitals-analytics-section {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      
+      .vitals-summary-card, .vitals-notes-card {
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+        overflow: hidden;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        
+        &:hover {
+          transform: translateY(-3px);
+          box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+        }
+        
+        .card-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 16px 20px;
+          background: #f8fafc;
+          border-bottom: 1px solid rgba(226, 232, 240, 0.7);
+          
+          h4 {
+            margin: 0;
+            font-size: 16px;
+            font-weight: 700;
+            color: #334155;
+          }
+          
+          i {
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            font-size: 14px;
+            color: #6366f1;
+            background: rgba(224, 231, 255, 0.6);
+          }
+        }
+      }
+      
+      .vitals-summary-card {
+        border-top: 4px solid #6366f1;
+        
+        .vital-comparison {
+          padding: 16px 20px;
+          
+          .comparison-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px dashed rgba(226, 232, 240, 0.7);
+            
+            &:last-child {
+              border-bottom: none;
+            }
+            
+            .label {
+              font-size: 14px;
+              font-weight: 600;
+              color: #64748b;
+            }
+            
+            .value {
+              font-size: 15px;
+              font-weight: 700;
+              color: #22c55e;
+              
+              &.negative {
+                color: #ef4444;
+              }
+            }
+          }
+        }
+        
+        .vital-status {
+          padding: 0 20px 16px;
+          
+          .checkbox-alert {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 16px;
+            background: rgba(254, 226, 226, 0.3);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            border-radius: 8px;
+            transition: background-color 0.2s ease;
+            
+            &:hover {
+              background: rgba(254, 226, 226, 0.5);
+            }
+            
+            input[type="checkbox"] {
+              width: 18px;
+              height: 18px;
+              accent-color: #ef4444;
+              cursor: pointer;
+            }
+            
+            label {
+              display: flex;
+              align-items: center;
+              gap: 8px;
+              font-size: 14px;
+              font-weight: 600;
+              color: #ef4444;
+              cursor: pointer;
+              
+              i {
+                font-size: 14px;
+              }
+            }
+          }
+        }
+      }
+      
+      .vitals-notes-card {
+        flex: 1;
+        border-top: 4px solid #94a3b8;
+        display: flex;
+        flex-direction: column;
+        
+        textarea {
+          flex: 1;
+          padding: 16px 20px;
+          border: none;
+          resize: none;
+          font-size: 14px;
+          line-height: 1.6;
+          color: #334155;
+          background: #fbfcfd;
+          min-height: 120px;
+          transition: background-color 0.2s ease;
+          
+          &:focus {
+            outline: none;
+            background: white;
+          }
+          
+          &::placeholder {
+            color: #94a3b8;
+          }
+        }
+      }
+    }
+  }
+}
+
+// Media queries para responsive
+@media (max-width: 1200px) {
+  .vitals-tab {
+    .vitals-layout {
+      grid-template-columns: 1fr 1fr;
+      
+      .vitals-analytics-section {
+        grid-column: span 2;
+        grid-row: 2;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+  }
+}
+
+@media (max-width: 992px) {
+  .vitals-tab {
+    .vitals-layout {
+      grid-template-columns: 1fr;
+      gap: 20px;
+      
+      .vitals-analytics-section {
+        grid-column: auto;
+        grid-template-columns: 1fr;
+      }
+      
+      .vitals-section {
+        .vitals-grid {
+          .vital-card {
+            &.wide {
+              grid-column: span 2;
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .vitals-tab {
+    .section-title {
+      h2 {
+        font-size: 20px;
+      }
+    }
+    
+    .vitals-layout {
+      .vitals-section {
+        .vitals-header {
+          padding: 14px 16px;
+          
+          .title-with-icon {
+            i {
+              width: 32px;
+              height: 32px;
+              font-size: 14px;
+            }
+            
+            h3 {
+              font-size: 15px;
+            }
+          }
+          
+          .info-badge {
+            font-size: 11px;
+            padding: 4px 10px;
+          }
+        }
+        
+        .vitals-grid {
+          padding: 16px;
+          gap: 16px;
+          grid-template-columns: 1fr;
+          
+          .vital-card {
+            &.wide {
+              grid-column: span 1;
+            }
+            
+            label {
+              font-size: 13px;
+              margin-bottom: 8px;
+            }
+            
+            .input-field {
+              input {
+                padding: 10px 14px;
+                font-size: 14px;
+                padding-right: 65px;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+@media (max-width: 576px) {
+  .vitals-tab {
+    .vitals-layout {
+      .vitals-section {
+        .vitals-grid {
+          .vital-card {
+            .bp-field {
+              flex-direction: column;
+              gap: 8px;
+              
+              input {
+                width: 100%;
+              }
+              
+              .bp-divider {
+                display: none;
+              }
+              
+              .unit {
+                align-self: flex-end;
+              }
+            }
+          }
+        }
+      }
+      
+      .vitals-analytics-section {
+        .vitals-summary-card {
+          .vital-comparison {
+            .comparison-item {
+              flex-direction: column;
+              align-items: flex-start;
+              gap: 4px;
+              
+              .value {
+                align-self: flex-end;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

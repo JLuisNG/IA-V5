@@ -1,6 +1,6 @@
 // components/ObjectiveSection.jsx
 import React, { useState } from 'react';
-import '../../../../../../styles/developer/Patients/InfoPaciente/NotesAndSign/ObjectiveSection.scss';
+import '../../../../../../../styles/developer/Patients/InfoPaciente/NotesAndSign/ObjectiveSection.scss';
 import StandardizedTest from './StandardizedTest';
 
 const ObjectiveSection = ({ data, onChange }) => {

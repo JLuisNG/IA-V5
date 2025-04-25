@@ -1,6 +1,6 @@
 // components/Navigation.jsx
 import React from 'react';
-import '../../../../../../styles/developer/Patients/InfoPaciente/NotesAndSign/Navigation.scss';
+import '../../../../../../../styles/developer/Patients/InfoPaciente/NotesAndSign/Navigation.scss';
 
 const Navigation = ({ currentStep, onStepChange, patientName, visitDate }) => {
   const steps = [
@@ -8,6 +8,7 @@ const Navigation = ({ currentStep, onStepChange, patientName, visitDate }) => {
     { id: 'objective', label: 'Objective' },
     { id: 'assessment', label: 'Assessment' },
     { id: 'plan', label: 'Plan' },
+    { id: 'transfers', label: 'Transfers / ADL' },
     { id: 'finale', label: 'Finale' }
   ];
   

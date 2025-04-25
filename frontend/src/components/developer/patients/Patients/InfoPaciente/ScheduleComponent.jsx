@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import '../../../../../styles/developer/Patients/InfoPaciente/ScheduleComponent.scss';
-import VisitCompletionModal from './NotesAndSign/VisitCompletionModal';
+import VisitCompletionModal from './NotesAndSign/Evaluation/VisitCompletionModal';
 
 const ScheduleComponent = ({ patient, onUpdateSchedule }) => {
   // Estados para controlar las vistas y datos
