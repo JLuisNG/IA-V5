@@ -2,13 +2,37 @@
 import React, { useState } from 'react';
 import '../../../../../../../styles/developer/Patients/InfoPaciente/NotesAndSign/TransfersSection.scss';
 import StandardizedTest from './StandardizedTest';
+import KatzModal from './standardizedTests/KatzModal';
+import BarthelModal from './standardizedTests/BarthelModal';
 
 const TransfersSection = ({ data, onChange }) => {
-  // Manejador para los cambios en los campos
+  // State to manage modal visibility
+  const [isKatzModalOpen, setIsKatzModalOpen] = useState(false);
+  const [isBarthelModalOpen, setIsBarthelModalOpen] = useState(false);
+
+  // State to store standardized test data
+  const [katzData, setKatzData] = useState(data.katz || { isComplete: false });
+  const [barthelData, setBarthelData] = useState(data.barthel || { isComplete: false });
+
+  // Handler for form changes
   const handleChange = (field, value) => {
     onChange({ ...data, [field]: value });
   };
-  
+
+  // Handler for Katz modal submission
+  const handleKatzSubmit = (katzFormData) => {
+    setKatzData(katzFormData);
+    onChange({ ...data, katz: katzFormData });
+    setIsKatzModalOpen(false);
+  };
+
+  // Handler for Barthel modal submission
+  const handleBarthelSubmit = (barthelFormData) => {
+    setBarthelData(barthelFormData);
+    onChange({ ...data, barthel: barthelFormData });
+    setIsBarthelModalOpen(false);
+  };
+
   return (
     <div className="transfers-section-container">
       <div className="form-section">
@@ -558,7 +582,7 @@ const TransfersSection = ({ data, onChange }) => {
         
         <div className="form-row">
           <div className="form-group">
-            <label>Additional Information</label>
+            <label>Additional Information about ADL / Self Care Skills</label>
             <textarea 
               value={data.adlAdditional || ''}
               onChange={(e) => handleChange('adlAdditional', e.target.value)}
@@ -575,18 +599,39 @@ const TransfersSection = ({ data, onChange }) => {
           <div className="standardized-tests-row">
             <StandardizedTest 
               title="Katz" 
-              isComplete={false}
-              onOpen={() => console.log('Opening Katz test')}
+              isComplete={katzData.isComplete}
+              score={katzData.isComplete ? katzData.totalScore : null}
+              onOpen={() => setIsKatzModalOpen(true)}
             />
             
             <StandardizedTest 
               title="Barthel" 
-              isComplete={false}
-              onOpen={() => console.log('Opening Barthel test')}
+              isComplete={barthelData.isComplete}
+              score={barthelData.isComplete ? barthelData.totalScore : null}
+              onOpen={() => setIsBarthelModalOpen(true)}
             />
           </div>
         </div>
       </div>
+
+      {/* Modals for Katz and Barthel */}
+      <KatzModal 
+        isOpen={isKatzModalOpen}
+        onClose={(data) => {
+          if (!data) setIsKatzModalOpen(false);
+          else handleKatzSubmit(data);
+        }}
+        initialData={katzData}
+      />
+      
+      <BarthelModal 
+        isOpen={isBarthelModalOpen}
+        onClose={(data) => {
+          if (!data) setIsBarthelModalOpen(false);
+          else handleBarthelSubmit(data);
+        }}
+        initialData={barthelData}
+      />
     </div>
   );
 };

@@ -3,6 +3,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import '../../../../../../../styles/developer/Patients/InfoPaciente/NotesAndSign/VisitCompletionModal.scss';
 
 // Importar todos los componentes de los pasos
+
 import Navigation from './Navigation';
 import PTEvaluation from './PTEvaluation';
 import ObjectiveSection from './ObjectiveSection';
@@ -11,10 +12,11 @@ import PlanSection from './PlanSection';
 import TransfersSection from './TransfersSection';
 import FinaleSection from './FinaleSection';
 import FooterNavigation from './FooterNavigation';
-
+import MedicationTab from './MedicationTab';
 
 // Importar componentes de pruebas estandarizadas
-import TinettiModal from './FstandardizedTests/TinettiModal.jsx';
+
+import TinettiModal from './FstandardizedTests/TinettiModal';
 import BergModal from './standardizedTests/BergModal.jsx';
 import AceIIIModal from './standardizedTests/AceIIIModal.jsx';
 import TimedUpAndGoModal from './standardizedTests/TimedUpAndGoModal.jsx';
@@ -31,7 +33,11 @@ import WoundAssessmentModal from './standardizedTests/WoundAssessmentModal.jsx';
 import BradenScaleModal from './standardizedTests/BradenScaleModal.jsx';
 import MedicationListModal from './standardizedTests/MedicationListModal.jsx';
 import DiagnosisModal from './DiagnosisModal.jsx';
+import MobergModal from './standardizedTests/MobergModal.jsx';
+import SlumsModal from './standardizedTests/SlumsModal.jsx';
+import FourStageBalanceTestModal from './standardizedTests/FourStageBalanceTestModal ';
 
+// Constantes para los nombres de los test estandarizados
 // Constantes para los nombres de los test estandarizados
 const STANDARDIZED_TESTS = {
   ACE_III: 'ACE III',
@@ -46,15 +52,19 @@ const STANDARDIZED_TESTS = {
   SPPB: 'Short Physical Performance Battery',
   NUTRITIONAL: 'Nutritional Status Assessment',
   DIABETIC_FOOT: 'Diabetic Foot Exam',
-  KATZ: 'Katz Index',
+  KATZ: 'Katz',
   WOUND: 'Wound Assessment',
   BRADEN: 'Braden Scale',
-  MEDICATION: 'Medication List'
+  MEDICATION: 'Medication List',
+  MOBERG: 'Moberg Hand Function Test',
+  SLUMS: 'SLUMS Examination',
+  FOUR_STAGE_BALANCE: 'Four Stage Balance Test',
 };
 
 const VisitCompletionModal = ({ isOpen, onClose, visitData, onSave }) => {
   // Estados para manejar los pasos y datos del formulario
   const [currentStep, setCurrentStep] = useState('evaluation');
+  const [activeTab, setActiveTab] = useState('patient-information');
   const [formData, setFormData] = useState({
     patientInfo: {},
     objective: {},
@@ -71,6 +81,7 @@ const VisitCompletionModal = ({ isOpen, onClose, visitData, onSave }) => {
   // Estado para controlar el guardado automático
   const [lastSaved, setLastSaved] = useState(new Date());
   const [autoSaveMessage, setAutoSaveMessage] = useState('');
+  const [showAutoSaveMessage, setShowAutoSaveMessage] = useState(false);
 
   // Efecto para inicializar los datos del formulario con los datos de la visita
   useEffect(() => {
@@ -107,8 +118,9 @@ const VisitCompletionModal = ({ isOpen, onClose, visitData, onSave }) => {
         await onSave(formData);
         setLastSaved(new Date());
         setAutoSaveMessage('AUTOSAVED');
+        setShowAutoSaveMessage(true);
         setTimeout(() => {
-          setAutoSaveMessage('');
+          setShowAutoSaveMessage(false);
         }, 3000);
         setIsFormDirty(false);
       } catch (error) {
@@ -131,6 +143,13 @@ const VisitCompletionModal = ({ isOpen, onClose, visitData, onSave }) => {
     // Auto-guardar antes de cambiar de paso
     autoSave();
     setCurrentStep(step);
+    // Resetear la pestaña activa al cambiar de paso
+    setActiveTab('patient-information');
+  };
+
+  // Función para cambiar entre pestañas dentro de un paso
+  const handleTabChange = (tab) => {
+    setActiveTab(tab);
   };
 
   // Función para guardar y salir
@@ -145,24 +164,6 @@ const VisitCompletionModal = ({ isOpen, onClose, visitData, onSave }) => {
     } finally {
       setIsSaving(false);
     }
-  };
-
-  // Función para mostrar las notas anteriores
-  const handleShowPastNotes = () => {
-    // Implementar lógica para mostrar notas anteriores
-    console.log('Show past notes');
-  };
-
-  // Función para mostrar el formulario de referencia
-  const handleShowReferral = () => {
-    // Implementar lógica para mostrar formulario de referencia
-    console.log('Show referral form');
-  };
-
-  // Función para mostrar los stickies
-  const handleShowStickies = () => {
-    // Implementar lógica para mostrar stickies
-    console.log('Show stickies');
   };
 
   // Manejar la apertura de una prueba estandarizada
@@ -202,6 +203,26 @@ const VisitCompletionModal = ({ isOpen, onClose, visitData, onSave }) => {
     setShowDiagnosisModal(false);
   };
 
+  // Obtener el texto para el paso actual
+  const getStepTitle = () => {
+    switch (currentStep) {
+      case 'evaluation':
+        return 'PT Evaluation';
+      case 'objective':
+        return 'Objective';
+      case 'transfers':
+        return 'Transfers / ADL';
+      case 'assessment':
+        return 'Assessment';
+      case 'plan':
+        return 'Plan';
+      case 'finale':
+        return 'Finale';
+      default:
+        return 'PT Evaluation';
+    }
+  };
+
   // Renderizar el componente actual basado en el paso
   const renderCurrentStep = () => {
     switch (currentStep) {
@@ -212,7 +233,9 @@ const VisitCompletionModal = ({ isOpen, onClose, visitData, onSave }) => {
             onChange={(data) => handleFormChange('patientInfo', data)}
             onOpenTest={handleOpenTest}
             onOpenDiagnosisModal={handleOpenDiagnosisModal}
-            autoSaveMessage={autoSaveMessage}
+            activeTab={activeTab}
+            setActiveTab={handleTabChange}
+            autoSaveMessage={showAutoSaveMessage ? autoSaveMessage : ''}
           />
         );
       case 'objective':
@@ -221,24 +244,24 @@ const VisitCompletionModal = ({ isOpen, onClose, visitData, onSave }) => {
             data={formData.objective}
             onChange={(data) => handleFormChange('objective', data)}
             onOpenTest={handleOpenTest}
-            autoSaveMessage={autoSaveMessage}
+            autoSaveMessage={showAutoSaveMessage ? autoSaveMessage : ''}
           />
         );
-        case 'transfers': // Nuevo paso para la sección de transferencias
-      return (
-        <TransfersSection
-          data={formData.transfers || {}} // Asegurarse de que existe la sección en formData
-          onChange={(data) => handleFormChange('transfers', data)}
-          onOpenTest={handleOpenTest}
-          autoSaveMessage={autoSaveMessage}
-        />
-      );
+      case 'transfers':
+        return (
+          <TransfersSection
+            data={formData.transfers || {}}
+            onChange={(data) => handleFormChange('transfers', data)}
+            onOpenTest={handleOpenTest}
+            autoSaveMessage={showAutoSaveMessage ? autoSaveMessage : ''}
+          />
+        );
       case 'assessment':
         return (
           <AssessmentSection
             data={formData.assessment}
             onChange={(data) => handleFormChange('assessment', data)}
-            autoSaveMessage={autoSaveMessage}
+            autoSaveMessage={showAutoSaveMessage ? autoSaveMessage : ''}
           />
         );
       case 'plan':
@@ -246,7 +269,7 @@ const VisitCompletionModal = ({ isOpen, onClose, visitData, onSave }) => {
           <PlanSection
             data={formData.plan}
             onChange={(data) => handleFormChange('plan', data)}
-            autoSaveMessage={autoSaveMessage}
+            autoSaveMessage={showAutoSaveMessage ? autoSaveMessage : ''}
           />
         );
       case 'finale':
@@ -254,11 +277,16 @@ const VisitCompletionModal = ({ isOpen, onClose, visitData, onSave }) => {
           <FinaleSection
             data={formData.finale}
             onChange={(data) => handleFormChange('finale', data)}
-            autoSaveMessage={autoSaveMessage}
+            autoSaveMessage={showAutoSaveMessage ? autoSaveMessage : ''}
           />
         );
       default:
-        return <PTEvaluation data={formData.patientInfo} onChange={(data) => handleFormChange('patientInfo', data)} />;
+        return <PTEvaluation 
+          data={formData.patientInfo} 
+          onChange={(data) => handleFormChange('patientInfo', data)}
+          activeTab={activeTab}
+          setActiveTab={handleTabChange}
+        />;
     }
   };
 
@@ -361,6 +389,24 @@ const VisitCompletionModal = ({ isOpen, onClose, visitData, onSave }) => {
           onClose={handleCloseTest} 
           initialData={formData.patientInfo.standardizedTests?.[STANDARDIZED_TESTS.MEDICATION]} 
         />;
+      case STANDARDIZED_TESTS.MOBERG:
+        return <MobergModal 
+          isOpen={!!activeTest} 
+          onClose={handleCloseTest} 
+          initialData={formData.patientInfo.standardizedTests?.[STANDARDIZED_TESTS.MOBERG]} 
+        />;
+      case STANDARDIZED_TESTS.FOUR_STAGE_BALANCE:
+        return <FourStageBalanceTestModal
+          isOpen={!!activeTest}
+          onClose={handleCloseTest}
+          initialData={formData.patientInfo.standardizedTests?.[STANDARDIZED_TESTS.FOUR_STAGE_BALANCE]}
+        />;
+      case STANDARDIZED_TESTS.SLUMS:
+        return <SlumsModal 
+          isOpen={!!activeTest} 
+          onClose={handleCloseTest} 
+          initialData={formData.patientInfo.standardizedTests?.[STANDARDIZED_TESTS.SLUMS]} 
+        />;
       default:
         return null;
     }
@@ -369,36 +415,99 @@ const VisitCompletionModal = ({ isOpen, onClose, visitData, onSave }) => {
   // Si el modal no está abierto, no renderizar nada
   if (!isOpen) return null;
 
+  // Definir los pasos de navegación
+  const navigationSteps = [
+    { id: 'evaluation', label: 'PT Evaluation', number: 1 },
+    { id: 'objective', label: 'Objective', number: 2 },
+    { id: 'assessment', label: 'Assessment', number: 3 },
+    { id: 'plan', label: 'Plan', number: 4 },
+    { id: 'transfers', label: 'Transfers / ADL', number: 5 },
+    { id: 'finale', label: 'Finale', number: 6 }
+  ];
+
   return (
     <div className="visit-completion-modal-overlay">
       <div className="visit-completion-modal">
         <div className="modal-header">
-          <h2>PT Evaluation</h2>
+          <h2>{getStepTitle()}</h2>
+          <div className="patient-info">
+            <div className="info-item">
+              <i className="fas fa-user"></i>
+              <span>Patient: {visitData?.patientName || 'Unknown'}</span>
+            </div>
+            <div className="info-item">
+              <i className="fas fa-calendar-alt"></i>
+              <span>Date: {visitData?.date || new Date().toLocaleDateString()}</span>
+            </div>
+          </div>
           <button className="close-button" onClick={onClose}>
             <i className="fas fa-times"></i>
           </button>
         </div>
         
-        <Navigation 
-          currentStep={currentStep} 
-          onStepChange={handleStepChange}
-          patientName={visitData?.patientName}
-          visitDate={visitData?.date}
-        />
+        <div className="navigation-container">
+          <div className="step-navigation">
+            {navigationSteps.map((step) => (
+              <button
+                key={step.id}
+                className={`step-button ${currentStep === step.id ? 'active' : ''}`}
+                onClick={() => handleStepChange(step.id)}
+              >
+                <span className="step-number">{step.number}</span>
+                {step.label}
+              </button>
+            ))}
+          </div>
+        </div>
         
         <div className="modal-content">
           {renderCurrentStep()}
         </div>
         
-        <FooterNavigation
-          onSaveAndExit={handleSaveAndExit}
-          onPastNotes={handleShowPastNotes}
-          onReferral={handleShowReferral}
-          onStickies={handleShowStickies}
-          currentStep={currentStep}
-          onStepChange={handleStepChange}
-          isSaving={isSaving}
-        />
+        <div className="modal-footer">
+          <div className="footer-actions">
+            <button 
+              className={`footer-button save-exit ${isSaving ? 'loading' : ''}`}
+              onClick={handleSaveAndExit}
+              disabled={isSaving}
+            >
+              <i className="fas fa-save"></i>
+              <span>Save & Exit</span>
+            </button>
+          </div>
+          
+          <div className="footer-actions">
+            {currentStep !== 'evaluation' && (
+              <button 
+                className="footer-button secondary"
+                onClick={() => {
+                  const currentIndex = navigationSteps.findIndex(step => step.id === currentStep);
+                  if (currentIndex > 0) {
+                    handleStepChange(navigationSteps[currentIndex - 1].id);
+                  }
+                }}
+              >
+                <i className="fas fa-arrow-left"></i>
+                <span>Previous</span>
+              </button>
+            )}
+            
+            {currentStep !== 'finale' && (
+              <button 
+                className="footer-button primary"
+                onClick={() => {
+                  const currentIndex = navigationSteps.findIndex(step => step.id === currentStep);
+                  if (currentIndex < navigationSteps.length - 1) {
+                    handleStepChange(navigationSteps[currentIndex + 1].id);
+                  }
+                }}
+              >
+                <span>Next</span>
+                <i className="fas fa-arrow-right"></i>
+              </button>
+            )}
+          </div>
+        </div>
         
         {/* Renderizar el modal de prueba estandarizada activo */}
         {renderActiveTestModal()}

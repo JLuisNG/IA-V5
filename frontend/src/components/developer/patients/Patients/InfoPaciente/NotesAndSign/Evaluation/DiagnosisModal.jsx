@@ -1,12 +1,57 @@
-// components/DiagnosisModal.jsx
+// Enhanced DiagnosisModal.jsx
 import React, { useState, useEffect } from 'react';
 import '../../../../../../../styles/developer/Patients/InfoPaciente/NotesAndSign/DiagnosisModal.scss';
 
 const DiagnosisModal = ({ isOpen, onClose, initialData = '' }) => {
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedDiagnosis, setSelectedDiagnosis] = useState(initialData);
+  const [selectedDiagnosis, setSelectedDiagnosis] = useState(initialData ? parseInitialData(initialData) : null);
   const [secondaryDiagnoses, setSecondaryDiagnoses] = useState([]);
   const [activeTab, setActiveTab] = useState('search');
+  const [customCode, setCustomCode] = useState('');
+  const [customDescription, setCustomDescription] = useState('');
+  
+  // Parse initial data if it exists
+  function parseInitialData(data) {
+    if (!data) return null;
+    
+    try {
+      // Assuming format "CODE - Description | Secondary: CODE - Description, CODE - Description"
+      const parts = data.split(' | Secondary: ');
+      const primary = parts[0];
+      
+      // Parse the primary diagnosis
+      const primaryMatch = primary.match(/^([A-Z0-9.]+) - (.+)$/);
+      if (primaryMatch) {
+        const primaryDiagnosis = {
+          code: primaryMatch[1],
+          description: primaryMatch[2]
+        };
+        
+        // Parse secondary diagnoses if they exist
+        if (parts.length > 1) {
+          const secondaryPart = parts[1];
+          const secondaryList = secondaryPart.split(', ').map(item => {
+            const match = item.match(/^([A-Z0-9.]+) - (.+)$/);
+            if (match) {
+              return {
+                code: match[1],
+                description: match[2]
+              };
+            }
+            return null;
+          }).filter(item => item !== null);
+          
+          setSecondaryDiagnoses(secondaryList);
+        }
+        
+        return primaryDiagnosis;
+      }
+    } catch (error) {
+      console.error('Error parsing diagnosis data:', error);
+    }
+    
+    return null;
+  }
   
   // Lista de diagnósticos comunes (seleccionados de los más frecuentes en la imagen)
   const commonDiagnoses = [
@@ -59,7 +104,7 @@ const DiagnosisModal = ({ isOpen, onClose, initialData = '' }) => {
     { code: 'M62.511', description: 'Muscle wasting and atrophy, not elsewhere classified, right shoulder' },
     { code: 'M62.551', description: 'Muscle wasting and atrophy, not elsewhere classified, right thigh' },
     { code: 'M62.521', description: 'Muscle wasting and atrophy, not elsewhere classified, right upper arm' },
-    // Additional diagnoses I added
+    // Additional diagnoses
     { code: 'M25.559', description: 'Pain in unspecified hip' },
     { code: 'M54.9', description: 'Dorsalgia, unspecified' },
     { code: 'G82.52', description: 'Quadriplegia, C5-C7 complete' },
@@ -93,6 +138,20 @@ const DiagnosisModal = ({ isOpen, onClose, initialData = '' }) => {
     setSecondaryDiagnoses(secondaryDiagnoses.filter(d => d.code !== code));
   };
   
+  // Manejar la adición de un diagnóstico personalizado
+  const handleAddCustomDiagnosis = () => {
+    if (customCode && customDescription) {
+      const customDiagnosis = {
+        code: customCode,
+        description: customDescription
+      };
+      
+      setSelectedDiagnosis(customDiagnosis);
+      setCustomCode('');
+      setCustomDescription('');
+    }
+  };
+  
   // Manejar la confirmación y cierre del modal
   const handleConfirm = () => {
     // Crear un string formateado con todos los diagnósticos
@@ -112,7 +171,10 @@ const DiagnosisModal = ({ isOpen, onClose, initialData = '' }) => {
     <div className="diagnosis-modal-overlay">
       <div className="diagnosis-modal">
         <div className="modal-header">
-          <h2>Select Therapy Diagnosis</h2>
+          <h2>
+            <i className="fas fa-heartbeat"></i>
+            Select Therapy Diagnosis
+          </h2>
           <button className="close-button" onClick={() => onClose()}>
             <i className="fas fa-times"></i>
           </button>
@@ -123,24 +185,28 @@ const DiagnosisModal = ({ isOpen, onClose, initialData = '' }) => {
             className={`tab-button ${activeTab === 'search' ? 'active' : ''}`}
             onClick={() => setActiveTab('search')}
           >
+            <i className="fas fa-search"></i>
             Search
           </button>
           <button 
             className={`tab-button ${activeTab === 'common' ? 'active' : ''}`}
             onClick={() => setActiveTab('common')}
           >
+            <i className="fas fa-star"></i>
             Common Diagnoses
           </button>
           <button 
             className={`tab-button ${activeTab === 'recent' ? 'active' : ''}`}
             onClick={() => setActiveTab('recent')}
           >
+            <i className="fas fa-history"></i>
             Recent
           </button>
           <button 
             className={`tab-button ${activeTab === 'custom' ? 'active' : ''}`}
             onClick={() => setActiveTab('custom')}
           >
+            <i className="fas fa-edit"></i>
             Custom
           </button>
         </div>
@@ -149,22 +215,30 @@ const DiagnosisModal = ({ isOpen, onClose, initialData = '' }) => {
           {activeTab === 'search' && (
             <div className="search-tab">
               <div className="search-bar">
-                <input 
-                  type="text"
-                  placeholder="Search by code or description..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
-                <button className="search-btn">
-                  <i className="fas fa-search"></i>
-                </button>
+                <div className="search-input-wrapper">
+                  <i className="fas fa-search search-icon"></i>
+                  <input 
+                    type="text"
+                    placeholder="Search by code or description..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                  />
+                  {searchTerm && (
+                    <button 
+                      className="clear-btn"
+                      onClick={() => setSearchTerm('')}
+                    >
+                      <i className="fas fa-times"></i>
+                    </button>
+                  )}
+                </div>
               </div>
               
               <div className="diagnosis-list">
                 {filteredDiagnoses.map(diagnosis => (
                   <div 
                     key={diagnosis.code} 
-                    className={`diagnosis-item ${selectedDiagnosis.code === diagnosis.code ? 'selected' : ''}`}
+                    className={`diagnosis-item ${selectedDiagnosis?.code === diagnosis.code ? 'selected' : ''}`}
                     onClick={() => handleSelectDiagnosis(diagnosis)}
                   >
                     <div className="diagnosis-info">
@@ -178,6 +252,7 @@ const DiagnosisModal = ({ isOpen, onClose, initialData = '' }) => {
                           e.stopPropagation();
                           handleAddSecondaryDiagnosis(diagnosis);
                         }}
+                        title="Add as secondary diagnosis"
                       >
                         <i className="fas fa-plus"></i>
                       </button>
@@ -186,7 +261,10 @@ const DiagnosisModal = ({ isOpen, onClose, initialData = '' }) => {
                 ))}
                 
                 {filteredDiagnoses.length === 0 && (
-                  <div className="no-results">No diagnoses found matching "{searchTerm}"</div>
+                  <div className="no-results">
+                    <i className="fas fa-search"></i>
+                    <span>No diagnoses found matching "{searchTerm}"</span>
+                  </div>
                 )}
               </div>
             </div>
@@ -198,7 +276,7 @@ const DiagnosisModal = ({ isOpen, onClose, initialData = '' }) => {
                 {commonDiagnoses.map(diagnosis => (
                   <div 
                     key={diagnosis.code} 
-                    className={`diagnosis-item ${selectedDiagnosis.code === diagnosis.code ? 'selected' : ''}`}
+                    className={`diagnosis-item ${selectedDiagnosis?.code === diagnosis.code ? 'selected' : ''}`}
                     onClick={() => handleSelectDiagnosis(diagnosis)}
                   >
                     <div className="diagnosis-info">
@@ -212,6 +290,7 @@ const DiagnosisModal = ({ isOpen, onClose, initialData = '' }) => {
                           e.stopPropagation();
                           handleAddSecondaryDiagnosis(diagnosis);
                         }}
+                        title="Add as secondary diagnosis"
                       >
                         <i className="fas fa-plus"></i>
                       </button>
@@ -226,7 +305,10 @@ const DiagnosisModal = ({ isOpen, onClose, initialData = '' }) => {
             <div className="recent-tab">
               <div className="diagnosis-list">
                 {/* Aquí normalmente cargaríamos los diagnósticos recientes del usuario */}
-                <div className="no-results">No recent diagnoses found</div>
+                <div className="no-results">
+                  <i className="fas fa-history"></i>
+                  <span>No recent diagnoses found</span>
+                </div>
               </div>
             </div>
           )}
@@ -235,25 +317,39 @@ const DiagnosisModal = ({ isOpen, onClose, initialData = '' }) => {
             <div className="custom-tab">
               <div className="form-row">
                 <div className="form-group">
-                  <label>Diagnosis Code</label>
+                  <label>
+                    <i className="fas fa-tag"></i>
+                    Diagnosis Code
+                  </label>
                   <input 
                     type="text"
                     placeholder="Enter ICD-10 code"
+                    value={customCode}
+                    onChange={(e) => setCustomCode(e.target.value)}
                   />
                 </div>
               </div>
               
               <div className="form-row">
                 <div className="form-group">
-                  <label>Diagnosis Description</label>
+                  <label>
+                    <i className="fas fa-align-left"></i>
+                    Diagnosis Description
+                  </label>
                   <input 
                     type="text"
                     placeholder="Enter diagnosis description"
+                    value={customDescription}
+                    onChange={(e) => setCustomDescription(e.target.value)}
                   />
                 </div>
               </div>
               
-              <button className="add-custom-btn">
+              <button 
+                className="add-custom-btn"
+                onClick={handleAddCustomDiagnosis}
+                disabled={!customCode || !customDescription}
+              >
                 <i className="fas fa-plus"></i>
                 <span>Add Custom Diagnosis</span>
               </button>
@@ -263,19 +359,46 @@ const DiagnosisModal = ({ isOpen, onClose, initialData = '' }) => {
         
         <div className="selected-diagnoses">
           <div className="primary-diagnosis">
-            <h3>Primary Diagnosis</h3>
+            <div className="diagnosis-header">
+              <h3>
+                <i className="fas fa-star"></i>
+                Primary Diagnosis
+              </h3>
+            </div>
             {selectedDiagnosis ? (
               <div className="selected-diagnosis-item">
-                <div className="diagnosis-code">{selectedDiagnosis.code}</div>
-                <div className="diagnosis-description">{selectedDiagnosis.description}</div>
+                <div className="diagnosis-info">
+                  <div className="diagnosis-code">{selectedDiagnosis.code}</div>
+                  <div className="diagnosis-description">{selectedDiagnosis.description}</div>
+                </div>
+                <button 
+                  className="remove-btn"
+                  onClick={() => setSelectedDiagnosis(null)}
+                  title="Remove primary diagnosis"
+                >
+                  <i className="fas fa-times"></i>
+                </button>
               </div>
             ) : (
-              <div className="no-diagnosis">No primary diagnosis selected</div>
+              <div className="no-diagnosis">
+                <i className="fas fa-info-circle"></i>
+                <span>No primary diagnosis selected</span>
+              </div>
             )}
           </div>
           
           <div className="secondary-diagnoses">
-            <h3>Secondary Diagnoses</h3>
+            <div className="diagnosis-header">
+              <h3>
+                <i className="fas fa-list-ul"></i>
+                Secondary Diagnoses
+              </h3>
+              {secondaryDiagnoses.length > 0 && (
+                <div className="count-badge">
+                  {secondaryDiagnoses.length}
+                </div>
+              )}
+            </div>
             {secondaryDiagnoses.length > 0 ? (
               <div className="secondary-list">
                 {secondaryDiagnoses.map(diagnosis => (
@@ -287,6 +410,7 @@ const DiagnosisModal = ({ isOpen, onClose, initialData = '' }) => {
                     <button 
                       className="remove-btn"
                       onClick={() => handleRemoveSecondaryDiagnosis(diagnosis.code)}
+                      title="Remove secondary diagnosis"
                     >
                       <i className="fas fa-times"></i>
                     </button>
@@ -294,13 +418,17 @@ const DiagnosisModal = ({ isOpen, onClose, initialData = '' }) => {
                 ))}
               </div>
             ) : (
-              <div className="no-diagnosis">No secondary diagnoses selected</div>
+              <div className="no-diagnosis">
+                <i className="fas fa-info-circle"></i>
+                <span>No secondary diagnoses selected</span>
+              </div>
             )}
           </div>
         </div>
         
         <div className="modal-footer">
           <button className="cancel-btn" onClick={() => onClose()}>
+            <i className="fas fa-times"></i>
             Cancel
           </button>
           <button 
@@ -308,6 +436,7 @@ const DiagnosisModal = ({ isOpen, onClose, initialData = '' }) => {
             onClick={handleConfirm}
             disabled={!selectedDiagnosis}
           >
+            <i className="fas fa-check"></i>
             Confirm
           </button>
         </div>

@@ -1,0 +1,105 @@
+// styles/developer/Patients/InfoPaciente/NotesAndSign/ObjectiveSections/WoundCareSection.scss
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+
+.wound-care-section {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  padding: 10px 0;
+  
+  .section-title {
+    margin: 0 0 24px;
+    font-size: 18px;
+    font-weight: 700;
+    color: #1e293b;
+    position: relative;
+    
+    &::after {
+      content: '';
+      position: absolute;
+      bottom: -6px;
+      left: 0;
+      width: 60px;
+      height: 3px;
+      background: linear-gradient(
+        90deg,
+        #ef4444,
+        #f87171
+      );
+      border-radius: 3px;
+    }
+  }
+  
+  .subsection-title {
+    margin: 0 0 16px;
+    font-size: 15px;
+    font-weight: 600;
+    color: #475569;
+  }
+  
+  .description-section {
+    margin-bottom: 24px;
+    
+    textarea {
+      width: 100%;
+      padding: 16px;
+      border-radius: 8px;
+      border: 1px solid rgba(203, 213, 225, 0.7);
+      background: white;
+      font-size: 14px;
+      color: #334155;
+      resize: vertical;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      
+      &::placeholder {
+        color: #94a3b8;
+      }
+      
+      &:focus {
+        outline: none;
+        border-color: rgba(239, 68, 68, 0.5);
+        box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15);
+      }
+    }
+  }
+  
+  .separator {
+    height: 1px;
+    background: rgba(226, 232, 240, 0.8);
+    margin: 20px 0;
+  }
+  
+  .standardized-tests-section {
+    .tests-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 20px;
+      
+      .wound-test-card {
+        background: #f8fafc;
+        border: 1px solid rgba(226, 232, 240, 0.8);
+        border-radius: 12px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        
+        &:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        
+        &.completed {
+          border-left: 4px solid #10b981;
+        }
+      }
+    }
+  }
+}
+
+// Responsive styles
+@media (max-width: 768px) {
+  .wound-care-section {
+    .standardized-tests-section {
+      .tests-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  }
+}

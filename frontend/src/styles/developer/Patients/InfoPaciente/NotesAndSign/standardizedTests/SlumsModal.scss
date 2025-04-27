@@ -1,0 +1,608 @@
+// styles/developer/Patients/InfoPaciente/NotesAndSign/standardizedTests/SlumsModal.scss
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+
+.slums-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(15, 23, 42, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+  padding: 24px;
+  overflow-y: auto;
+  backdrop-filter: blur(5px);
+  animation: fadeIn 0.3s ease;
+  
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  
+  .slums-modal {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 
+      0 20px 25px -5px rgba(0, 0, 0, 0.1), 
+      0 10px 10px -5px rgba(0, 0, 0, 0.04),
+      0 0 0 1px rgba(255, 255, 255, 0.1);
+    width: 100%;
+    max-width: 1000px;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    position: relative;
+    animation: slideUp 0.3s ease;
+    
+    @keyframes slideUp {
+      from { transform: translateY(30px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+    
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 24px;
+      background: linear-gradient(
+        to right,
+        rgba(30, 41, 59, 0.05),
+        rgba(15, 23, 42, 0.05)
+      );
+      border-bottom: 1px solid rgba(226, 232, 240, 0.7);
+      
+      h2 {
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        margin: 0;
+        font-size: 20px;
+        font-weight: 700;
+        color: #1e293b;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        
+        i {
+          color: #1e293b;
+          font-size: 18px;
+        }
+      }
+      
+      .close-button {
+        background: transparent;
+        border: none;
+        color: #64748b;
+        font-size: 18px;
+        cursor: pointer;
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s ease;
+        
+        &:hover {
+          background: rgba(241, 245, 249, 0.6);
+          color: #334155;
+        }
+      }
+    }
+    
+    .modal-content {
+      padding: 20px 24px;
+      overflow-y: auto;
+      max-height: calc(90vh - 140px); // Header and footer height
+      
+      .info-note {
+        padding: 12px 16px;
+        background: rgba(186, 230, 253, 0.5);
+        border-radius: 8px;
+        margin-bottom: 20px;
+        
+        p {
+          font-family: 'Plus Jakarta Sans', sans-serif;
+          font-size: 14px;
+          color: #0369a1;
+          margin: 0;
+        }
+      }
+      
+      .assessment-info {
+        margin-bottom: 24px;
+        
+        .info-card {
+          display: flex;
+          align-items: center;
+          gap: 16px;
+          padding: 16px;
+          background: rgba(241, 245, 249, 0.5);
+          border: 1px solid rgba(226, 232, 240, 0.7);
+          border-radius: 12px;
+          
+          .info-icon {
+            flex-shrink: 0;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background: rgba(226, 232, 240, 0.5);
+            color: #1e293b;
+            font-size: 20px;
+          }
+          
+          .info-text {
+            p {
+              font-family: 'Plus Jakarta Sans', sans-serif;
+              margin: 0;
+              font-size: 14px;
+              line-height: 1.5;
+              color: #334155;
+            }
+          }
+        }
+      }
+      
+      .form-grid {
+        display: flex;
+        flex-direction: column;
+        gap: 24px;
+        margin-bottom: 24px;
+        
+        .form-section {
+          background: white;
+          border-radius: 12px;
+          border: 1px solid rgba(226, 232, 240, 0.7);
+          padding: 20px;
+          
+          &.patient-status {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            border-top: 4px solid #1e293b;
+          }
+          
+          &.orientation {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 20px;
+            border-top: 4px solid #3b82f6;
+          }
+          
+          &.memory {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            border-top: 4px solid #8b5cf6;
+          }
+          
+          &.story-recall {
+            border-top: 4px solid #ef4444;
+            
+            .story-text {
+              background: rgba(248, 250, 252, 0.7);
+              border: 1px solid rgba(226, 232, 240, 0.7);
+              border-radius: 8px;
+              padding: 16px;
+              margin: 16px 0;
+              
+              p {
+                font-family: 'Plus Jakarta Sans', sans-serif;
+                font-size: 14px;
+                line-height: 1.6;
+                color: #334155;
+                margin: 0;
+              }
+            }
+            
+            .sub-questions {
+              display: grid;
+              grid-template-columns: 1fr 1fr;
+              gap: 20px;
+            }
+          }
+        }
+        
+        .form-row.divider {
+          height: 1px;
+          background: rgba(226, 232, 240, 0.7);
+          margin: 0;
+        }
+        
+        .form-columns {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 20px;
+          
+          .form-column {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            
+            .question-item {
+              background: white;
+              border-radius: 12px;
+              border: 1px solid rgba(226, 232, 240, 0.7);
+              padding: 20px;
+              
+              &.number-recall {
+                border-top: 4px solid #0ea5e9;
+              }
+              
+              &.number-reverse {
+                border-top: 4px solid #10b981;
+              }
+              
+              &.clock-face {
+                border-top: 4px solid #f59e0b;
+                
+                .clock-diagram {
+                  margin: 20px 0;
+                  background: rgba(248, 250, 252, 0.5);
+                  border: 1px solid rgba(226, 232, 240, 0.7);
+                  border-radius: 8px;
+                  padding: 20px;
+                  display: flex;
+                  justify-content: center;
+                  
+                  .shapes {
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    width: 200px;
+                    
+                    .square {
+                      width: 50px;
+                      height: 50px;
+                      border: 2px solid #334155;
+                    }
+                    
+                    .triangle {
+                      width: 0;
+                      height: 0;
+                      border-left: 30px solid transparent;
+                      border-right: 30px solid transparent;
+                      border-bottom: 50px solid #334155;
+                    }
+                    
+                    .rectangle {
+                      width: 40px;
+                      height: 60px;
+                      border: 2px solid #334155;
+                    }
+                  }
+                }
+              }
+              
+              &.figure-test {
+                border-top: 4px solid #a855f7;
+              }
+            }
+          }
+        }
+        
+        .question-item {
+          display: flex;
+          flex-direction: column;
+          gap: 10px;
+          
+          label {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 14px;
+            font-weight: 600;
+            color: #334155;
+            line-height: 1.5;
+          }
+          
+          select {
+            width: 100%;
+            padding: 12px 16px;
+            border-radius: 8px;
+            border: 1px solid rgba(203, 213, 225, 0.7);
+            background: white;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 14px;
+            color: #334155;
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            background-size: 16px;
+            padding-right: 40px;
+            transition: all 0.2s ease;
+            
+            &:focus {
+              outline: none;
+              border-color: rgba(51, 65, 85, 0.5);
+              box-shadow: 0 0 0 3px rgba(51, 65, 85, 0.15);
+            }
+            
+            &.error {
+              border-color: rgba(239, 68, 68, 0.5);
+              
+              &:focus {
+                box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15);
+              }
+            }
+          }
+          
+          &.math-problem {
+            background: rgba(241, 245, 249, 0.3);
+            border-radius: 8px;
+            padding: 16px;
+            
+            .sub-question {
+              margin-top: 12px;
+            }
+          }
+          
+          .sub-question {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-left: 16px;
+            
+            label {
+              font-weight: 500;
+              font-size: 13px;
+              display: flex;
+              align-items: center;
+              
+              &:before {
+                content: "•";
+                margin-right: 8px;
+                color: #64748b;
+              }
+            }
+          }
+          
+          .error-message {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 12px;
+            color: #ef4444;
+            margin-top: 4px;
+          }
+        }
+      }
+      
+      .score-summary {
+        margin-bottom: 24px;
+        background: white;
+        border-radius: 12px;
+        border: 1px solid rgba(226, 232, 240, 0.7);
+        overflow: hidden;
+        
+        .score-display {
+          padding: 20px;
+          
+          .score-value {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 16px;
+            font-weight: 700;
+            color: #334155;
+            margin-bottom: 16px;
+            
+            .score-number {
+              color: #1e293b;
+              background: rgba(248, 250, 252, 0.7);
+              padding: 4px 8px;
+              border-radius: 6px;
+              border: 1px solid rgba(226, 232, 240, 0.7);
+            }
+          }
+          
+          .score-interpretation {
+            display: flex;
+            gap: 16px;
+            
+            .interpretation-item {
+              flex: 1;
+              padding: 12px 16px;
+              background: rgba(241, 245, 249, 0.4);
+              border-radius: 8px;
+              transition: all 0.3s ease;
+              
+              &.active {
+                transform: scale(1.02);
+                background: white;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+              }
+              
+              .level {
+                font-family: 'Plus Jakarta Sans', sans-serif;
+                font-size: 14px;
+                font-weight: 700;
+                display: block;
+                
+                &.normal {
+                  color: #10b981;
+                }
+                
+                &.impaired {
+                  color: #ef4444;
+                }
+              }
+            }
+          }
+        }
+      }
+      
+      .additional-notes {
+        h3 {
+          font-family: 'Plus Jakarta Sans', sans-serif;
+          font-size: 16px;
+          font-weight: 600;
+          color: #334155;
+          margin: 0 0 12px;
+        }
+        
+        textarea {
+          width: 100%;
+          padding: 12px 16px;
+          border-radius: 8px;
+          border: 1px solid rgba(203, 213, 225, 0.7);
+          background: white;
+          font-family: 'Plus Jakarta Sans', sans-serif;
+          font-size: 14px;
+          color: #334155;
+          resize: vertical;
+          transition: all 0.2s ease;
+          
+          &::placeholder {
+            color: #94a3b8;
+          }
+          
+          &:focus {
+            outline: none;
+            border-color: rgba(51, 65, 85, 0.5);
+            box-shadow: 0 0 0 3px rgba(51, 65, 85, 0.15);
+          }
+        }
+      }
+    }
+    
+    .modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+      padding: 16px 24px;
+      background: #f8fafc;
+      border-top: 1px solid rgba(226, 232, 240, 0.7);
+      
+      .cancel-btn {
+        padding: 12px 24px;
+        border-radius: 8px;
+        background: white;
+        border: 1px solid rgba(226, 232, 240, 0.8);
+        color: #475569;
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        
+        &:hover {
+          background: #f1f5f9;
+          color: #334155;
+        }
+      }
+      
+      .submit-btn {
+        padding: 12px 24px;
+        border-radius: 8px;
+        background: #1e293b;
+        border: none;
+        color: white;
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        box-shadow: 
+          0 4px 12px rgba(30, 41, 59, 0.2),
+          0 2px 6px rgba(30, 41, 59, 0.1);
+        
+        &:hover {
+          background: #0f172a;
+          transform: translateY(-2px);
+          box-shadow: 
+            0 6px 15px rgba(30, 41, 59, 0.3),
+            0 3px 8px rgba(30, 41, 59, 0.15);
+        }
+      }
+    }
+  }
+}
+
+// Responsive styles
+@media (max-width: 992px) {
+  .slums-modal-overlay {
+    .slums-modal {
+      .modal-content {
+        .form-grid {
+          .form-section {
+            &.orientation {
+              grid-template-columns: 1fr 1fr;
+            }
+          }
+          
+          .form-columns {
+            grid-template-columns: 1fr;
+          }
+        }
+      }
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .slums-modal-overlay {
+    padding: 16px;
+    
+    .slums-modal {
+      .modal-header {
+        padding: 16px;
+        
+        h2 {
+          font-size: 18px;
+        }
+      }
+      
+      .modal-content {
+        padding: 16px;
+        
+        .assessment-info {
+          .info-card {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 10px;
+            
+            .info-icon {
+              margin-bottom: 5px;
+            }
+          }
+        }
+        
+        .form-grid {
+          .form-section {
+            padding: 16px;
+            
+            &.patient-status, &.orientation {
+              grid-template-columns: 1fr;
+            }
+            
+            &.story-recall {
+              .sub-questions {
+                grid-template-columns: 1fr;
+              }
+            }
+          }
+        }
+        
+        .score-summary {
+          .score-display {
+            .score-interpretation {
+              flex-direction: column;
+              gap: 8px;
+            }
+          }
+        }
+      }
+      
+      .modal-footer {
+        padding: 12px 16px;
+        flex-direction: column-reverse;
+        gap: 8px;
+        
+        .cancel-btn, .submit-btn {
+          width: 100%;
+        }
+      }
+    }
+  }
+}

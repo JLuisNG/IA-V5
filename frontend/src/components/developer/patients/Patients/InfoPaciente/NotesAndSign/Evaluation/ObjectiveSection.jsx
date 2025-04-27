@@ -3,7 +3,15 @@ import React, { useState } from 'react';
 import '../../../../../../../styles/developer/Patients/InfoPaciente/NotesAndSign/ObjectiveSection.scss';
 import StandardizedTest from './StandardizedTest';
 
-const ObjectiveSection = ({ data, onChange }) => {
+// Importar los nuevos componentes
+import CognitiveStatusSection from './ObjectiveSections/CognitiveStatusSection';
+import SensorySection from './ObjectiveSections/SensorySection';
+import EquipmentSection from './ObjectiveSections/EquipmentSection';
+import ProstheticOrthoticSection from './ObjectiveSections/ProstheticOrthoticSection';
+import PatientCaregiverEducationSection from './ObjectiveSections/PatientCaregiverEducationSection';
+import WoundCareSection from './ObjectiveSections/WoundCareSection';
+
+const ObjectiveSection = ({ data, onChange, onOpenTest, autoSaveMessage }) => {
   // Estados locales para los diversos componentes de la sección objetiva
   const [activeTab, setActiveTab] = useState('subjective');
   
@@ -12,20 +20,41 @@ const ObjectiveSection = ({ data, onChange }) => {
     onChange({ ...data, [field]: value });
   };
   
-  // Manejador para abrir una prueba estandarizada
-  const handleOpenTest = (testName) => {
-    console.log(`Opening test: ${testName}`);
-    // Implementaría la lógica para abrir el modal de la prueba
+  // Manejador para los cambios en subsecciones completas
+  const handleSectionChange = (section, sectionData) => {
+    onChange({
+      ...data,
+      [section]: sectionData
+    });
   };
   
   return (
     <div className="objective-section-container">
+      <div className="section-header">
+        <h2 className="section-title">Objective</h2>
+        <span className={`autosaved-badge ${autoSaveMessage ? 'visible' : ''}`}>
+          {autoSaveMessage || 'AUTOSAVED'}
+        </span>
+      </div>
+      
       <div className="tabs-container">
         <button 
           className={`tab-button ${activeTab === 'subjective' ? 'active' : ''}`}
           onClick={() => setActiveTab('subjective')}
         >
           Subjective
+        </button>
+        <button 
+          className={`tab-button ${activeTab === 'cognitive' ? 'active' : ''}`}
+          onClick={() => setActiveTab('cognitive')}
+        >
+          Cognitive Status
+        </button>
+        <button 
+          className={`tab-button ${activeTab === 'sensory' ? 'active' : ''}`}
+          onClick={() => setActiveTab('sensory')}
+        >
+          Sensory
         </button>
         <button 
           className={`tab-button ${activeTab === 'living' ? 'active' : ''}`}
@@ -37,7 +66,7 @@ const ObjectiveSection = ({ data, onChange }) => {
           className={`tab-button ${activeTab === 'mobility' ? 'active' : ''}`}
           onClick={() => setActiveTab('mobility')}
         >
-          Gait / Mobility Training
+          Gait / Mobility
         </button>
         <button 
           className={`tab-button ${activeTab === 'muscle' ? 'active' : ''}`}
@@ -50,6 +79,30 @@ const ObjectiveSection = ({ data, onChange }) => {
           onClick={() => setActiveTab('balance')}
         >
           Balance
+        </button>
+        <button 
+          className={`tab-button ${activeTab === 'equipment' ? 'active' : ''}`}
+          onClick={() => setActiveTab('equipment')}
+        >
+          Equipment
+        </button>
+        <button 
+          className={`tab-button ${activeTab === 'prosthetic' ? 'active' : ''}`}
+          onClick={() => setActiveTab('prosthetic')}
+        >
+          Prosthetic/Orthotic
+        </button>
+        <button 
+          className={`tab-button ${activeTab === 'education' ? 'active' : ''}`}
+          onClick={() => setActiveTab('education')}
+        >
+          Patient Education
+        </button>
+        <button 
+          className={`tab-button ${activeTab === 'woundcare' ? 'active' : ''}`}
+          onClick={() => setActiveTab('woundcare')}
+        >
+          Wound Care
         </button>
       </div>
       
@@ -71,6 +124,20 @@ const ObjectiveSection = ({ data, onChange }) => {
               </div>
             </div>
           </div>
+        )}
+        
+        {activeTab === 'cognitive' && (
+          <CognitiveStatusSection 
+            data={data.cognitive || {}}
+            onChange={(sectionData) => handleSectionChange('cognitive', sectionData)}
+          />
+        )}
+        
+        {activeTab === 'sensory' && (
+          <SensorySection 
+            data={data.sensory || {}}
+            onChange={(sectionData) => handleSectionChange('sensory', sectionData)}
+          />
         )}
         
         {activeTab === 'living' && (
@@ -214,11 +281,42 @@ const ObjectiveSection = ({ data, onChange }) => {
                 <div className="checkbox-item">
                   <input 
                     type="checkbox" 
-                    id="notApplicable" 
+                    id="mobilityNotApplicable" 
                     checked={data.mobilityNotApplicable || false}
-                    onChange={(e) => handleChange('mobilityNotApplicable', e.target.checked)}
+                    onChange={(e) => {
+                      const isChecked = e.target.checked;
+                      handleChange('mobilityNotApplicable', isChecked);
+                      // Clear other fields when "Not Applicable" is checked
+                      if (isChecked) {
+                        handleChange('levelSurface', false);
+                        handleChange('unlevelSurface', false);
+                        handleChange('carpetedSurface', false);
+                        handleChange('gaitQualities', '');
+                        handleChange('stairsCurb', '');
+                        handleChange('sixMinuteWalk', '');
+                        // Optionally clear standardized test data if needed
+                        if (data.standardizedTests?.['Tinetti']) {
+                          onChange({
+                            ...data,
+                            standardizedTests: {
+                              ...data.standardizedTests,
+                              'Tinetti': { ...data.standardizedTests['Tinetti'], isComplete: false }
+                            }
+                          });
+                        }
+                        if (data.standardizedTests?.['Timed Up And Go']) {
+                          onChange({
+                            ...data,
+                            standardizedTests: {
+                              ...data.standardizedTests,
+                              'Timed Up And Go': { ...data.standardizedTests['Timed Up And Go'], isComplete: false }
+                            }
+                          });
+                        }
+                      }
+                    }}
                   />
-                  <label htmlFor="notApplicable">Not Applicable</label>
+                  <label htmlFor="mobilityNotApplicable">Not Applicable</label>
                 </div>
               </div>
               
@@ -229,6 +327,7 @@ const ObjectiveSection = ({ data, onChange }) => {
                     id="levelSurface" 
                     checked={data.levelSurface || false}
                     onChange={(e) => handleChange('levelSurface', e.target.checked)}
+                    disabled={data.mobilityNotApplicable}
                   />
                   <label htmlFor="levelSurface">Level Surface</label>
                 </div>
@@ -239,6 +338,7 @@ const ObjectiveSection = ({ data, onChange }) => {
                     id="unlevelSurface" 
                     checked={data.unlevelSurface || false}
                     onChange={(e) => handleChange('unlevelSurface', e.target.checked)}
+                    disabled={data.mobilityNotApplicable}
                   />
                   <label htmlFor="unlevelSurface">Unlevel Surface</label>
                 </div>
@@ -249,6 +349,7 @@ const ObjectiveSection = ({ data, onChange }) => {
                     id="carpetedSurface" 
                     checked={data.carpetedSurface || false}
                     onChange={(e) => handleChange('carpetedSurface', e.target.checked)}
+                    disabled={data.mobilityNotApplicable}
                   />
                   <label htmlFor="carpetedSurface">Carpeted Surface</label>
                 </div>
@@ -262,6 +363,7 @@ const ObjectiveSection = ({ data, onChange }) => {
                     onChange={(e) => handleChange('gaitQualities', e.target.value)}
                     rows={4}
                     placeholder="Describe gait qualities, deviations and postures"
+                    disabled={data.mobilityNotApplicable}
                   />
                 </div>
                 
@@ -272,6 +374,7 @@ const ObjectiveSection = ({ data, onChange }) => {
                     onChange={(e) => handleChange('stairsCurb', e.target.value)}
                     rows={4}
                     placeholder="Notes on stairs and curb navigation"
+                    disabled={data.mobilityNotApplicable}
                   />
                 </div>
               </div>
@@ -284,6 +387,7 @@ const ObjectiveSection = ({ data, onChange }) => {
                     value={data.sixMinuteWalk || ''}
                     onChange={(e) => handleChange('sixMinuteWalk', e.target.value)}
                     placeholder="Enter distance covered in six minute walk"
+                    disabled={data.mobilityNotApplicable}
                   />
                 </div>
               </div>
@@ -292,14 +396,16 @@ const ObjectiveSection = ({ data, onChange }) => {
                 <div className="standardized-tests-row">
                   <StandardizedTest 
                     title="Tinetti" 
-                    isComplete={false}
-                    onOpen={() => handleOpenTest('Tinetti')}
+                    isComplete={data?.standardizedTests?.['Tinetti']?.isComplete || false}
+                    onOpen={() => !data.mobilityNotApplicable && onOpenTest('Tinetti')}
+                    status={data.mobilityNotApplicable ? 'Not Required' : undefined}
                   />
                   
                   <StandardizedTest 
                     title="Timed Up And Go" 
-                    isComplete={false}
-                    onOpen={() => handleOpenTest('Timed Up And Go')}
+                    isComplete={data?.standardizedTests?.['Timed Up And Go']?.isComplete || false}
+                    onOpen={() => !data.mobilityNotApplicable && onOpenTest('Timed Up And Go')}
+                    status={data.mobilityNotApplicable ? 'Not Required' : undefined}
                   />
                 </div>
               </div>
@@ -349,8 +455,8 @@ const ObjectiveSection = ({ data, onChange }) => {
               <div className="muscle-tests">
                 <StandardizedTest 
                   title="Functional Reach" 
-                  isComplete={false}
-                  onOpen={() => handleOpenTest('Functional Reach')}
+                  isComplete={data?.standardizedTests?.['Functional Reach']?.isComplete || false}
+                  onOpen={() => onOpenTest('Functional Reach')}
                 />
               </div>
             </div>
@@ -363,7 +469,7 @@ const ObjectiveSection = ({ data, onChange }) => {
               <h2>Balance</h2>
               
               <div className="form-row">
-                <button className="gfp-scale-btn" onClick={() => console.log('Show GFP Scale')}>
+                <button className="gfp-scale-btn" onClick={() => console.logใบ('Show GFP Scale')}>
                   <i className="fas fa-info-circle"></i>
                   <span>Show GFP Scale</span>
                 </button>
@@ -477,49 +583,78 @@ const ObjectiveSection = ({ data, onChange }) => {
                 <div className="standardized-tests-grid">
                   <StandardizedTest 
                     title="Berg" 
-                    isComplete={false}
-                    onOpen={() => handleOpenTest('Berg')}
+                    isComplete={data?.standardizedTests?.['BERG']?.isComplete || false}
+                    onOpen={() => onOpenTest('BERG')}
                   />
                   
                   <StandardizedTest 
                     title="Fall Risk Assessment" 
-                    isComplete={false}
-                    onOpen={() => handleOpenTest('Fall Risk Assessment')}
+                    isComplete={data?.standardizedTests?.['Fall Risk Assessment']?.isComplete || false}
+                    onOpen={() => onOpenTest('Fall Risk Assessment')}
                   />
                   
                   <StandardizedTest 
                     title="Tinetti" 
-                    isComplete={false}
-                    onOpen={() => handleOpenTest('Tinetti')}
+                    isComplete={data?.standardizedTests?.['Tinetti']?.isComplete || false}
+                    onOpen={() => onOpenTest('Tinetti')}
                   />
                   
                   <StandardizedTest 
                     title="Advanced Balance" 
-                    isComplete={false}
-                    onOpen={() => handleOpenTest('Advanced Balance')}
+                    isComplete={data?.standardizedTests?.['Advanced Balance']?.isComplete || false}
+                    onOpen={() => onOpenTest('Advanced Balance')}
                   />
                   
                   <StandardizedTest 
                     title="Four Stage Balance Test" 
-                    isComplete={false}
-                    onOpen={() => handleOpenTest('Four Stage Balance Test')}
+                    isComplete={data?.standardizedTests?.['Four Stage Balance Test']?.isComplete || false}
+                    onOpen={() => onOpenTest('Four Stage Balance Test')}
                   />
                   
                   <StandardizedTest 
                     title="MAHC10" 
-                    isComplete={false}
-                    onOpen={() => handleOpenTest('MAHC10')}
+                    isComplete={data?.standardizedTests?.['MAHC10']?.isComplete || false}
+                    onOpen={() => onOpenTest('MAHC10')}
                   />
                   
                   <StandardizedTest 
                     title="Short Physical Performance Battery" 
-                    isComplete={false}
-                    onOpen={() => handleOpenTest('Short Physical Performance Battery')}
+                    isComplete={data?.standardizedTests?.['Short Physical Performance Battery']?.isComplete || false}
+                    onOpen={() => onOpenTest('Short Physical Performance Battery')}
                   />
                 </div>
               </div>
             </div>
           </div>
+        )}
+        
+        {activeTab === 'equipment' && (
+          <EquipmentSection 
+            data={data.equipment || {}}
+            onChange={(sectionData) => handleSectionChange('equipment', sectionData)}
+          />
+        )}
+        
+        {activeTab === 'prosthetic' && (
+          <ProstheticOrthoticSection 
+            data={data.prostheticOrthotic || {}}
+            onChange={(sectionData) => handleSectionChange('prostheticOrthotic', sectionData)}
+          />
+        )}
+        
+        {activeTab === 'education' && (
+          <PatientCaregiverEducationSection 
+            data={data.patientEducation || {}}
+            onChange={(sectionData) => handleSectionChange('patientEducation', sectionData)}
+          />
+        )}
+        
+        {activeTab === 'woundcare' && (
+          <WoundCareSection 
+            data={data.woundCare || {}}
+            onChange={(sectionData) => handleSectionChange('woundCare', sectionData)}
+            onOpenTest={onOpenTest}
+          />
         )}
       </div>
     </div>
