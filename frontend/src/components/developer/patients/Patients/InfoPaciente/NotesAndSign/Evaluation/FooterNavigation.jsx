@@ -1,22 +1,20 @@
-// components/FooterNavigation.jsx
+// Enhanced FooterNavigation.jsx
 import React from 'react';
 import '../../../../../../../styles/developer/Patients/InfoPaciente/NotesAndSign/FooterNavigation.scss';
 
 const FooterNavigation = ({
   onSaveAndExit,
-  onPastNotes,
-  onReferral,
-  onStickies,
   currentStep,
   onStepChange,
   isSaving
 }) => {
   const steps = [
-    { id: 'evaluation', label: 'PT Evaluation' },
-    { id: 'objective', label: 'Objective' },
-    { id: 'assessment', label: 'Assessment' },
-    { id: 'plan', label: 'Plan' },
-    { id: 'finale', label: 'Finale' }
+    { id: 'evaluation', label: 'PT Evaluation', icon: 'fa-clipboard-check' },
+    { id: 'objective', label: 'Objective', icon: 'fa-bullseye' },
+    { id: 'assessment', label: 'Assessment', icon: 'fa-chart-bar' },
+    { id: 'plan', label: 'Plan', icon: 'fa-tasks' },
+    { id: 'transfers', label: 'Transfers / ADL', icon: 'fa-exchange-alt' },
+    { id: 'finale', label: 'Finale', icon: 'fa-flag-checkered' }
   ];
   
   const currentIndex = steps.findIndex(step => step.id === currentStep);
@@ -53,28 +51,23 @@ const FooterNavigation = ({
           ) : (
             <>
               <i className="fas fa-save"></i>
-              <span>SAVE & EXIT</span>
+              <span>Save & Exit</span>
             </>
           )}
-        </button>
-        
-        <button className="action-btn past-notes-btn" onClick={onPastNotes}>
-          <i className="fas fa-history"></i>
-          <span>PAST NOTES</span>
-        </button>
-        
-        <button className="action-btn referral-btn" onClick={onReferral}>
-          <i className="fas fa-file-export"></i>
-          <span>REFERRAL</span>
-        </button>
-        
-        <button className="action-btn stickies-btn" onClick={onStickies}>
-          <i className="fas fa-sticky-note"></i>
-          <span>STICKIES</span>
         </button>
       </div>
       
       <div className="step-selector">
+        {!isFirstStep && (
+          <button 
+            className="navigation-btn prev-btn"
+            onClick={handlePrevious}
+          >
+            <i className="fas fa-arrow-left"></i>
+            <span>Previous</span>
+          </button>
+        )}
+        
         <select 
           className="step-dropdown"
           value={currentStep}
@@ -87,14 +80,15 @@ const FooterNavigation = ({
           ))}
         </select>
         
-        <button 
-          className="navigation-btn next-btn"
-          onClick={handleNext}
-          disabled={isLastStep}
-        >
-          <span>NEXT</span>
-          <i className="fas fa-arrow-right"></i>
-        </button>
+        {!isLastStep && (
+          <button 
+            className="navigation-btn next-btn"
+            onClick={handleNext}
+          >
+            <span>Next</span>
+            <i className="fas fa-arrow-right"></i>
+          </button>
+        )}
       </div>
     </div>
   );

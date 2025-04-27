@@ -1,4 +1,4 @@
-// components/SignaturePad.jsx
+// Enhanced SignaturePad.jsx
 import React, { useRef, useState, useEffect } from 'react';
 import '../../../../../../../styles/developer/Patients/InfoPaciente/NotesAndSign/SignaturePad.scss';
 
@@ -15,6 +15,8 @@ const SignaturePad = ({
   const [hasSignature, setHasSignature] = useState(!!initialSignature);
   const [useUpload, setUseUpload] = useState(false);
   const [fileName, setFileName] = useState('');
+  const [canvasLoaded, setCanvasLoaded] = useState(false);
+  const [isAnimating, setIsAnimating] = useState(false);
 
   // Initialize the canvas
   useEffect(() => {
@@ -42,6 +44,7 @@ const SignaturePad = ({
     ctx.lineWidth = 2;
     ctx.strokeStyle = '#334155';
     setContext(ctx);
+    setCanvasLoaded(true);
 
     // Load initial signature if provided
     if (initialSignature) {
@@ -56,8 +59,18 @@ const SignaturePad = ({
         } else {
           drawWidth = canvasHeight * aspectRatio;
         }
-        ctx.drawImage(img, 0, 0, drawWidth, drawHeight);
-        setHasSignature(true);
+        
+        // Clear the canvas first
+        ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+        
+        // Load the image with a fade-in animation
+        setIsAnimating(true);
+        setTimeout(() => {
+          ctx.globalAlpha = 1;
+          ctx.drawImage(img, 0, 0, drawWidth, drawHeight);
+          setHasSignature(true);
+          setIsAnimating(false);
+        }, 300);
       };
       img.src = initialSignature;
     }
@@ -166,24 +179,45 @@ const SignaturePad = ({
     window.removeEventListener('touchend', handleTouchEnd);
   };
 
-  // Clear the signature
+  // Clear the signature with animation
   const clearSignature = () => {
     if (disabled) return;
 
-    // If in drawing mode, clear the canvas
+    // If in drawing mode, clear the canvas with animation
     if (!useUpload) {
       const canvas = canvasRef.current;
       if (canvas && context) {
-        context.clearRect(0, 0, canvas.width, canvas.height);
+        setIsAnimating(true);
+        
+        // Fade out animation
+        let opacity = 1;
+        const fadeOut = () => {
+          opacity -= 0.1;
+          context.clearRect(0, 0, canvas.width, canvas.height);
+          
+          if (opacity <= 0) {
+            setIsAnimating(false);
+            setHasSignature(false);
+            if (onSignatureChange) {
+              onSignatureChange(null);
+            }
+            return;
+          }
+          
+          requestAnimationFrame(fadeOut);
+        };
+        
+        fadeOut();
       }
-    }
+    } else {
+      // If in upload mode, just clear the data
+      setHasSignature(false);
+      setUseUpload(false);
+      setFileName('');
 
-    setHasSignature(false);
-    setUseUpload(false);
-    setFileName('');
-
-    if (onSignatureChange) {
-      onSignatureChange(null);
+      if (onSignatureChange) {
+        onSignatureChange(null);
+      }
     }
   };
 
@@ -232,12 +266,32 @@ const SignaturePad = ({
             } else {
               drawWidth = canvasHeight * aspectRatio;
             }
-            context.drawImage(img, 0, 0, drawWidth, drawHeight);
-
-            setHasSignature(true);
-            saveSignature();
-            // Switch back to upload mode after rendering
-            setUseUpload(true);
+            
+            // Clear the canvas first
+            context.clearRect(0, 0, canvasWidth, canvasHeight);
+            
+            // Fade in the image
+            setIsAnimating(true);
+            let opacity = 0;
+            const fadeIn = () => {
+              opacity += 0.1;
+              context.clearRect(0, 0, canvasWidth, canvasHeight);
+              context.globalAlpha = opacity;
+              context.drawImage(img, 0, 0, drawWidth, drawHeight);
+              
+              if (opacity >= 1) {
+                setIsAnimating(false);
+                setHasSignature(true);
+                saveSignature();
+                // Switch back to upload mode after rendering
+                setUseUpload(true);
+                return;
+              }
+              
+              requestAnimationFrame(fadeIn);
+            };
+            
+            fadeIn();
           };
           img.src = event.target.result;
         }, 0);
@@ -264,65 +318,117 @@ const SignaturePad = ({
   };
 
   return (
-    <div className={`signature-pad ${disabled ? 'disabled' : ''}`}>
-      <div className="signature-options">
-        <label className="upload-toggle">
-          <input
-            type="checkbox"
-            checked={useUpload}
-            onChange={(e) => {
-              setUseUpload(e.target.checked);
-              if (!e.target.checked) {
-                clearSignature();
-              }
-            }}
-            disabled={disabled}
-          />
-          Captured signature outside of system
-        </label>
+    <div className={`signature-pad ${disabled ? 'disabled' : ''} ${hasSignature ? 'has-content' : ''}`}>
+      <div className="signature-header">
+        <h3 className="signature-title">
+          <i className="fas fa-signature"></i>
+          Signature
+        </h3>
+        <div className="signature-options">
+          <label className="upload-toggle">
+            <div className="toggle-switch">
+              <input
+                type="checkbox"
+                checked={useUpload}
+                onChange={(e) => {
+                  setUseUpload(e.target.checked);
+                  if (!e.target.checked) {
+                    clearSignature();
+                  }
+                }}
+                disabled={disabled}
+              />
+              <span className="toggle-slider"></span>
+            </div>
+            <span className="toggle-label">Captured signature outside of system</span>
+          </label>
+        </div>
       </div>
 
-      <div className="signature-area">
-        <span className="signature-label">{label}</span>
+      <div className={`signature-area ${isAnimating ? 'animating' : ''}`}>
         {useUpload ? (
           <div className="upload-area">
-            <button
-              className="upload-btn"
-              onClick={handleUploadClick}
-              disabled={disabled}
-            >
-              Upload Signature File
-            </button>
+            {fileName ? (
+              <div className="file-preview">
+                <i className="fas fa-file-signature"></i>
+                <div className="file-info">
+                  <span className="file-name">{fileName}</span>
+                  <span className="file-status">File uploaded successfully</span>
+                </div>
+                <button className="change-file-btn" onClick={handleUploadClick} disabled={disabled}>
+                  <i className="fas fa-exchange-alt"></i>
+                </button>
+              </div>
+            ) : (
+              <>
+                <div className="upload-icon">
+                  <i className="fas fa-cloud-upload-alt"></i>
+                </div>
+                <div className="upload-text">
+                  <h4>Upload Signature File</h4>
+                  <p>Drag and drop a file here or click to browse</p>
+                </div>
+                <button
+                  className="upload-btn"
+                  onClick={handleUploadClick}
+                  disabled={disabled}
+                >
+                  <i className="fas fa-file-upload"></i>
+                  Browse Files
+                </button>
+              </>
+            )}
             <input
               type="file"
               ref={fileInputRef}
               onChange={handleFileUpload}
               style={{ display: 'none' }}
+              accept="image/*,.pdf"
             />
-            {fileName && (
-              <div className="file-name">
-                Uploaded: {fileName}
-              </div>
-            )}
           </div>
         ) : (
-          <canvas
-            ref={canvasRef}
-            className={`signature-canvas ${hasSignature ? 'has-signature' : ''}`}
-            onMouseDown={handleMouseDown}
-            onTouchStart={handleTouchStart}
-          />
+          <>
+            <div className="canvas-container">
+              <canvas
+                ref={canvasRef}
+                className={`signature-canvas ${hasSignature ? 'has-signature' : ''} ${isDrawing ? 'is-drawing' : ''}`}
+                onMouseDown={handleMouseDown}
+                onTouchStart={handleTouchStart}
+              />
+              {!hasSignature && canvasLoaded && (
+                <div className="canvas-placeholder">
+                  <i className="fas fa-pen"></i>
+                  <span>Draw your signature here</span>
+                </div>
+              )}
+            </div>
+            <div className="signature-guidelines">
+              <div className="guideline-item">
+                <i className="fas fa-mouse-pointer"></i>
+                <span>Click and drag to sign</span>
+              </div>
+              <div className="guideline-item">
+                <i className="fas fa-mobile-alt"></i>
+                <span>Touch and move to sign on mobile</span>
+              </div>
+            </div>
+          </>
         )}
-        <div className="signature-line"></div>
+        <div className="signature-line">
+          <span className="signature-label">{label}</span>
+        </div>
       </div>
 
-      <button 
-        className="clear-btn" 
-        onClick={clearSignature}
-        disabled={disabled || !hasSignature}
-      >
-        CLEAR
-      </button>
+      <div className="signature-actions">
+        <button 
+          className={`clear-btn ${(!hasSignature || disabled) ? 'disabled' : ''}`}
+          onClick={clearSignature}
+          disabled={disabled || !hasSignature}
+        >
+          <i className="fas fa-trash-alt"></i>
+          Clear Signature
+        </button>
+      </div>
     </div>
   );
 };

@@ -1,8 +1,59 @@
-// components/ObjectiveSections/EquipmentSection.jsx
-import React from 'react';
+// Enhanced EquipmentSection.jsx
+import React, { useState } from 'react';
 import '../../../../../../../../styles/developer/Patients/InfoPaciente/NotesAndSign/ObjectiveSections/EquipmentSection.scss';
 
 const EquipmentSection = ({ data, onChange }) => {
+  // Estado para búsqueda y filtrado
+  const [searchTerm, setSearchTerm] = useState('');
+  const [expandedGroups, setExpandedGroups] = useState({
+    gaitMobility: true,
+    transfers: true,
+    toileting: true,
+    bathing: true,
+    bedMobility: true,
+    dressing: true,
+    other: true
+  });
+  
+  // Información de los grupos para UI mejorada
+  const groupInfo = {
+    gaitMobility: {
+      title: 'Gait & Mobility',
+      icon: 'fas fa-walking',
+      description: 'Equipment used to assist with walking and movement'
+    },
+    transfers: {
+      title: 'Transfers',
+      icon: 'fas fa-exchange-alt',
+      description: 'Equipment used to assist with transfers between surfaces'
+    },
+    toileting: {
+      title: 'Toileting',
+      icon: 'fas fa-toilet',
+      description: 'Equipment used to assist with toileting activities'
+    },
+    bathing: {
+      title: 'Bathing',
+      icon: 'fas fa-bath',
+      description: 'Equipment used to assist with bathing and showering'
+    },
+    bedMobility: {
+      title: 'Bed Mobility',
+      icon: 'fas fa-bed',
+      description: 'Equipment used to assist with movement in bed'
+    },
+    dressing: {
+      title: 'Dressing',
+      icon: 'fas fa-tshirt',
+      description: 'Equipment used to assist with dressing activities'
+    },
+    other: {
+      title: 'Other Equipment',
+      icon: 'fas fa-tools',
+      description: 'Additional assistive devices and equipment'
+    }
+  };
+
   // Grupos de equipamientos
   const equipmentGroups = {
     gaitMobility: [
@@ -65,6 +116,23 @@ const EquipmentSection = ({ data, onChange }) => {
     ]
   };
   
+  // Obtener la cantidad total de equipos seleccionados
+  const getSelectedCount = () => {
+    let count = 0;
+    Object.keys(equipmentGroups).forEach(group => {
+      if (data[group]) {
+        count += Object.values(data[group]).filter(Boolean).length;
+      }
+    });
+    return count;
+  };
+  
+  // Obtener la cantidad de equipos seleccionados por grupo
+  const getGroupSelectedCount = (group) => {
+    if (!data[group]) return 0;
+    return Object.values(data[group]).filter(Boolean).length;
+  };
+  
   // Manejar cambios en los checkboxes
   const handleCheckboxChange = (group, itemId) => {
     // Inicializar grupo si no existe
@@ -89,57 +157,153 @@ const EquipmentSection = ({ data, onChange }) => {
       [field]: value
     });
   };
+  
+  // Manejar el cambio en el campo de búsqueda
+  const handleSearchChange = (e) => {
+    setSearchTerm(e.target.value);
+  };
+  
+  // Alternar la expansión de un grupo
+  const toggleGroupExpansion = (group) => {
+    setExpandedGroups(prev => ({
+      ...prev,
+      [group]: !prev[group]
+    }));
+  };
+  
+  // Filtrar equipos por término de búsqueda
+  const filterEquipment = (items) => {
+    if (!searchTerm) return items;
+    return items.filter(item => 
+      item.label.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  };
 
   // Renderizar un grupo de checkboxes
-  const renderCheckboxGroup = (title, group, items) => (
-    <div className="equipment-group">
-      <h3 className="group-title">{title}:</h3>
-      <div className="checkbox-group">
-        {items.map(item => (
-          <div className="checkbox-item" key={item.id}>
-            <input 
-              type="checkbox" 
-              id={item.id} 
-              checked={data[group]?.[item.id] || false}
-              onChange={() => handleCheckboxChange(group, item.id)}
-            />
-            <label htmlFor={item.id}>{item.label}</label>
+  const renderCheckboxGroup = (groupKey, items) => {
+    const groupDetails = groupInfo[groupKey];
+    const filteredItems = filterEquipment(items);
+    const selectedCount = getGroupSelectedCount(groupKey);
+    const isExpanded = expandedGroups[groupKey];
+    const hasMatchingItems = filteredItems.length > 0;
+    
+    return (
+      <div className={`equipment-group ${!hasMatchingItems && searchTerm ? 'hidden' : ''}`}>
+        <div 
+          className="group-header" 
+          onClick={() => toggleGroupExpansion(groupKey)}
+        >
+          <div className="group-title-container">
+            <div className="group-icon">
+              <i className={groupDetails.icon}></i>
+            </div>
+            <div className="group-info">
+              <h3 className="group-title">{groupDetails.title}</h3>
+              <p className="group-description">{groupDetails.description}</p>
+            </div>
           </div>
-        ))}
+          <div className="group-actions">
+            {selectedCount > 0 && (
+              <span className="selected-badge">{selectedCount} selected</span>
+            )}
+            <button className="toggle-button">
+              <i className={`fas fa-chevron-${isExpanded ? 'up' : 'down'}`}></i>
+            </button>
+          </div>
+        </div>
+        
+        {isExpanded && hasMatchingItems && (
+          <div className="checkbox-container">
+            <div className="checkbox-group">
+              {filteredItems.map(item => (
+                <div 
+                  className={`checkbox-item ${data[groupKey]?.[item.id] ? 'selected' : ''}`} 
+                  key={item.id}
+                >
+                  <input 
+                    type="checkbox" 
+                    id={item.id} 
+                    checked={data[groupKey]?.[item.id] || false}
+                    onChange={() => handleCheckboxChange(groupKey, item.id)}
+                  />
+                  <label htmlFor={item.id}>{item.label}</label>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
-    </div>
-  );
+    );
+  };
 
   return (
     <div className="equipment-section">
-      <h2 className="section-title">Equipment</h2>
-      
-      <div className="equipment-owned-section">
-        <h3 className="subsection-title">EQUIPMENT OWNED</h3>
-        
-        <div className="equipment-grid">
-          <div className="equipment-column">
-            {renderCheckboxGroup('GAIT MOBILITY', 'gaitMobility', equipmentGroups.gaitMobility)}
-            {renderCheckboxGroup('TRANSFERS', 'transfers', equipmentGroups.transfers)}
-            {renderCheckboxGroup('TOILETING', 'toileting', equipmentGroups.toileting)}
-          </div>
-          
-          <div className="equipment-column">
-            {renderCheckboxGroup('BATHING', 'bathing', equipmentGroups.bathing)}
-            {renderCheckboxGroup('BED MOBILITY', 'bedMobility', equipmentGroups.bedMobility)}
-            {renderCheckboxGroup('DRESSING', 'dressing', equipmentGroups.dressing)}
-            {renderCheckboxGroup('OTHER', 'other', equipmentGroups.other)}
+      <div className="section-header">
+        <h2 className="section-title">
+          <i className="fas fa-wheelchair"></i>
+          Equipment
+        </h2>
+        <div className="section-meta">
+          <div className="equipment-count">
+            <span className="count-number">{getSelectedCount()}</span>
+            <span className="count-label">items selected</span>
           </div>
         </div>
       </div>
       
-      <div className="additional-info-row">
-        <span className="label">ADDITIONAL INFORMATION:</span>
+      <div className="equipment-owned-section">
+        <div className="section-header-actions">
+          <h3 className="subsection-title">
+            <i className="fas fa-box-open"></i>
+            Equipment Owned
+          </h3>
+          <div className="search-container">
+            <input
+              type="text"
+              placeholder="Search equipment..."
+              value={searchTerm}
+              onChange={handleSearchChange}
+              className="search-input"
+            />
+            <i className="fas fa-search search-icon"></i>
+            {searchTerm && (
+              <button 
+                className="clear-search" 
+                onClick={() => setSearchTerm('')}
+              >
+                <i className="fas fa-times"></i>
+              </button>
+            )}
+          </div>
+        </div>
+        
+        <div className="equipment-grid">
+          <div className="equipment-column">
+            {renderCheckboxGroup('gaitMobility', equipmentGroups.gaitMobility)}
+            {renderCheckboxGroup('transfers', equipmentGroups.transfers)}
+            {renderCheckboxGroup('toileting', equipmentGroups.toileting)}
+            {renderCheckboxGroup('bathing', equipmentGroups.bathing)}
+          </div>
+          
+          <div className="equipment-column">
+            {renderCheckboxGroup('bedMobility', equipmentGroups.bedMobility)}
+            {renderCheckboxGroup('dressing', equipmentGroups.dressing)}
+            {renderCheckboxGroup('other', equipmentGroups.other)}
+          </div>
+        </div>
+      </div>
+      
+      <div className="additional-info-container">
+        <h3 className="subsection-title">
+          <i className="fas fa-sticky-note"></i>
+          Additional Information
+        </h3>
         <textarea 
           value={data.additionalInformation || ''}
           onChange={(e) => handleTextChange('additionalInformation', e.target.value)}
-          rows={3}
+          rows={4}
           placeholder="Add any additional information about equipment"
+          className="additional-info-textarea"
         />
       </div>
     </div>

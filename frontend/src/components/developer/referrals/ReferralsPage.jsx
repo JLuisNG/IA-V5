@@ -33,7 +33,7 @@ const DevReferralsPage = () => {
   const containerRef = useRef(null);
   const fileInputRef = useRef(null);
   
-  // Form data state
+  // Form data state with added weight and height fields
   const [formData, setFormData] = useState({
     // Patient personal data
     firstName: '',
@@ -64,6 +64,10 @@ const DevReferralsPage = () => {
     priorLevelOfFunction: 'To Be Obtained at Evaluation',
     homebound: {},
     wbs: '',
+    weight: '',
+    weightUnit: 'lbs', // Default unit for weight
+    height: '',
+    heightUnit: 'ft', // Default unit for height
     
     // Therapy
     reasonsForReferral: {
@@ -147,7 +151,6 @@ const DevReferralsPage = () => {
   
   // Effect for simulating loading state
   useEffect(() => {
-    // Simulate loading for a smoother experience
     const timer = setTimeout(() => {
       setIsLoading(false);
     }, 800);
@@ -188,7 +191,6 @@ const DevReferralsPage = () => {
       const endDate = new Date(startDate);
       endDate.setDate(startDate.getDate() + 60);
       
-      // Format date as YYYY-MM-DD for date input
       const formattedEndDate = endDate.toISOString().split('T')[0];
       
       setFormData(prev => ({
@@ -203,33 +205,28 @@ const DevReferralsPage = () => {
     setIsLoggingOut(true);
     setShowUserMenu(false);
     
-    // Apply class to document.body for global effects
     document.body.classList.add('logging-out');
   };
   
   // Callback for when the logout animation completes
   const handleLogoutAnimationComplete = () => {
-    // Execute logout from authentication context
     logout();
-    // Navigate to login page
     navigate('/');
   };
   
   // Handle navigation to main menu
   const handleMainMenuTransition = () => {
-    if (isLoggingOut) return; // Prevent navigation during logout
+    if (isLoggingOut) return;
     
-    // Extract base role for navigation
     const baseRole = currentUser?.role?.split(' - ')[0].toLowerCase() || 'developer';
     navigate(`/${baseRole}/homePage`);
   };
 
   // Handle starting create new referral process
   const handleStartCreateReferral = () => {
-    if (isLoggingOut) return; // Prevent actions during logout
+    if (isLoggingOut) return;
     
     setReferralFormLoading(true);
-    // Simulate loading for smoother transition
     setTimeout(() => {
       setCurrentView('createReferral');
       setReferralFormLoading(false);
@@ -238,20 +235,20 @@ const DevReferralsPage = () => {
 
   // Handle navigation to referral stats
   const handleReferralStats = () => {
-    if (isLoggingOut) return; // Prevent actions during logout
+    if (isLoggingOut) return;
     
     setCurrentView('stats');
   };
   
   // Handle click on PDF upload area
   const handlePdfAreaClick = () => {
-    if (isLoggingOut) return; // Prevent actions during logout
+    if (isLoggingOut) return;
     fileInputRef.current.click();
   };
   
   // Handle file upload
   const handleFileUpload = (e) => {
-    if (isLoggingOut) return; // Prevent actions during logout
+    if (isLoggingOut) return;
     
     const files = Array.from(e.target.files).filter(file => file.type === 'application/pdf');
     
@@ -265,7 +262,7 @@ const DevReferralsPage = () => {
   
   // Handle form input changes
   const handleInputChange = (e) => {
-    if (isLoggingOut) return; // Prevent actions during logout
+    if (isLoggingOut) return;
     
     const { name, value, type, checked } = e.target;
     
@@ -275,9 +272,9 @@ const DevReferralsPage = () => {
     }));
   };
   
-  // Handle contact number changes
+  // Handle contact number changes-started here
   const handleContactNumberChange = (index, value) => {
-    if (isLoggingOut) return; // Prevent actions during logout
+    if (isLoggingOut) return;
     
     const updatedNumbers = [...formData.contactNumbers];
     updatedNumbers[index] = value;
@@ -290,7 +287,7 @@ const DevReferralsPage = () => {
   
   // Add a new contact number
   const addContactNumber = () => {
-    if (isLoggingOut) return; // Prevent actions during logout
+    if (isLoggingOut) return;
     
     setFormData(prev => ({
       ...prev,
@@ -300,7 +297,7 @@ const DevReferralsPage = () => {
   
   // Remove a contact number
   const removeContactNumber = (index) => {
-    if (isLoggingOut) return; // Prevent actions during logout
+    if (isLoggingOut) return;
     
     if (formData.contactNumbers.length > 1) {
       const updatedNumbers = [...formData.contactNumbers];
@@ -315,7 +312,7 @@ const DevReferralsPage = () => {
   
   // Handle physician selection
   const handlePhysicianChange = (e) => {
-    if (isLoggingOut) return; // Prevent actions during logout
+    if (isLoggingOut) return;
     
     const physicianId = e.target.value;
     
@@ -329,7 +326,7 @@ const DevReferralsPage = () => {
   
   // Handle agency selection
   const handleAgencyChange = (e) => {
-    if (isLoggingOut) return; // Prevent actions during logout
+    if (isLoggingOut) return;
     
     const agencyId = e.target.value;
     
@@ -346,7 +343,7 @@ const DevReferralsPage = () => {
 
   // Handle nurse manager selection
   const handleNurseManagerChange = (e) => {
-    if (isLoggingOut) return; // Prevent actions during logout
+    if (isLoggingOut) return;
     
     const value = e.target.value;
     
@@ -369,7 +366,7 @@ const DevReferralsPage = () => {
   
   // Handle homebound option changes
   const handleHomeboundChange = (optionId, isChecked) => {
-    if (isLoggingOut) return; // Prevent actions during logout
+    if (isLoggingOut) return;
     
     setFormData(prev => ({
       ...prev,
@@ -382,7 +379,7 @@ const DevReferralsPage = () => {
   
   // Handle reasons for referral changes
   const handleReasonChange = (reasonId, isChecked) => {
-    if (isLoggingOut) return; // Prevent actions during logout
+    if (isLoggingOut) return;
     
     setFormData(prev => ({
       ...prev,
@@ -395,46 +392,15 @@ const DevReferralsPage = () => {
   
   // Handle discipline selection
   const handleDisciplineChange = (discipline) => {
-    if (isLoggingOut) return; // Prevent actions during logout
+    if (isLoggingOut) return;
     
-    let updatedDisciplines = { ...selectedDisciplines };
-    
-    updatedDisciplines[discipline] = !updatedDisciplines[discipline];
-    
-    // Apply pairing rules
-    if (discipline === 'PT' && updatedDisciplines.PT) {
-      updatedDisciplines.PTA = true;
-    } else if (discipline === 'PT' && !updatedDisciplines.PT) {
-      updatedDisciplines.PTA = false;
-    } else if (discipline === 'PTA' && updatedDisciplines.PTA) {
-      updatedDisciplines.PT = true;
-    } else if (discipline === 'PTA' && !updatedDisciplines.PTA) {
-      updatedDisciplines.PT = false;
-    }
-    
-    if (discipline === 'OT' && updatedDisciplines.OT) {
-      updatedDisciplines.COTA = true;
-    } else if (discipline === 'OT' && !updatedDisciplines.OT) {
-      updatedDisciplines.COTA = false;
-    } else if (discipline === 'COTA' && updatedDisciplines.COTA) {
-      updatedDisciplines.OT = true;
-    } else if (discipline === 'COTA' && !updatedDisciplines.COTA) {
-      updatedDisciplines.OT = false;
-    }
-    
-    if (discipline === 'ST' && updatedDisciplines.ST) {
-      updatedDisciplines.STA = true;
-    } else if (discipline === 'ST' && !updatedDisciplines.ST) {
-      updatedDisciplines.STA = false;
-    } else if (discipline === 'STA' && updatedDisciplines.STA) {
-      updatedDisciplines.ST = true;
-    } else if (discipline === 'STA' && !updatedDisciplines.STA) {
-      updatedDisciplines.ST = false;
-    }
+    const updatedDisciplines = {
+      ...selectedDisciplines,
+      [discipline]: !selectedDisciplines[discipline]
+    };
     
     setSelectedDisciplines(updatedDisciplines);
     
-    // Update formData.disciplines
     const selectedDisciplinesList = Object.keys(updatedDisciplines).filter(key => updatedDisciplines[key]);
     
     setFormData(prev => ({
@@ -445,7 +411,7 @@ const DevReferralsPage = () => {
   
   // Handle therapist selection
   const handleTherapistSelection = (discipline, therapistId) => {
-    if (isLoggingOut) return; // Prevent actions during logout
+    if (isLoggingOut) return;
     
     setSelectedTherapists(prev => ({
       ...prev,
@@ -453,13 +419,9 @@ const DevReferralsPage = () => {
     }));
   };
   
-  // Validate that the discipline pairing rule is met (PT+PTA, OT+COTA, ST+STA)
+  // Validate that at least one discipline is selected
   const validateDisciplines = () => {
-    const hasPTPair = selectedDisciplines.PT && selectedDisciplines.PTA;
-    const hasOTPair = selectedDisciplines.OT && selectedDisciplines.COTA;
-    const hasSTAPair = selectedDisciplines.ST && selectedDisciplines.STA;
-    
-    return hasPTPair || hasOTPair || hasSTAPair;
+    return Object.values(selectedDisciplines).some(discipline => discipline);
   };
   
   // Get selected agency
@@ -471,11 +433,11 @@ const DevReferralsPage = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     
-    if (isLoggingOut) return; // Prevent actions during logout
+    if (isLoggingOut) return;
     
-    // Validate that at least one discipline pair is selected
+    // Validate that at least one discipline is selected
     if (!validateDisciplines()) {
-      alert('Please select at least one discipline pair (PT+PTA, OT+COTA, or ST+STA)');
+      alert('Please select at least one discipline (PT, PTA, OT, COTA, ST, or STA)');
       return;
     }
     
@@ -486,6 +448,16 @@ const DevReferralsPage = () => {
     
     if (!hasAllTherapistsSelected) {
       alert('Please select a therapist for each selected discipline');
+      return;
+    }
+    
+    // Validate weight and height
+    if (formData.weight && isNaN(formData.weight)) {
+      alert('Please enter a valid number for Weight');
+      return;
+    }
+    if (formData.height && isNaN(formData.height)) {
+      alert('Please enter a valid number for Height');
       return;
     }
     
@@ -500,16 +472,14 @@ const DevReferralsPage = () => {
     // Handle form submission success
     setTimeout(() => {
       setFormSubmitting(false);
-      // Reset the view to referrals menu
       setCurrentView('menu');
     }, 2000);
   };
 
   // Cancel creating referral and go back to menu
   const handleCancelCreateReferral = () => {
-    if (isLoggingOut) return; // Prevent actions during logout
+    if (isLoggingOut) return;
     
-    // Ask for confirmation if form has data
     const hasFormData = Object.values(formData).some(value => {
       if (typeof value === 'string') return value !== '';
       if (Array.isArray(value)) return value.length > 0 && value[0] !== '';
@@ -550,6 +520,10 @@ const DevReferralsPage = () => {
       priorLevelOfFunction: 'To Be Obtained at Evaluation',
       homebound: {},
       wbs: '',
+      weight: '',
+      weightUnit: 'lbs',
+      height: '',
+      heightUnit: 'ft',
       reasonsForReferral: {
         strength_balance: false,
         gait: false,
@@ -1085,7 +1059,6 @@ const DevReferralsPage = () => {
                     </select>
                   </div>
                   
-                  {/* Cert Period field with two dates */}
                   <div className="form-group full-width">
                     <label>Cert Period</label>
                     <div className="cert-period-container">
@@ -1352,6 +1325,65 @@ const DevReferralsPage = () => {
                       disabled={isLoggingOut}
                     />
                   </div>
+                  
+                  {/* Weight field with unit selection */}
+                  <div className="form-group">
+                    <label htmlFor="weight">Weight</label>
+                    <div className="measurement-input">
+                      <input
+                        type="number"
+                        id="weight"
+                        name="weight"
+                        value={formData.weight}
+                        onChange={handleInputChange}
+                        placeholder="Enter weight"
+                        min="0"
+                        step="0.1"
+                        disabled={isLoggingOut}
+                      />
+                      <select
+                        name="weightUnit"
+                        value={formData.weightUnit}
+                        onChange={handleInputChange}
+                        disabled={isLoggingOut}
+                      >
+                        <option value="lbs">lbs</option>
+                        <option value="kg">kg</option>
+                      </select>
+                    </div>
+                  </div>
+                  
+                  {/* Height field with unit selection */}
+                  <div className="form-group">
+                    <label htmlFor="height">Height</label>
+                    <div className="measurement-input">
+                      <input
+                        type="number"
+                        id="height"
+                        name="height"
+                        value={formData.height}
+                        onChange={handleInputChange}
+                        placeholder="Enter height"
+                        min="0"
+                        step="0.1"
+                        disabled={isLoggingOut}
+                      />
+                      <select
+                        name="heightUnit"
+                        value={formData.heightUnit}
+                        onChange={handleInputChange}
+                        disabled={isLoggingOut}
+                      >
+                        <option value="ft">ft</option>
+                        <option value="cm">cm</option>
+                      </select>
+                    </div>
+                    {formData.heightUnit === 'ft' && (
+                      <small className="form-text text-muted">
+                        Enter height in feet (e.g., 5.5 for 5 feet 6 inches)
+                      </small>
+                    )}
+                  </div>
                 </div>
               </div>
               
@@ -1463,7 +1495,7 @@ const DevReferralsPage = () => {
                                 disabled={isLoggingOut}
                               >
                                 <option value="">Select PTA Therapist</option>
-                                {therapists.PINEAPPLE.map(therapist => (
+                                {therapists.PTA.map(therapist => (
                                   <option key={therapist.id} value={therapist.id}>
                                     {therapist.name}
                                   </option>
@@ -1607,14 +1639,14 @@ const DevReferralsPage = () => {
                       </div>
 
                       <div className="discipline-note">
-                        <p><i className="fas fa-info-circle"></i> At least one pair of disciplines must be selected (PT+PTA, OT+COTA, or ST+STA)</p>
+                        <p><i className="fas fa-info-circle"></i> At least one discipline must be selected (PT, PTA, OT, COTA, ST, or STA)</p>
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
               
-              {/* Documents Upload Section - NOW AT THE END */}
+              {/* Documents Upload Section */}
               <div className="form-section">
                 <div className="section-header">
                   <i className="fas fa-file-pdf"></i>

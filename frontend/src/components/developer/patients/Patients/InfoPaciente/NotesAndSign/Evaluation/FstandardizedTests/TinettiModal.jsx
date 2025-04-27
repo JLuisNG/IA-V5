@@ -1,4 +1,4 @@
-// components/standardizedTests/TinettiModal.jsx
+// Enhanced TinettiModal.jsx
 import React, { useState, useEffect } from 'react';
 import '../../../../../../../../styles/developer/Patients/InfoPaciente/NotesAndSign/standardizedTests/TinettiModal.scss';
 
@@ -44,6 +44,9 @@ const TinettiModal = ({ isOpen, onClose, initialData = null }) => {
 
   // Estado para la validación
   const [validationErrors, setValidationErrors] = useState({});
+
+  // Estado para mostrar ayuda
+  const [showHelp, setShowHelp] = useState(false);
   
   // Opciones para los campos de selección
   const balanceOptions = {
@@ -212,6 +215,22 @@ const TinettiModal = ({ isOpen, onClose, initialData = null }) => {
     setValidationErrors(errors);
     return Object.keys(errors).length === 0;
   };
+
+  // Verificar progreso del formulario
+  const getCompletionPercentage = () => {
+    const totalFields = 20; // Total de campos a completar
+    const requiredFields = [
+      'sittingBalance', 'risesFromChair', 'attemptToRise', 
+      'immediateStandingBalance', 'standingBalance', 'nudged', 
+      'eyesClosed', 'turning360Steps', 'turning360Stability', 'sittingDown',
+      'initiationOfGait', 'rightStepLength', 'rightStepHeight',
+      'leftStepLength', 'leftStepHeight', 'stepSymmetry',
+      'stepContinuity', 'path', 'trunk', 'walkingStance'
+    ];
+    
+    const completedFields = requiredFields.filter(field => formData[field]).length;
+    return Math.round((completedFields / totalFields) * 100);
+  };
     
   // Manejar cambios en los campos
   const handleChange = (field, value) => {
@@ -246,8 +265,7 @@ const TinettiModal = ({ isOpen, onClose, initialData = null }) => {
         score: formData.totalScore
       });
     } else {
-      // Resaltar los campos faltantes
-      // También podríamos mostrar un mensaje de error
+      // Mostrar un mensaje de error y hacer scroll hacia arriba
       window.scrollTo(0, 0);
     }
   };
@@ -266,32 +284,117 @@ const TinettiModal = ({ isOpen, onClose, initialData = null }) => {
     if (formData.totalScore >= 19) return 'moderate-risk';
     return 'high-risk';
   };
+
+  // Obtener mensaje de riesgo
+  const getRiskMessage = () => {
+    if (formData.totalScore >= 24) return 'Low Fall Risk';
+    if (formData.totalScore >= 19) return 'Moderate Fall Risk';
+    return 'High Fall Risk';
+  };
+
+  // Obtener indicaciones de intervención
+  const getInterventionGuideline = () => {
+    if (formData.totalScore <= 18) {
+      return 'Consider comprehensive fall prevention program';
+    } else if (formData.totalScore <= 23) {
+      return 'Balance training and gait assessment recommended';
+    } else {
+      return 'General mobility maintenance';
+    }
+  };
   
   // Si el modal no está abierto, no renderizar nada
   if (!isOpen) return null;
+  
+  // Calcular porcentaje de progreso
+  const completionPercentage = getCompletionPercentage();
   
   return (
     <div className="tinetti-modal-overlay">
       <div className="tinetti-modal">
         <div className="modal-header">
-          <h2>
-            <i className="fas fa-balance-scale"></i>
-            Tinetti Balance & Gait Assessment
-          </h2>
-          <button className="close-button" onClick={() => onClose()}>
-            <i className="fas fa-times"></i>
-          </button>
+          <div className="header-content">
+            <h2>
+              <i className="fas fa-balance-scale"></i>
+              Tinetti Balance & Gait Assessment
+            </h2>
+            <div className="header-actions">
+              <button className="help-button" onClick={() => setShowHelp(!showHelp)}>
+                <i className="fas fa-question-circle"></i>
+                <span>Help</span>
+              </button>
+              <button className="close-button" onClick={() => onClose()}>
+                <i className="fas fa-times"></i>
+              </button>
+            </div>
+          </div>
+          
+          <div className="progress-container">
+            <div className="progress-bar">
+              <div 
+                className="progress-fill" 
+                style={{ width: `${completionPercentage}%` }}
+              ></div>
+            </div>
+            <div className="progress-text">
+              <span>{completionPercentage}% Complete</span>
+              {Object.keys(validationErrors).length > 0 && (
+                <span className="error-count">
+                  <i className="fas fa-exclamation-triangle"></i>
+                  {Object.keys(validationErrors).length} items need attention
+                </span>
+              )}
+            </div>
+          </div>
         </div>
         
         <div className="modal-content">
+          {showHelp && (
+            <div className="help-panel">
+              <div className="help-header">
+                <h3>About the Tinetti Assessment</h3>
+                <button onClick={() => setShowHelp(false)}>
+                  <i className="fas fa-times"></i>
+                </button>
+              </div>
+              <div className="help-content">
+                <p>The Tinetti Balance and Gait Assessment is a simple, easily administered test that measures a patient's gait and balance abilities.</p>
+                <div className="help-sections">
+                  <div className="help-section">
+                    <h4>What it measures</h4>
+                    <p>The test assesses 10 balance components and 8 gait components. Each component receives a score, with a maximum score of 28 points.</p>
+                  </div>
+                  <div className="help-section">
+                    <h4>Interpreting results</h4>
+                    <ul>
+                      <li><span className="score high-risk">≤18 points</span>: High fall risk</li>
+                      <li><span className="score moderate-risk">19-23 points</span>: Moderate fall risk</li>
+                      <li><span className="score low-risk">≥24 points</span>: Low fall risk</li>
+                    </ul>
+                  </div>
+                </div>
+                <div className="help-footer">
+                  <p>All fields in this assessment are required. Complete each section to generate a final score.</p>
+                  <button className="help-close-btn" onClick={() => setShowHelp(false)}>
+                    Close Help
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+          
           <div className="assessment-info">
             <div className="info-card">
               <div className="info-icon">
                 <i className="fas fa-info-circle"></i>
               </div>
               <div className="info-text">
-                <p>The Tinetti test evaluates a person's balance and gait to determine their fall risk. Scores range from 0 to 28.</p>
+                <p>The Tinetti Assessment evaluates a person's balance and gait to determine fall risk. Complete all items below for an accurate assessment.</p>
               </div>
+              <button className="info-button" onClick={() => setShowHelp(!showHelp)}>
+                <i className="fas fa-lightbulb"></i>
+                <span>Learn More</span>
+              </button>
             </div>
           </div>
 
@@ -300,13 +403,15 @@ const TinettiModal = ({ isOpen, onClose, initialData = null }) => {
               className="section-header" 
               onClick={() => toggleSection('balance')}
             >
-              <h3>
-                <i className="fas fa-standing-person"></i>
-                Balance Section
-              </h3>
-              <span className="section-score">
-                Score: {formData.balanceTotal}/16
-              </span>
+              <div className="section-title">
+                <h3>
+                  <i className="fas fa-standing-person"></i>
+                  Balance Section
+                </h3>
+                <span className="section-score">
+                  Score: {formData.balanceTotal}/16
+                </span>
+              </div>
               <button className="toggle-btn">
                 <i className={`fas fa-chevron-${sectionsOpen.balance ? 'up' : 'down'}`}></i>
               </button>
@@ -316,7 +421,10 @@ const TinettiModal = ({ isOpen, onClose, initialData = null }) => {
               <div className="section-content">
                 <div className="tinetti-items">
                   <div className={`tinetti-item ${validationErrors.sittingBalance ? 'has-error' : ''}`}>
-                    <label>1. Sitting Balance</label>
+                    <label>
+                      <span className="item-number">1</span>
+                      Sitting Balance
+                    </label>
                     <select 
                       value={formData.sittingBalance}
                       onChange={(e) => handleChange('sittingBalance', e.target.value)}
@@ -329,12 +437,18 @@ const TinettiModal = ({ isOpen, onClose, initialData = null }) => {
                       ))}
                     </select>
                     {validationErrors.sittingBalance && (
-                      <div className="error-message">This field is required</div>
+                      <div className="error-message">
+                        <i className="fas fa-exclamation-circle"></i>
+                        This field is required
+                      </div>
                     )}
                   </div>
                   
                   <div className={`tinetti-item ${validationErrors.risesFromChair ? 'has-error' : ''}`}>
-                    <label>2. Rises From Chair</label>
+                    <label>
+                      <span className="item-number">2</span>
+                      Rises From Chair
+                    </label>
                     <select 
                       value={formData.risesFromChair}
                       onChange={(e) => handleChange('risesFromChair', e.target.value)}
@@ -347,12 +461,18 @@ const TinettiModal = ({ isOpen, onClose, initialData = null }) => {
                       ))}
                     </select>
                     {validationErrors.risesFromChair && (
-                      <div className="error-message">This field is required</div>
+                      <div className="error-message">
+                        <i className="fas fa-exclamation-circle"></i>
+                        This field is required
+                      </div>
                     )}
                   </div>
                   
                   <div className={`tinetti-item ${validationErrors.attemptToRise ? 'has-error' : ''}`}>
-                    <label>3. Attempt To Rise</label>
+                    <label>
+                      <span className="item-number">3</span>
+                      Attempt To Rise
+                    </label>
                     <select 
                       value={formData.attemptToRise}
                       onChange={(e) => handleChange('attemptToRise', e.target.value)}
@@ -365,12 +485,18 @@ const TinettiModal = ({ isOpen, onClose, initialData = null }) => {
                       ))}
                     </select>
                     {validationErrors.attemptToRise && (
-                      <div className="error-message">This field is required</div>
+                      <div className="error-message">
+                        <i className="fas fa-exclamation-circle"></i>
+                        This field is required
+                      </div>
                     )}
                   </div>
                   
                   <div className={`tinetti-item ${validationErrors.immediateStandingBalance ? 'has-error' : ''}`}>
-                    <label>4. Immediate Standing Balance (5 sec.)</label>
+                    <label>
+                      <span className="item-number">4</span>
+                      Immediate Standing Balance (5 sec.)
+                    </label>
                     <select 
                       value={formData.immediateStandingBalance}
                       onChange={(e) => handleChange('immediateStandingBalance', e.target.value)}
@@ -383,12 +509,18 @@ const TinettiModal = ({ isOpen, onClose, initialData = null }) => {
                       ))}
                     </select>
                     {validationErrors.immediateStandingBalance && (
-                      <div className="error-message">This field is required</div>
+                      <div className="error-message">
+                        <i className="fas fa-exclamation-circle"></i>
+                        This field is required
+                      </div>
                     )}
                   </div>
                   
                   <div className={`tinetti-item ${validationErrors.standingBalance ? 'has-error' : ''}`}>
-                    <label>5. Standing Balance</label>
+                    <label>
+                      <span className="item-number">5</span>
+                      Standing Balance
+                    </label>
                     <select 
                       value={formData.standingBalance}
                       onChange={(e) => handleChange('standingBalance', e.target.value)}
@@ -401,12 +533,18 @@ const TinettiModal = ({ isOpen, onClose, initialData = null }) => {
                       ))}
                     </select>
                     {validationErrors.standingBalance && (
-                      <div className="error-message">This field is required</div>
+                      <div className="error-message">
+                        <i className="fas fa-exclamation-circle"></i>
+                        This field is required
+                      </div>
                     )}
                   </div>
                   
                   <div className={`tinetti-item ${validationErrors.nudged ? 'has-error' : ''}`}>
-                    <label>6. Nudged</label>
+                    <label>
+                      <span className="item-number">6</span>
+                      Nudged
+                    </label>
                     <select 
                       value={formData.nudged}
                       onChange={(e) => handleChange('nudged', e.target.value)}
@@ -419,12 +557,18 @@ const TinettiModal = ({ isOpen, onClose, initialData = null }) => {
                       ))}
                     </select>
                     {validationErrors.nudged && (
-                      <div className="error-message">This field is required</div>
+                      <div className="error-message">
+                        <i className="fas fa-exclamation-circle"></i>
+                        This field is required
+                      </div>
                     )}
                   </div>
                   
                   <div className={`tinetti-item ${validationErrors.eyesClosed ? 'has-error' : ''}`}>
-                    <label>7. Eyes Closed</label>
+                    <label>
+                      <span className="item-number">7</span>
+                      Eyes Closed
+                    </label>
                     <select 
                       value={formData.eyesClosed}
                       onChange={(e) => handleChange('eyesClosed', e.target.value)}
@@ -437,12 +581,18 @@ const TinettiModal = ({ isOpen, onClose, initialData = null }) => {
                       ))}
                     </select>
                     {validationErrors.eyesClosed && (
-                      <div className="error-message">This field is required</div>
+                      <div className="error-message">
+                        <i className="fas fa-exclamation-circle"></i>
+                        This field is required
+                      </div>
                     )}
                   </div>
                   
-                  <div className={`tinetti-item ${validationErrors.turning360Steps || validationErrors.turning360Stability ? 'has-error' : ''}`}>
-                    <label>8. Turning 360°</label>
+                  <div className={`tinetti-item turning-item ${validationErrors.turning360Steps || validationErrors.turning360Stability ? 'has-error' : ''}`}>
+                    <label>
+                      <span className="item-number">8</span>
+                      Turning 360°
+                    </label>
                     <div className="dual-select">
                       <div className="sub-item">
                         <label>Steps</label>
@@ -458,7 +608,10 @@ const TinettiModal = ({ isOpen, onClose, initialData = null }) => {
                           ))}
                         </select>
                         {validationErrors.turning360Steps && (
-                          <div className="error-message">Required</div>
+                          <div className="error-message">
+                            <i className="fas fa-exclamation-circle"></i>
+                            Required
+                          </div>
                         )}
                       </div>
                       
@@ -476,14 +629,20 @@ const TinettiModal = ({ isOpen, onClose, initialData = null }) => {
                           ))}
                         </select>
                         {validationErrors.turning360Stability && (
-                          <div className="error-message">Required</div>
+                          <div className="error-message">
+                            <i className="fas fa-exclamation-circle"></i>
+                            Required
+                          </div>
                         )}
                       </div>
                     </div>
                   </div>
                   
                   <div className={`tinetti-item ${validationErrors.sittingDown ? 'has-error' : ''}`}>
-                    <label>9. Sitting Down</label>
+                    <label>
+                      <span className="item-number">9</span>
+                      Sitting Down
+                    </label>
                     <select 
                       value={formData.sittingDown}
                       onChange={(e) => handleChange('sittingDown', e.target.value)}
@@ -496,7 +655,10 @@ const TinettiModal = ({ isOpen, onClose, initialData = null }) => {
                       ))}
                     </select>
                     {validationErrors.sittingDown && (
-                      <div className="error-message">This field is required</div>
+                      <div className="error-message">
+                        <i className="fas fa-exclamation-circle"></i>
+                        This field is required
+                      </div>
                     )}
                   </div>
                 </div>
@@ -505,13 +667,14 @@ const TinettiModal = ({ isOpen, onClose, initialData = null }) => {
             
             <div className="section-footer">
               <div className="section-score-summary">
+                <div className="score-label">Balance Score:</div>
                 <div className="progress-bar">
                   <div 
                     className="progress" 
                     style={{ width: `${(formData.balanceTotal / 16) * 100}%` }}
                   ></div>
                 </div>
-                <span className="score-value">{formData.balanceTotal}/16 points</span>
+                <div className="score-value">{formData.balanceTotal}/16 points</div>
               </div>
             </div>
           </div>
@@ -521,15 +684,17 @@ const TinettiModal = ({ isOpen, onClose, initialData = null }) => {
               className="section-header" 
               onClick={() => toggleSection('gait')}
             >
-              <h3>
-                <i className="fas fa-person-walking"></i>
-                Gait Section
-              </h3>
-              <span className="section-score">
-                Score: {formData.gaitTotal}/12
-              </span>
+              <div className="section-title">
+                <h3>
+                  <i className="fas fa-person-walking"></i>
+                  Gait Section
+                </h3>
+                <span className="section-score">
+                  Score: {formData.gaitTotal}/12
+                </span>
+              </div>
               <button className="toggle-btn">
-                <i className={`fas fa-chevron-${sectionsOpen.gait ? 'up' : 'down'}`}></i>
+              <i className={`fas fa-chevron-${sectionsOpen.gait ? 'up' : 'down'}`}></i>
               </button>
             </div>
             
@@ -537,7 +702,10 @@ const TinettiModal = ({ isOpen, onClose, initialData = null }) => {
               <div className="section-content">
                 <div className="tinetti-items">
                   <div className={`tinetti-item ${validationErrors.initiationOfGait ? 'has-error' : ''}`}>
-                    <label>10. Initiation of Gait</label>
+                    <label>
+                      <span className="item-number">10</span>
+                      Initiation of Gait
+                    </label>
                     <select 
                       value={formData.initiationOfGait}
                       onChange={(e) => handleChange('initiationOfGait', e.target.value)}
@@ -550,15 +718,24 @@ const TinettiModal = ({ isOpen, onClose, initialData = null }) => {
                       ))}
                     </select>
                     {validationErrors.initiationOfGait && (
-                      <div className="error-message">This field is required</div>
+                      <div className="error-message">
+                        <i className="fas fa-exclamation-circle"></i>
+                        This field is required
+                      </div>
                     )}
                   </div>
                   
                   <div className="tinetti-item step-item">
-                    <label>11. Step Length & Height</label>
+                    <label>
+                      <span className="item-number">11</span>
+                      Step Length & Height
+                    </label>
                     <div className="multi-select">
                       <div className={`sub-item ${validationErrors.rightStepLength || validationErrors.rightStepHeight ? 'has-error' : ''}`}>
-                        <label>Right swing foot</label>
+                        <div className="sub-item-header">
+                          <i className="fas fa-shoe-prints"></i>
+                          <label>Right swing foot</label>
+                        </div>
                         <div className="sub-select-group">
                           <div className="select-with-label">
                             <span className="select-label">Length</span>
@@ -574,7 +751,10 @@ const TinettiModal = ({ isOpen, onClose, initialData = null }) => {
                               ))}
                             </select>
                             {validationErrors.rightStepLength && (
-                              <div className="error-message">Required</div>
+                              <div className="error-message">
+                                <i className="fas fa-exclamation-circle"></i>
+                                Required
+                              </div>
                             )}
                           </div>
                           
@@ -592,14 +772,20 @@ const TinettiModal = ({ isOpen, onClose, initialData = null }) => {
                               ))}
                             </select>
                             {validationErrors.rightStepHeight && (
-                              <div className="error-message">Required</div>
+                              <div className="error-message">
+                                <i className="fas fa-exclamation-circle"></i>
+                                Required
+                              </div>
                             )}
                           </div>
                         </div>
                       </div>
                       
                       <div className={`sub-item ${validationErrors.leftStepLength || validationErrors.leftStepHeight ? 'has-error' : ''}`}>
-                        <label>Left swing foot</label>
+                        <div className="sub-item-header">
+                          <i className="fas fa-shoe-prints fa-flip-horizontal"></i>
+                          <label>Left swing foot</label>
+                        </div>
                         <div className="sub-select-group">
                           <div className="select-with-label">
                             <span className="select-label">Length</span>
@@ -615,7 +801,10 @@ const TinettiModal = ({ isOpen, onClose, initialData = null }) => {
                               ))}
                             </select>
                             {validationErrors.leftStepLength && (
-                              <div className="error-message">Required</div>
+                              <div className="error-message">
+                                <i className="fas fa-exclamation-circle"></i>
+                                Required
+                              </div>
                             )}
                           </div>
                           
@@ -633,7 +822,10 @@ const TinettiModal = ({ isOpen, onClose, initialData = null }) => {
                               ))}
                             </select>
                             {validationErrors.leftStepHeight && (
-                              <div className="error-message">Required</div>
+                              <div className="error-message">
+                                <i className="fas fa-exclamation-circle"></i>
+                                Required
+                              </div>
                             )}
                           </div>
                         </div>
@@ -642,7 +834,10 @@ const TinettiModal = ({ isOpen, onClose, initialData = null }) => {
                   </div>
                   
                   <div className={`tinetti-item ${validationErrors.stepSymmetry ? 'has-error' : ''}`}>
-                    <label>12. Step Symmetry</label>
+                    <label>
+                      <span className="item-number">12</span>
+                      Step Symmetry
+                    </label>
                     <select 
                       value={formData.stepSymmetry}
                       onChange={(e) => handleChange('stepSymmetry', e.target.value)}
@@ -655,12 +850,18 @@ const TinettiModal = ({ isOpen, onClose, initialData = null }) => {
                       ))}
                     </select>
                     {validationErrors.stepSymmetry && (
-                      <div className="error-message">This field is required</div>
+                      <div className="error-message">
+                        <i className="fas fa-exclamation-circle"></i>
+                        This field is required
+                      </div>
                     )}
                   </div>
                   
                   <div className={`tinetti-item ${validationErrors.stepContinuity ? 'has-error' : ''}`}>
-                    <label>13. Step Continuity</label>
+                    <label>
+                      <span className="item-number">13</span>
+                      Step Continuity
+                    </label>
                     <select 
                       value={formData.stepContinuity}
                       onChange={(e) => handleChange('stepContinuity', e.target.value)}
@@ -673,12 +874,18 @@ const TinettiModal = ({ isOpen, onClose, initialData = null }) => {
                       ))}
                     </select>
                     {validationErrors.stepContinuity && (
-                      <div className="error-message">This field is required</div>
+                      <div className="error-message">
+                        <i className="fas fa-exclamation-circle"></i>
+                        This field is required
+                      </div>
                     )}
                   </div>
                   
                   <div className={`tinetti-item ${validationErrors.path ? 'has-error' : ''}`}>
-                    <label>14. Path</label>
+                    <label>
+                      <span className="item-number">14</span>
+                      Path
+                    </label>
                     <select 
                       value={formData.path}
                       onChange={(e) => handleChange('path', e.target.value)}
@@ -691,12 +898,18 @@ const TinettiModal = ({ isOpen, onClose, initialData = null }) => {
                       ))}
                     </select>
                     {validationErrors.path && (
-                      <div className="error-message">This field is required</div>
+                      <div className="error-message">
+                        <i className="fas fa-exclamation-circle"></i>
+                        This field is required
+                      </div>
                     )}
                   </div>
                   
                   <div className={`tinetti-item ${validationErrors.trunk ? 'has-error' : ''}`}>
-                    <label>15. Trunk</label>
+                    <label>
+                      <span className="item-number">15</span>
+                      Trunk
+                    </label>
                     <select 
                       value={formData.trunk}
                       onChange={(e) => handleChange('trunk', e.target.value)}
@@ -709,12 +922,18 @@ const TinettiModal = ({ isOpen, onClose, initialData = null }) => {
                       ))}
                     </select>
                     {validationErrors.trunk && (
-                      <div className="error-message">This field is required</div>
+                      <div className="error-message">
+                        <i className="fas fa-exclamation-circle"></i>
+                        This field is required
+                      </div>
                     )}
                   </div>
                   
                   <div className={`tinetti-item ${validationErrors.walkingStance ? 'has-error' : ''}`}>
-                    <label>16. Walking Stance</label>
+                    <label>
+                      <span className="item-number">16</span>
+                      Walking Stance
+                    </label>
                     <select 
                       value={formData.walkingStance}
                       onChange={(e) => handleChange('walkingStance', e.target.value)}
@@ -727,7 +946,10 @@ const TinettiModal = ({ isOpen, onClose, initialData = null }) => {
                       ))}
                     </select>
                     {validationErrors.walkingStance && (
-                      <div className="error-message">This field is required</div>
+                      <div className="error-message">
+                        <i className="fas fa-exclamation-circle"></i>
+                        This field is required
+                      </div>
                     )}
                   </div>
                 </div>
@@ -736,13 +958,14 @@ const TinettiModal = ({ isOpen, onClose, initialData = null }) => {
             
             <div className="section-footer">
               <div className="section-score-summary">
+                <div className="score-label">Gait Score:</div>
                 <div className="progress-bar">
                   <div 
                     className="progress" 
                     style={{ width: `${(formData.gaitTotal / 12) * 100}%` }}
                   ></div>
                 </div>
-                <span className="score-value">{formData.gaitTotal}/12 points</span>
+                <div className="score-value">{formData.gaitTotal}/12 points</div>
               </div>
             </div>
           </div>
@@ -750,8 +973,38 @@ const TinettiModal = ({ isOpen, onClose, initialData = null }) => {
           <div className="total-score">
             <div className={`score-card ${getRiskClass()}`}>
               <div className="score-header">
-                <h4>Total Tinetti Score</h4>
-                <span className="score-badge">{formData.totalScore}/28</span>
+                <div className="score-title">
+                  <h4>Total Tinetti Score</h4>
+                  <span className="score-interpretation">{getRiskMessage()}</span>
+                </div>
+                <div className="score-badge-container">
+                  <span className="score-badge">{formData.totalScore}</span>
+                  <span className="score-max">/28</span>
+                </div>
+              </div>
+              <div className="score-visualization">
+                <div className="score-gauge">
+                  <div className="gauge-sections">
+                    <div className="gauge-section high-risk">
+                      <span className="gauge-label">High Risk</span>
+                      <span className="gauge-range">≤18</span>
+                    </div>
+                    <div className="gauge-section moderate-risk">
+                      <span className="gauge-label">Moderate Risk</span>
+                      <span className="gauge-range">19-23</span>
+                    </div>
+                    <div className="gauge-section low-risk">
+                      <span className="gauge-label">Low Risk</span>
+                      <span className="gauge-range">≥24</span>
+                    </div>
+                  </div>
+                  <div className="gauge-indicator" style={{ 
+                    left: `${Math.min(100, Math.max(0, (formData.totalScore / 28) * 100))}%` 
+                  }}>
+                    <div className="indicator-point"></div>
+                    <div className="indicator-value">{formData.totalScore}</div>
+                  </div>
+                </div>
               </div>
               <div className="score-interpretation">
                 <div className="risk-levels">
@@ -778,12 +1031,24 @@ const TinettiModal = ({ isOpen, onClose, initialData = null }) => {
                   </div>
                 </div>
                 <div className="guidelines">
-                  <p><strong>Intervention Guidelines:</strong></p>
-                  <ul>
-                    <li>≤18: Consider comprehensive fall prevention program</li>
-                    <li>19-23: Balance training and gait assessment recommended</li>
-                    <li>24: General mobility maintenance</li>
-                  </ul>
+                  <div className="guideline-header">
+                    <i className="fas fa-clipboard-list"></i>
+                    <h5>Intervention Guidelines</h5>
+                  </div>
+                  <div className="guideline-content">
+                    <div className="guideline-item">
+                      <div className="guideline-bullet"></div>
+                      <p>{getInterventionGuideline()}</p>
+                    </div>
+                    <div className="guideline-item">
+                      <div className="guideline-bullet"></div>
+                      <p>Document results in patient's medical record</p>
+                    </div>
+                    <div className="guideline-item">
+                      <div className="guideline-bullet"></div>
+                      <p>Implement fall prevention protocols as appropriate</p>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -791,14 +1056,32 @@ const TinettiModal = ({ isOpen, onClose, initialData = null }) => {
         </div>
         
         <div className="modal-footer">
-          <button className="cancel-btn" onClick={() => onClose()}>
-            <i className="fas fa-times"></i>
-            Cancel
-          </button>
-          <button className="submit-btn" onClick={handleSubmit}>
-            <i className="fas fa-check"></i>
-            SUBMIT ASSESSMENT
-          </button>
+          <div className="footer-status">
+            {Object.keys(validationErrors).length > 0 ? (
+              <div className="validation-status error">
+                <i className="fas fa-exclamation-triangle"></i>
+                <span>Please complete all required fields</span>
+              </div>
+            ) : (
+              <div className="validation-status success">
+                <i className="fas fa-check-circle"></i>
+                <span>Ready to submit</span>
+              </div>
+            )}
+          </div>
+          <div className="footer-actions">
+            <button className="cancel-btn" onClick={() => onClose()}>
+              <i className="fas fa-times"></i>
+              Cancel
+            </button>
+            <button 
+              className={`submit-btn ${Object.keys(validationErrors).length > 0 ? 'disabled' : ''}`} 
+              onClick={handleSubmit}
+            >
+              <i className="fas fa-check"></i>
+              SUBMIT ASSESSMENT
+            </button>
+          </div>
         </div>
       </div>
     </div>
