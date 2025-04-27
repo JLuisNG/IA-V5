@@ -1,0 +1,231 @@
+// styles/developer/Patients/InfoPaciente/NotesAndSign/ObjectiveSections/SensorySection.scss
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+
+.sensory-section {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  padding: 10px 0;
+  
+  .section-title {
+    margin: 0 0 24px;
+    font-size: 18px;
+    font-weight: 700;
+    color: #1e293b;
+    position: relative;
+    
+    &::after {
+      content: '';
+      position: absolute;
+      bottom: -6px;
+      left: 0;
+      width: 60px;
+      height: 3px;
+      background: linear-gradient(
+        90deg,
+        #60a5fa,
+        #3b82f6
+      );
+      border-radius: 3px;
+    }
+  }
+  
+  .sensory-grid {
+    margin-bottom: 24px;
+    
+    .grid-row {
+      display: flex;
+      margin-bottom: 16px;
+      
+      &:last-child {
+        margin-bottom: 0;
+      }
+      
+      .grid-item {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        
+        &:first-child {
+          margin-right: 20px;
+        }
+        
+        .label {
+          flex: 0 0 200px;
+          font-size: 14px;
+          font-weight: 600;
+          color: #64748b;
+          padding-right: 10px;
+        }
+        
+        select {
+          flex: 1;
+          padding: 10px 14px;
+          border-radius: 8px;
+          border: 1px solid rgba(203, 213, 225, 0.7);
+          background: white;
+          font-size: 14px;
+          color: #334155;
+          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+          appearance: none;
+          background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+          background-repeat: no-repeat;
+          background-position: right 12px center;
+          background-size: 16px;
+          padding-right: 40px;
+          
+          &:focus {
+            outline: none;
+            border-color: rgba(59, 130, 246, 0.5);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+          }
+          
+          &:hover {
+            border-color: rgba(148, 163, 184, 0.8);
+          }
+          
+          option {
+            padding: 8px;
+          }
+        }
+      }
+    }
+  }
+  
+  .checkbox-section {
+    margin-bottom: 24px;
+    
+    .checkbox-row {
+      margin-bottom: 20px;
+      
+      &:last-child {
+        margin-bottom: 0;
+      }
+      
+      .section-label {
+        display: block;
+        font-size: 14px;
+        font-weight: 600;
+        color: #64748b;
+        margin-bottom: 12px;
+      }
+      
+      .checkbox-group {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 16px;
+        
+        .checkbox-item {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          min-width: 160px;
+          
+          input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+            accent-color: #3b82f6;
+          }
+          
+          label {
+            font-size: 14px;
+            color: #334155;
+            cursor: pointer;
+          }
+        }
+      }
+    }
+  }
+  
+  .additional-info-row {
+    display: flex;
+    align-items: flex-start;
+    
+    .label {
+      flex: 0 0 200px;
+      font-size: 14px;
+      font-weight: 600;
+      color: #64748b;
+      padding-top: 4px;
+    }
+    
+    textarea {
+      flex: 1;
+      padding: 12px 16px;
+      border-radius: 8px;
+      border: 1px solid rgba(203, 213, 225, 0.7);
+      background: white;
+      font-size: 14px;
+      color: #334155;
+      resize: vertical;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      
+      &::placeholder {
+        color: #94a3b8;
+      }
+      
+      &:focus {
+        outline: none;
+        border-color: rgba(59, 130, 246, 0.5);
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+      }
+    }
+  }
+}
+
+// Responsive styles
+@media (max-width: 992px) {
+  .sensory-section {
+    .sensory-grid {
+      .grid-row {
+        .grid-item {
+          .label {
+            flex: 0 0 160px;
+          }
+        }
+      }
+    }
+    
+    .additional-info-row {
+      .label {
+        flex: 0 0 160px;
+      }
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .sensory-section {
+    .sensory-grid {
+      .grid-row {
+        flex-direction: column;
+        gap: 16px;
+        
+        .grid-item {
+          &:first-child {
+            margin-right: 0;
+            margin-bottom: 8px;
+          }
+        }
+      }
+    }
+    
+    .checkbox-section {
+      .checkbox-row {
+        .checkbox-group {
+          .checkbox-item {
+            min-width: calc(50% - 8px);
+          }
+        }
+      }
+    }
+    
+    .additional-info-row {
+      flex-direction: column;
+      gap: 8px;
+      
+      .label {
+        margin-bottom: 8px;
+      }
+    }
+  }
+}

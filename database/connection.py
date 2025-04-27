@@ -18,7 +18,7 @@ def wait_for_db(retries=5, delay=5):
         try:
             engine = create_engine(
                 DATABASE_URL,
-                echo=False,  # Set to False to reduce verbosity
+                echo=False, 
                 pool_pre_ping=True,
                 pool_size=5,
                 max_overflow=10,

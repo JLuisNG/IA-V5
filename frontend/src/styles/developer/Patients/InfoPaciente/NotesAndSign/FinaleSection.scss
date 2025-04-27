@@ -1,0 +1,587 @@
+// styles/developer/Patients/InfoPaciente/NotesAndSign/FinaleSection.scss
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+
+.finale-section-container {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  
+  .tabs-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    border-bottom: 1px solid rgba(226, 232, 240, 0.8);
+    margin-bottom: 24px;
+    overflow-x: auto;
+    padding-bottom: 1px;
+    
+    &::-webkit-scrollbar {
+      height: 6px;
+    }
+    
+    &::-webkit-scrollbar-track {
+      background: rgba(241, 245, 249, 0.4);
+      border-radius: 10px;
+    }
+    
+    &::-webkit-scrollbar-thumb {
+      background: rgba(148, 163, 184, 0.3);
+      border-radius: 10px;
+      
+      &:hover {
+        background: rgba(148, 163, 184, 0.5);
+      }
+    }
+    
+    .tab-button {
+      padding: 12px 20px;
+      background: transparent;
+      border: none;
+      border-bottom: 3px solid transparent;
+      color: #64748b;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      white-space: nowrap;
+      
+      &:hover {
+        color: #334155;
+        background: rgba(241, 245, 249, 0.6);
+      }
+      
+      &.active {
+        color: #4f46e5;
+        border-bottom: 3px solid #4f46e5;
+        font-weight: 700;
+      }
+    }
+  }
+  
+  .tab-content {
+    padding: 10px 0;
+    
+    .form-section {
+      margin-bottom: 30px;
+      
+      .section-title {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 24px;
+        
+        h2 {
+          margin: 0;
+          font-size: 18px;
+          font-weight: 700;
+          color: #1e293b;
+          position: relative;
+          
+          &::after {
+            content: '';
+            position: absolute;
+            bottom: -6px;
+            left: 0;
+            width: 60px;
+            height: 3px;
+            background: linear-gradient(
+              90deg,
+              #4f46e5,
+              #6366f1
+            );
+            border-radius: 3px;
+          }
+        }
+        
+        .autosaved-badge {
+          font-size: 12px;
+          font-weight: 600;
+          color: #10b981;
+          background: rgba(209, 250, 229, 0.8);
+          padding: 4px 10px;
+          border-radius: 20px;
+          border: 1px solid rgba(16, 185, 129, 0.2);
+          opacity: 0;
+          transition: opacity 0.3s ease;
+          
+          &.visible {
+            opacity: 1;
+          }
+        }
+      }
+      
+      // Estilos para la pestaña de formularios adicionales
+      .forms-reference {
+        margin-bottom: 24px;
+        
+        .forms-table {
+          width: 100%;
+          border-collapse: collapse;
+          margin-bottom: 12px;
+          
+          td {
+            padding: 8px 0;
+            font-size: 15px;
+            color: #334155;
+            
+            &:first-child {
+              font-weight: 600;
+              width: 180px;
+            }
+          }
+        }
+        
+        .form-note {
+          color: #64748b;
+          font-size: 14px;
+          font-style: italic;
+        }
+      }
+      
+      .form-row {
+        margin-bottom: 20px;
+        
+        p {
+          font-size: 15px;
+          color: #334155;
+          margin-bottom: 12px;
+          line-height: 1.5;
+        }
+        
+        .forms-checkboxes {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 12px;
+          
+          @media (max-width: 768px) {
+            grid-template-columns: 1fr;
+          }
+        }
+        
+        &.signature-control-row {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          
+          .signature-control-text {
+            flex: 1;
+            
+            p {
+              margin: 0;
+              color: #475569;
+              font-size: 14px;
+            }
+          }
+          
+          .move-signature-btn {
+            padding: 10px 16px;
+            background: #4f46e5;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            
+            &:hover:not(:disabled) {
+              background: #4338ca;
+              transform: translateY(-1px);
+              box-shadow: 0 4px 12px rgba(79, 70, 229, 0.2);
+            }
+            
+            &:disabled {
+              background: #e2e8f0;
+              color: #94a3b8;
+              cursor: not-allowed;
+            }
+          }
+          
+          @media (max-width: 768px) {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 12px;
+            
+            .move-signature-btn {
+              width: 100%;
+            }
+          }
+        }
+        
+        .checkbox-item {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          
+          input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            accent-color: #4f46e5;
+            cursor: pointer;
+          }
+          
+          label {
+            font-size: 15px;
+            color: #334155;
+            cursor: pointer;
+          }
+        }
+        
+        .time-note {
+          padding: 16px;
+          background: rgba(186, 230, 253, 0.5);
+          border-radius: 8px;
+          border: 1px solid rgba(125, 211, 252, 0.3);
+          color: #0369a1;
+          font-size: 14px;
+        }
+      }
+      
+      // Estilos para el control de tiempo
+      .time-selectors {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 24px;
+        margin-bottom: 24px;
+        
+        @media (max-width: 768px) {
+          grid-template-columns: 1fr;
+          gap: 16px;
+        }
+      }
+      
+      .time-group {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        
+        label {
+          font-size: 14px;
+          font-weight: 600;
+          color: #475569;
+        }
+        
+        .time-inputs {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          
+          select {
+            padding: 10px 16px;
+            border: 1px solid rgba(203, 213, 225, 0.8);
+            border-radius: 8px;
+            font-size: 15px;
+            color: #334155;
+            background-color: white;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            background-size: 16px;
+            padding-right: 36px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            
+            &:hover {
+              border-color: #94a3b8;
+            }
+            
+            &:focus {
+              outline: none;
+              border-color: #4f46e5;
+              box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
+            }
+          }
+          
+          .time-separator {
+            font-size: 18px;
+            font-weight: 700;
+            color: #64748b;
+          }
+        }
+      }
+      
+      .drive-time {
+        margin-bottom: 24px;
+        
+        .time-group {
+          max-width: 300px;
+        }
+      }
+      
+      .units-display {
+        padding: 16px;
+        background: rgba(224, 231, 255, 0.5);
+        border-radius: 8px;
+        border: 1px solid rgba(165, 180, 252, 0.3);
+        
+        p {
+          margin: 0;
+          font-size: 15px;
+          font-weight: 600;
+          color: #4f46e5;
+        }
+      }
+      
+      // Estilos para la pestaña de finalización
+      .incomplete-sections {
+        margin-bottom: 24px;
+        padding: 16px;
+        background: rgba(254, 226, 226, 0.5);
+        border-radius: 8px;
+        border: 1px solid rgba(252, 165, 165, 0.3);
+        
+        .warning-text {
+          color: #dc2626;
+          font-weight: 600;
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          margin-bottom: 12px;
+          
+          i {
+            font-size: 16px;
+          }
+        }
+        
+        .incomplete-list {
+          margin: 0;
+          padding-left: 28px;
+          
+          li {
+            color: #b91c1c;
+            font-size: 14px;
+            margin-bottom: 6px;
+            
+            &:last-child {
+              margin-bottom: 0;
+            }
+          }
+        }
+      }
+      
+      .summary-container {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 24px;
+        margin-bottom: 28px;
+        
+        p {
+          font-size: 15px;
+          line-height: 1.6;
+          margin: 0 0 12px;
+          color: #334155;
+          
+          &:last-child {
+            margin-bottom: 0;
+          }
+          
+          strong {
+            font-weight: 600;
+          }
+        }
+        
+        .facility-info, .visit-info {
+          display: flex;
+          flex-direction: column;
+          
+          .patient-details, .visit-details {
+            margin-top: auto;
+          }
+        }
+        
+        @media (max-width: 768px) {
+          grid-template-columns: 1fr;
+          gap: 16px;
+        }
+      }
+      
+      .patient-information {
+        margin-bottom: 28px;
+        border: 1px solid rgba(226, 232, 240, 0.8);
+        border-radius: 12px;
+        overflow: hidden;
+        
+        h3 {
+          margin: 0;
+          padding: 16px 20px;
+          font-size: 16px;
+          font-weight: 700;
+          color: #334155;
+          background: rgba(241, 245, 249, 0.7);
+          border-bottom: 1px solid rgba(226, 232, 240, 0.7);
+        }
+        
+        .patient-info-grid {
+          padding: 16px 20px;
+          display: flex;
+          flex-direction: column;
+          gap: 12px;
+          
+          &.right-grid {
+            background: rgba(248, 250, 252, 0.5);
+            border-top: 1px solid rgba(226, 232, 240, 0.7);
+          }
+          
+          .info-row {
+            display: flex;
+            
+            .info-label {
+              width: 220px;
+              flex-shrink: 0;
+              font-size: 14px;
+              font-weight: 600;
+              color: #475569;
+            }
+            
+            .info-value {
+              font-size: 14px;
+              color: #334155;
+            }
+          }
+        }
+      }
+      
+      .rehab-info, .treatment-info, .certification-info {
+        margin-bottom: 28px;
+        
+        h3 {
+          margin: 0 0 12px;
+          font-size: 16px;
+          font-weight: 700;
+          color: #334155;
+          padding-bottom: 8px;
+          border-bottom: 1px solid rgba(226, 232, 240, 0.8);
+        }
+        
+        p {
+          font-size: 15px;
+          line-height: 1.6;
+          margin: 0;
+          color: #334155;
+          
+          strong {
+            font-weight: 600;
+          }
+        }
+      }
+      
+      .goals-info {
+        margin-bottom: 28px;
+        
+        h3 {
+          margin: 0 0 12px;
+          font-size: 16px;
+          font-weight: 700;
+          color: #334155;
+          padding-bottom: 8px;
+          border-bottom: 1px solid rgba(226, 232, 240, 0.8);
+        }
+        
+        .goal-category {
+          margin-bottom: 16px;
+          
+          &:last-child {
+            margin-bottom: 0;
+          }
+          
+          h4 {
+            margin: 0 0 8px;
+            font-size: 15px;
+            font-weight: 600;
+            color: #475569;
+          }
+          
+          p {
+            font-size: 14px;
+            line-height: 1.6;
+            margin: 0 0 8px;
+            color: #334155;
+            
+            &:last-child {
+              margin-bottom: 0;
+            }
+            
+            strong {
+              font-weight: 600;
+            }
+          }
+        }
+      }
+      
+      .signature-info {
+        .digital-signature-text {
+          font-size: 14px;
+          font-style: italic;
+          color: #64748b;
+          margin-bottom: 16px;
+          text-align: center;
+        }
+        
+        .signature-grid {
+          .signature-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 16px;
+            
+            .signature-item {
+              .signature-label {
+                font-size: 14px;
+                font-weight: 600;
+                color: #475569;
+                margin-bottom: 8px;
+                text-align: center;
+              }
+              
+              .signature-image {
+                height: 120px;
+                border: 1px dashed rgba(148, 163, 184, 0.5);
+                border-radius: 8px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                overflow: hidden;
+                
+                img {
+                  max-width: 100%;
+                  max-height: 100%;
+                  object-fit: contain;
+                }
+              }
+            }
+            
+            @media (max-width: 768px) {
+              grid-template-columns: 1fr;
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+// Responsive styles
+@media (max-width: 992px) {
+  .finale-section-container {
+    .tabs-container {
+      .tab-button {
+        padding: 10px 16px;
+        font-size: 14px;    
+      }
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .finale-section-container {
+    .tab-content {
+      .form-section {
+        .section-title {
+          h2 {
+            font-size: 16px;
+          }
+        }
+      }
+    }
+  }
+}

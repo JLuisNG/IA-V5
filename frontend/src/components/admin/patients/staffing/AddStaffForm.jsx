@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+  import React, { useState } from 'react';
 import '../../../../styles/developer/Patients/Staffing/AddStaffForm.scss';
 
 const AdminAddStaffForm = ({ onCancel }) => {
@@ -84,78 +84,27 @@ const AdminAddStaffForm = ({ onCancel }) => {
     });
   };
 
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    // Implementar lógica para enviar los datos
+    console.log('Form data:', formData);
+    console.log('Documents:', documents);
+    // Aquí iría la lógica para enviar al servidor
+  };
+
   const roles = [
-    { value: 'PT', label: 'PT - Physical Therapist' },
-    { value: 'OT', label: 'OT - Occupational Therapist' },
-    { value: 'ST', label: 'ST - Speech Therapist' },
-    { value: 'PTA', label: 'PTA - Physical Therapist Assistant' },
-    { value: 'COTA', label: 'COTA - Occupational Therapy Assistant' },
-    { value: 'STA', label: 'STA - Speech Therapy Assistant' },
-    { value: 'Agency', label: 'Agency' },
-    { value: 'Administrator', label: 'Administrator' },
-    { value: 'Developer', label: 'Developer' }
+    { value: 'agency', label: 'Agency' },
+    { value: 'support', label: 'Support' },
+    { value: 'developer', label: 'Developer' },
+    { value: 'administrator', label: 'Administrador' },
+    { value: 'pt', label: 'PT - Physical Therapist' },
+    { value: 'pta', label: 'PTA - Physical Therapist Assistant' },
+    { value: 'ot', label: 'OT - Occupational Therapist' },
+    { value: 'cota', label: 'COTA - Occupational Therapy Assistant' },
+    { value: 'st', label: 'ST - Speech Therapist' },
+    { value: 'sta', label: 'STA - Speech Therapy Assistant' },
   ];
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-  
-    try {
-      const baseUrl = 'http://localhost:8000';
-      let endpoint;
-      let postData;
-  
-      if (!formData.role) {
-        alert('Por favor seleccione un rol');
-        return;
-      }
-  
-      if (formData.role === 'Agency') {
-        endpoint = `${baseUrl}/api/agencias/`;
-        postData = {
-          agency_name: `${formData.firstName} ${formData.lastName}`,
-          email: formData.email,
-          phone: formData.phone,
-          username: formData.userName,
-          password: formData.password
-        };
-      } else {
-        endpoint = `${baseUrl}/api/terapistas/`;
-        postData = {
-          therapist_name: `${formData.firstName} ${formData.lastName}`,
-          email: formData.email,
-          phone: formData.phone,
-          birthday: formData.dob,
-          gender: formData.gender?.toUpperCase() || '',
-          username: formData.userName,
-          password: formData.password,
-          rol: formData.role
-        };
-      }
-  
-      const response = await fetch(endpoint, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
-        mode: 'cors',
-        body: JSON.stringify(postData)
-      });
-  
-      const responseData = await response.json();
-  
-      if (!response.ok) {
-        throw new Error(`Error HTTP ${response.status}: ${JSON.stringify(responseData)}`);
-      }
-  
-      alert('Usuario creado exitosamente!');
-      onCancel();
-  
-    } catch (error) {
-      alert(`Error al crear el usuario: ${error.message}`);
-    }
-  };
-  
   const documentsList = [
     { id: 'covidVaccine', name: 'Proof of COVID Vaccine' },
     { id: 'tbTest', name: 'TB Test proof (PPD/X-Ray)', description: 'PPD Test (valid for 1 year) or X-Ray TB test (valid for 5 years)' },

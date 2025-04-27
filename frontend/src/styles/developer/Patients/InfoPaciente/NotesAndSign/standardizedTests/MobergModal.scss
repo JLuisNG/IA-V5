@@ -1,0 +1,461 @@
+// styles/developer/Patients/InfoPaciente/NotesAndSign/standardizedTests/MobergModal.scss
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+
+.moberg-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(15, 23, 42, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+  padding: 24px;
+  overflow-y: auto;
+  backdrop-filter: blur(5px);
+  animation: fadeIn 0.3s ease;
+  
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  
+  .moberg-modal {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 
+      0 20px 25px -5px rgba(0, 0, 0, 0.1), 
+      0 10px 10px -5px rgba(0, 0, 0, 0.04),
+      0 0 0 1px rgba(255, 255, 255, 0.1);
+    width: 100%;
+    max-width: 900px;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    position: relative;
+    animation: slideUp 0.3s ease;
+    
+    @keyframes slideUp {
+      from { transform: translateY(30px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+    
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 24px;
+      background: linear-gradient(
+        to right,
+        rgba(51, 65, 85, 0.05),
+        rgba(30, 41, 59, 0.05)
+      );
+      border-bottom: 1px solid rgba(226, 232, 240, 0.7);
+      
+      h2 {
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        margin: 0;
+        font-size: 20px;
+        font-weight: 700;
+        color: #1e293b;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        
+        i {
+          color: #334155;
+          font-size: 18px;
+        }
+      }
+      
+      .close-button {
+        background: transparent;
+        border: none;
+        color: #64748b;
+        font-size: 18px;
+        cursor: pointer;
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s ease;
+        
+        &:hover {
+          background: rgba(241, 245, 249, 0.6);
+          color: #334155;
+        }
+      }
+    }
+    
+    .modal-content {
+      padding: 20px 24px;
+      overflow-y: auto;
+      max-height: calc(90vh - 140px); // Header and footer height
+      
+      .info-note {
+        padding: 12px 16px;
+        background: rgba(186, 230, 253, 0.5);
+        border-radius: 8px;
+        margin-bottom: 20px;
+        
+        p {
+          font-family: 'Plus Jakarta Sans', sans-serif;
+          font-size: 14px;
+          color: #0369a1;
+          margin: 0;
+        }
+      }
+      
+      .assessment-info {
+        margin-bottom: 24px;
+        
+        .info-card {
+          display: flex;
+          align-items: center;
+          gap: 16px;
+          padding: 16px;
+          background: rgba(241, 245, 249, 0.5);
+          border: 1px solid rgba(226, 232, 240, 0.7);
+          border-radius: 12px;
+          
+          .info-icon {
+            flex-shrink: 0;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background: rgba(226, 232, 240, 0.5);
+            color: #334155;
+            font-size: 20px;
+          }
+          
+          .info-text {
+            p {
+              font-family: 'Plus Jakarta Sans', sans-serif;
+              margin: 0;
+              font-size: 14px;
+              line-height: 1.5;
+              color: #334155;
+            }
+          }
+        }
+      }
+      
+      .validation-error {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 12px 16px;
+        background: rgba(254, 226, 226, 0.5);
+        border: 1px solid rgba(252, 165, 165, 0.3);
+        border-radius: 8px;
+        margin-bottom: 20px;
+        
+        i {
+          color: #dc2626;
+          font-size: 16px;
+        }
+        
+        span {
+          font-family: 'Plus Jakarta Sans', sans-serif;
+          font-size: 14px;
+          color: #b91c1c;
+        }
+      }
+      
+      .test-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+        margin-bottom: 24px;
+        
+        .test-section {
+          background: white;
+          border-radius: 12px;
+          border: 1px solid rgba(226, 232, 240, 0.7);
+          padding: 20px;
+          
+          &.unobscured-section {
+            border-top: 4px solid #3b82f6;
+            
+            h3 {
+              color: #1d4ed8;
+            }
+          }
+          
+          &.obscured-section {
+            border-top: 4px solid #8b5cf6;
+            
+            h3 {
+              color: #6d28d9;
+            }
+          }
+          
+          h3 {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            margin: 0 0 16px;
+            font-size: 16px;
+            font-weight: 700;
+            text-align: center;
+          }
+          
+          .hand-measurements {
+            .measurement-item {
+              margin-bottom: 16px;
+              
+              &:last-child {
+                margin-bottom: 0;
+              }
+              
+              label {
+                display: block;
+                font-family: 'Plus Jakarta Sans', sans-serif;
+                font-size: 14px;
+                font-weight: 600;
+                color: #475569;
+                margin-bottom: 8px;
+              }
+              
+              .input-with-unit {
+                position: relative;
+                
+                input {
+                  width: 100%;
+                  padding: 12px 16px;
+                  padding-right: 70px;
+                  border-radius: 8px;
+                  border: 1px solid rgba(203, 213, 225, 0.7);
+                  background: white;
+                  font-family: 'Plus Jakarta Sans', sans-serif;
+                  font-size: 15px;
+                  color: #334155;
+                  transition: all 0.2s ease;
+                  
+                  &:focus {
+                    outline: none;
+                    border-color: rgba(51, 65, 85, 0.5);
+                    box-shadow: 0 0 0 3px rgba(51, 65, 85, 0.15);
+                  }
+                  
+                  &::-webkit-inner-spin-button,
+                  &::-webkit-outer-spin-button {
+                    -webkit-appearance: none;
+                    margin: 0;
+                  }
+                }
+                
+                .unit {
+                  position: absolute;
+                  right: 16px;
+                  top: 50%;
+                  transform: translateY(-50%);
+                  font-family: 'Plus Jakarta Sans', sans-serif;
+                  font-size: 14px;
+                  color: #64748b;
+                }
+              }
+            }
+          }
+        }
+      }
+      
+      .result-summary {
+        margin-bottom: 24px;
+        
+        .result-data {
+          background: rgba(241, 245, 249, 0.5);
+          border: 1px solid rgba(226, 232, 240, 0.7);
+          border-radius: 12px;
+          padding: 20px;
+          
+          h3 {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            margin: 0 0 16px;
+            font-size: 16px;
+            font-weight: 700;
+            color: #334155;
+            text-align: center;
+          }
+          
+          .result-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            
+            .result-item {
+              background: white;
+              border-radius: 8px;
+              border: 1px solid rgba(226, 232, 240, 0.7);
+              padding: 12px 16px;
+              
+              .result-label {
+                font-family: 'Plus Jakarta Sans', sans-serif;
+                font-size: 13px;
+                font-weight: 600;
+                color: #64748b;
+                margin-bottom: 4px;
+              }
+              
+              .result-value {
+                font-family: 'Plus Jakarta Sans', sans-serif;
+                font-size: 15px;
+                font-weight: 700;
+                color: #334155;
+              }
+            }
+          }
+        }
+      }
+      
+      .additional-notes {
+        h3 {
+          font-family: 'Plus Jakarta Sans', sans-serif;
+          font-size: 16px;
+          font-weight: 600;
+          color: #334155;
+          margin: 0 0 12px;
+        }
+        
+        textarea {
+          width: 100%;
+          padding: 12px 16px;
+          border-radius: 8px;
+          border: 1px solid rgba(203, 213, 225, 0.7);
+          background: white;
+          font-family: 'Plus Jakarta Sans', sans-serif;
+          font-size: 14px;
+          color: #334155;
+          resize: vertical;
+          transition: all 0.2s ease;
+          
+          &::placeholder {
+            color: #94a3b8;
+          }
+          
+          &:focus {
+            outline: none;
+            border-color: rgba(51, 65, 85, 0.5);
+            box-shadow: 0 0 0 3px rgba(51, 65, 85, 0.15);
+          }
+        }
+      }
+    }
+    
+    .modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+      padding: 16px 24px;
+      background: #f8fafc;
+      border-top: 1px solid rgba(226, 232, 240, 0.7);
+      
+      .cancel-btn {
+        padding: 12px 24px;
+        border-radius: 8px;
+        background: white;
+        border: 1px solid rgba(226, 232, 240, 0.8);
+        color: #475569;
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        
+        &:hover {
+          background: #f1f5f9;
+          color: #334155;
+        }
+      }
+      
+      .submit-btn {
+        padding: 12px 24px;
+        border-radius: 8px;
+        background: #334155;
+        border: none;
+        color: white;
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        box-shadow: 
+          0 4px 12px rgba(51, 65, 85, 0.2),
+          0 2px 6px rgba(51, 65, 85, 0.1);
+        
+        &:hover {
+          background: #1e293b;
+          transform: translateY(-2px);
+          box-shadow: 
+            0 6px 15px rgba(51, 65, 85, 0.3),
+            0 3px 8px rgba(51, 65, 85, 0.15);
+        }
+      }
+    }
+  }
+}
+
+// Responsive styles
+@media (max-width: 768px) {
+  .moberg-modal-overlay {
+    padding: 16px;
+    
+    .moberg-modal {
+      .modal-header {
+        padding: 16px;
+        
+        h2 {
+          font-size: 18px;
+        }
+      }
+      
+      .modal-content {
+        padding: 16px;
+        
+        .assessment-info {
+          .info-card {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 10px;
+            
+            .info-icon {
+              margin-bottom: 5px;
+            }
+          }
+        }
+        
+        .test-grid {
+          grid-template-columns: 1fr;
+          
+          .test-section {
+            padding: 16px;
+          }
+        }
+        
+        .result-summary {
+          .result-data {
+            .result-grid {
+              grid-template-columns: 1fr;
+            }
+          }
+        }
+      }
+      
+      .modal-footer {
+        padding: 12px 16px;
+        flex-direction: column-reverse;
+        gap: 8px;
+        
+        .cancel-btn, .submit-btn {
+          width: 100%;
+        }
+      }
+    }
+  }
+}

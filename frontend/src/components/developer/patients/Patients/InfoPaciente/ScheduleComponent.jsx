@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import '../../../../../styles/developer/Patients/InfoPaciente/ScheduleComponent.scss';
+import VisitCompletionModal from './NotesAndSign/Evaluation/VisitCompletionModal';
 
 const ScheduleComponent = ({ patient, onUpdateSchedule }) => {
   // Estados para controlar las vistas y datos
@@ -17,6 +18,8 @@ const ScheduleComponent = ({ patient, onUpdateSchedule }) => {
   const [error, setError] = useState('');
   const [activeFilter, setActiveFilter] = useState('ALL');
   const [searchQuery, setSearchQuery] = useState('');
+  const [showCompletionModal, setShowCompletionModal] = useState(false);
+  const [completionVisitData, setCompletionVisitData] = useState(null);
   
   // Datos para formularios
   const [formData, setFormData] = useState({
@@ -383,26 +386,18 @@ const ScheduleComponent = ({ patient, onUpdateSchedule }) => {
   };
   
   // Función para actualizar una visita existente
-  const handleUpdateVisit = () => {
-    // Validar que todos los campos requeridos estén completos
-    if (!formData.visitType || !formData.therapist || !formData.date) {
-      setError('Please fill in all required fields');
-      return;
-    }
-    
-    // Validar si la hora está disponible (ignorando la visita actual)
-    if (formData.time && !isTimeAvailable(formData.date, formData.time, formData.therapist, selectedVisit.id)) {
-      setError('This time slot is already booked for the selected therapist');
-      return;
-    }
-    
-    // Simular carga al actualizar
+  const handleUpdateVisit = (visit) => {
     setIsLoading(true);
     
+    // Simular tiempo de carga
     setTimeout(() => {
+      // Verificar si el estado está cambiando a COMPLETED
+      const isCompletingVisit = visit.status === 'COMPLETED' && 
+                             selectedVisit.status !== 'COMPLETED';
+      
       // Actualizar la visita
-      const updatedVisits = visits.map(visit => 
-        visit.id === selectedVisit.id ? { ...visit, ...formData } : visit
+      const updatedVisits = visits.map(v => 
+        v.id === selectedVisit.id ? { ...v, ...visit } : v
       );
       setVisits(updatedVisits);
       
@@ -411,7 +406,13 @@ const ScheduleComponent = ({ patient, onUpdateSchedule }) => {
         onUpdateSchedule(updatedVisits);
       }
       
-      // Cerrar el modal
+      // Si se está completando la visita, mostrar el modal en lugar de cerrar el modal de edición
+      if (isCompletingVisit) {
+        const visitData = updatedVisits.find(v => v.id === selectedVisit.id);
+        setCompletionVisitData(visitData);
+        setShowCompletionModal(true);
+      }
+      
       setShowEditVisitModal(false);
       setSelectedVisit(null);
       setFormData({
@@ -425,6 +426,37 @@ const ScheduleComponent = ({ patient, onUpdateSchedule }) => {
       });
       setIsLoading(false);
     }, 1000);
+  };
+  
+  // Función para manejar el guardado del formulario de finalización
+  const handleCompletionFormSave = (formData) => {
+    // Simulación de guardado de los datos del formulario de finalización
+    console.log('Saving completion form data:', formData);
+    
+    // Aquí normalmente se enviarían los datos al backend
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        // Actualizar la visita con la información de la evaluación completada
+        const updatedVisits = visits.map(visit => 
+          visit.id === completionVisitData.id 
+            ? { 
+                ...visit, 
+                evaluationCompleted: true,
+                evaluationData: formData 
+              } 
+            : visit
+        );
+        
+        setVisits(updatedVisits);
+        
+        // Notificar al componente padre
+        if (onUpdateSchedule) {
+          onUpdateSchedule(updatedVisits);
+        }
+        
+        resolve();
+      }, 2000);
+    });
   };
   
   // Obtener el nombre del terapeuta por ID
@@ -1004,7 +1036,7 @@ const ScheduleComponent = ({ patient, onUpdateSchedule }) => {
                 </button>
                 <button 
                   className="save-btn" 
-                  onClick={handleUpdateVisit}
+                  onClick={() => handleUpdateVisit(formData)} // Pasar formData
                   disabled={isLoading}
                 >
                   {isLoading ? (
@@ -1336,6 +1368,13 @@ const ScheduleComponent = ({ patient, onUpdateSchedule }) => {
               <h3>Patient Schedule</h3>
             </div>
           </div>
+
+          <VisitCompletionModal 
+      isOpen={showCompletionModal}
+      onClose={() => setShowCompletionModal(false)}
+      visitData={completionVisitData}
+      onSave={handleCompletionFormSave}
+    />
     
           <div className="card-body">
             {isLoading && renderLoadingScreen()}
@@ -1370,7 +1409,11 @@ const ScheduleComponent = ({ patient, onUpdateSchedule }) => {
           {showEditVisitModal && renderEditVisitModal()}
           {showDeleteConfirmModal && renderDeleteConfirmModal()}
         </div>
+
+        
       );
+
+      
 };
     
 export default ScheduleComponent;

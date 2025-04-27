@@ -55,26 +55,22 @@ const Header = ({ onLogout }) => {
     return { baseRole, roleType };
   }
   
-  // Función para filtrar menú según el rol del usuario
+  // Función para filtrar menú según el rol del usuario - MODIFICADA PARA QUITAR SUPPORT
   function getFilteredMenuOptions() {
-    // Opciones completas del menú
+    // Opciones completas del menú (sin Support)
     const allMenuOptions = [
       { id: 1, name: "Patients", icon: "fa-user-injured", route: `/${baseRole}/patients`, color: "#36D1DC" },
       { id: 2, name: "Referrals", icon: "fa-file-medical", route: `/${baseRole}/referrals`, color: "#FF9966" },
-      { id: 3, name: "Support", icon: "fa-headset", route: `/${baseRole}/support`, color: "#64B5F6" },
       { id: 4, name: "System Management", icon: "fa-cogs", route: `/${baseRole}/management`, color: "#8B5CF6" },
       { id: 5, name: "Accounting", icon: "fa-chart-pie", route: `/${baseRole}/accounting`, color: "#4CAF50" }
     ];
     
     // Filtrar según el tipo de rol
-    if (roleType === 'developer') {
-      // Developer ve todas las opciones
+    if (roleType === 'developer' || roleType === 'admin') {
+      // Developer y Admin ven todas las opciones excepto Support
       return allMenuOptions;
-    } else if (roleType === 'admin') {
-      // Admin ve todas excepto Support
-      return allMenuOptions.filter(option => option.name !== "Support");
     } else if (roleType === 'therapist' || roleType === 'support') {
-      // Terapistas y support ven Patients y Referrals
+      // Terapistas y support solo ven Patients y Referrals
       return allMenuOptions.filter(option => 
         option.name === "Patients" || option.name === "Referrals"
       );

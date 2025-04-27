@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import '../../../styles/developer/support/FloatingSupportButton.scss';
+import '../../../styles/developer/support/FloatingSupportButtonDev.scss';
 import SupportModal from './SupportModal';
 import { useAuth } from '../../login/AuthContext';
 

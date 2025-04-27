@@ -3,7 +3,7 @@ import '../../../styles/developer/support/FloatingSupportButton.scss';
 import SupportModal from './SupportModal';
 import { useAuth } from '../../login/AuthContext';
 
-const TPFloatingSupportButton = () => {
+const FloatingSupportButton = () => {
   // Estados para controlar las interacciones y animaciones
   const [isExpanded, setIsExpanded] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -450,4 +450,4 @@ const TPFloatingSupportButton = () => {
   );
 };
 
-export default TPFloatingSupportButton;
+export default FloatingSupportButton;
