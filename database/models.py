@@ -35,7 +35,7 @@ class Pacientes(Base):
     nursing_diagnostic = Column(Text, nullable=True)
     urgency_level = Column(String, nullable=True)
     prior_level_of_function = Column(Text, nullable=True)
-    homebound = Column(Boolean, default=True)
+    homebound = Column(String, nullable=True)
     weight_bearing_status = Column(String, nullable=True)
     reason_for_referral = Column(Text, nullable=True)
     weight = Column(String, nullable=True)

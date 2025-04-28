@@ -11,7 +11,7 @@ router = APIRouter()
 def editar_staff_info(
     staff_id: int,
     name: Optional[str] = None,
-    birthday: Optional[str] = None,  # Puede ser str porque en Swagger no se parsea bien Date
+    birthday: Optional[str] = None, 
     gender: Optional[str] = None,
     postal_code: Optional[str] = None,
     email: Optional[str] = None,
@@ -62,20 +62,57 @@ def editar_staff_info(
         "staff_id": staff_db.id
     }
 
-@router.put("/pacientes/{paciente_id}", response_model=PacienteResponse)
-def update_paciente(paciente_id: int, paciente_update: PacienteUpdate, db: Session = Depends(get_db)):
+@router.put("/pacientes/{paciente_id}")
+def editar_paciente_info(
+    paciente_id: int,
+    patient_name: Optional[str] = None,
+    birthday: Optional[str] = None,
+    gender: Optional[str] = None,
+    address: Optional[str] = None,
+    contact_info: Optional[str] = None,
+    payor_type: Optional[str] = None,
+    physician: Optional[str] = None,
+    agency_id: Optional[int] = None,
+    nursing_diagnostic: Optional[str] = None,
+    urgency_level: Optional[str] = None,
+    prior_level_of_function: Optional[str] = None,
+    homebound: Optional[str] = None,
+    weight_bearing_status: Optional[str] = None,
+    reason_for_referral: Optional[str] = None,
+    weight: Optional[str] = None,
+    height: Optional[str] = None,
+    pmh: Optional[str] = None,
+    clinical_grouping: Optional[str] = None,
+    disciplines_needed: Optional[str] = None,
+    activo: Optional[bool] = None,
+    db: Session = Depends(get_db)
+):
     paciente_db = db.query(Pacientes).filter(Pacientes.id_paciente == paciente_id).first()
 
     if not paciente_db:
         raise HTTPException(status_code=404, detail="Paciente no encontrado.")
 
-    update_data = paciente_update.dict(exclude_unset=True)
-
-    if "contact_info" in update_data and update_data["contact_info"] is not None:
-        update_data["contact_info"] = ",".join(update_data["contact_info"])
-
-    if "disciplines_needed" in update_data and update_data["disciplines_needed"] is not None:
-        update_data["disciplines_needed"] = ",".join(update_data["disciplines_needed"])
+    update_data = {}
+    if patient_name: update_data["patient_name"] = patient_name
+    if birthday: update_data["birthday"] = birthday
+    if gender: update_data["gender"] = gender
+    if address: update_data["address"] = address
+    if contact_info: update_data["contact_info"] = contact_info
+    if payor_type: update_data["payor_type"] = payor_type
+    if physician: update_data["physician"] = physician
+    if agency_id: update_data["agency_id"] = agency_id
+    if nursing_diagnostic: update_data["nursing_diagnostic"] = nursing_diagnostic
+    if urgency_level: update_data["urgency_level"] = urgency_level
+    if prior_level_of_function: update_data["prior_level_of_function"] = prior_level_of_function
+    if homebound: update_data["homebound"] = homebound
+    if weight_bearing_status: update_data["weight_bearing_status"] = weight_bearing_status
+    if reason_for_referral: update_data["reason_for_referral"] = reason_for_referral
+    if weight: update_data["weight"] = weight
+    if height: update_data["height"] = height
+    if pmh: update_data["pmh"] = pmh
+    if clinical_grouping: update_data["clinical_grouping"] = clinical_grouping
+    if disciplines_needed: update_data["disciplines_needed"] = disciplines_needed
+    if activo is not None: update_data["activo"] = activo
 
     for key, value in update_data.items():
         setattr(paciente_db, key, value)
@@ -83,4 +120,7 @@ def update_paciente(paciente_id: int, paciente_update: PacienteUpdate, db: Sessi
     db.commit()
     db.refresh(paciente_db)
 
-    return paciente_db
+    return {
+        "message": "Paciente actualizado correctamente.",
+        "paciente_id": paciente_db.id_paciente
+    }

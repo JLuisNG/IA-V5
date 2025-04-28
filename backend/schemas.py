@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 from typing import Optional, List
 from datetime import datetime, date
 
@@ -21,17 +21,17 @@ class StaffCreate(StaffBase):
     pass
 
 class StaffUpdate(BaseModel): 
-    name: Optional[str] = Field(default=None, description="Nombre del staff")
-    birthday: Optional[date] = Field(default=None, description="Fecha de nacimiento")
-    gender: Optional[str] = Field(default=None, description="Género")
-    postal_code: Optional[str] = Field(default=None, description="Código postal")
-    email: Optional[str] = Field(default=None, description="Correo electrónico")
-    phone: Optional[str] = Field(default=None, description="Teléfono")
-    alt_phone: Optional[str] = Field(default=None, description="Teléfono alterno")
-    username: Optional[str] = Field(default=None, description="Usuario")
-    password: Optional[str] = Field(default=None, description="Contraseña")
-    rol: Optional[str] = Field(default=None, description="Rol")
-    activo: Optional[bool] = Field(default=None, description="Activo")
+    name: Optional[str] = None
+    birthday: Optional[date] = None
+    gender: Optional[str] = None
+    postal_code: Optional[str] = None
+    email: Optional[str] = None
+    phone: Optional[str] = None
+    alt_phone: Optional[str] = None
+    username: Optional[str] = None
+    password: Optional[str] = None
+    rol: Optional[str] = None
+    activo: Optional[bool] = None
 
     class Config:
         from_attributes = True
@@ -49,21 +49,21 @@ class PacienteBase(BaseModel):
     birthday: date
     gender: str
     address: str
-    contact_info: Optional[List[str]] = []
+    contact_info: Optional[str] = None
     payor_type: Optional[str] = None
     physician: Optional[str] = None
     agency_id: int
     nursing_diagnostic: Optional[str] = None
     urgency_level: Optional[str] = None
     prior_level_of_function: Optional[str] = None
-    homebound: Optional[bool] = True
+    homebound: Optional[str] = None
     weight_bearing_status: Optional[str] = None
     reason_for_referral: Optional[str] = None
     weight: Optional[str] = None
     height: Optional[str] = None
     pmh: Optional[str] = None
     clinical_grouping: Optional[str] = None
-    disciplines_needed: Optional[List[str]] = []
+    disciplines_needed: Optional[str] = None
     activo: Optional[bool] = True
 
 class PacienteCreate(PacienteBase):
@@ -81,7 +81,7 @@ class PacienteUpdate(BaseModel):
     nursing_diagnostic: Optional[str] = None
     urgency_level: Optional[str] = None
     prior_level_of_function: Optional[str] = None
-    homebound: Optional[bool] = None
+    homebound: Optional[str] = None
     weight_bearing_status: Optional[str] = None
     reason_for_referral: Optional[str] = None
     weight: Optional[str] = None

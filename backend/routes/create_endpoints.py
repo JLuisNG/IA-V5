@@ -42,19 +42,16 @@ def create_paciente(paciente: PacienteCreate, db: Session = Depends(get_db)):
         Pacientes.patient_name == paciente.patient_name,
         Pacientes.birthday == paciente.birthday
     ).first()
-    
+
     if existing_paciente:
         raise HTTPException(status_code=400, detail="Paciente ya registrado.")
-
-    contact_info_str = ",".join(paciente.contact_info) if paciente.contact_info else None
-    disciplines_needed_str = ",".join(paciente.disciplines_needed) if paciente.disciplines_needed else None
 
     new_paciente = Pacientes(
         patient_name=paciente.patient_name,
         birthday=paciente.birthday,
         gender=paciente.gender,
         address=paciente.address,
-        contact_info=contact_info_str,
+        contact_info=paciente.contact_info,
         payor_type=paciente.payor_type,
         physician=paciente.physician,
         agency_id=paciente.agency_id,
@@ -64,8 +61,12 @@ def create_paciente(paciente: PacienteCreate, db: Session = Depends(get_db)):
         homebound=paciente.homebound,
         weight_bearing_status=paciente.weight_bearing_status,
         reason_for_referral=paciente.reason_for_referral,
-        disciplines_needed=disciplines_needed_str,
-        activo=True
+        weight=paciente.weight,
+        height=paciente.height,
+        pmh=paciente.pmh,
+        clinical_grouping=paciente.clinical_grouping,
+        disciplines_needed=paciente.disciplines_needed,
+        activo=paciente.activo
     )
 
     db.add(new_paciente)
@@ -85,7 +86,7 @@ def create_paciente(paciente: PacienteCreate, db: Session = Depends(get_db)):
     db.add(cert_period)
     db.commit()
 
-    return new_paciente
+    return PacienteResponse.model_validate(new_paciente)
 
 @router.post("/documentos/", response_model=DocumentoResponse)
 def upload_document(documento: DocumentoCreate, db: Session = Depends(get_db)):
