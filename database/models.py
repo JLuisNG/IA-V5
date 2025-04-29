@@ -45,7 +45,7 @@ class Pacientes(Base):
     disciplines_needed = Column(Text, nullable=True)
     activo = Column(Boolean, default=True)
 
-    exercise_assignments = relationship("PacienteExerciseAssignment", back_populates="paciente")
+    exercise_assignments = relationship("PacienteExerciseAssignment", back_populates="paciente", primaryjoin="Pacientes.id_paciente == PacienteExerciseAssignment.paciente_id")
     cert_periods = relationship("CertificationPeriod", back_populates="paciente")
     documentos = relationship("Documentos", back_populates="paciente")
 
@@ -82,8 +82,8 @@ class Exercise(Base):
     default_reps = Column(Integer, nullable=True)
     default_sessions_per_day = Column(Integer, nullable=True)
     hep_required = Column(Boolean, default=True)
-    discipline = Column(String, nullable=False)  # PT, OT, ST
-    focus_area = Column(String, nullable=True)   # Strengthening, Balance, etc.
+    discipline = Column(String, nullable=False)  
+    focus_area = Column(String, nullable=True)  
 
 class PacienteExerciseAssignment(Base):
     __tablename__ = "paciente_exercise_assignments"

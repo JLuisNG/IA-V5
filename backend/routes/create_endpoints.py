@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, Depends
 from sqlalchemy.orm import Session
 from typing import List
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 from database.connection import get_db
 from database.models import Staff, Pacientes, CertificationPeriod, Documentos, Exercise, PacienteExerciseAssignment
 from schemas import StaffCreate, StaffResponse, PacienteCreate, PacienteResponse, DocumentoCreate, DocumentoResponse, ExerciseCreate, ExerciseResponse, PacienteExerciseAssignmentCreate
@@ -110,11 +110,11 @@ def create_exercise(exercise: ExerciseCreate, db: Session = Depends(get_db)):
 
     return new_exercise
 
-@router.post("/pacientes/{paciente_id}/exercises/")
-def assign_exercises_to_paciente(paciente_id: int, assignments: List[PacienteExerciseAssignmentCreate], db: Session = Depends(get_db)):
+@router.post("/pacientes/exercises/")
+def assign_exercises_to_paciente(assignments: List[PacienteExerciseAssignmentCreate], db: Session = Depends(get_db)):
     for assignment in assignments:
         new_assignment = PacienteExerciseAssignment(
-            paciente_id=paciente_id,
+            paciente_id=assignment.paciente_id,
             exercise_id=assignment.exercise_id,
             sets=assignment.sets,
             reps=assignment.reps,
@@ -125,3 +125,32 @@ def assign_exercises_to_paciente(paciente_id: int, assignments: List[PacienteExe
 
     db.commit()
     return {"message": "Ejercicios asignados exitosamente."}
+
+@router.post("/pacientes/{paciente_id}/certification-period")
+def create_certification_period(
+    paciente_id: int,
+    start_date: date,
+    db: Session = Depends(get_db)
+):
+    paciente = db.query(Pacientes).filter(Pacientes.id_paciente == paciente_id).first()
+
+    if not paciente:
+        raise HTTPException(status_code=404, detail="Paciente no encontrado.")
+
+    end_date = start_date + timedelta(days=60)
+
+    new_cert = CertificationPeriod(
+        paciente_id=paciente_id,
+        start_date=start_date,
+        end_date=end_date,
+        is_active=True
+    )
+
+    db.add(new_cert)
+    db.commit()
+    db.refresh(new_cert)
+
+    return {
+        "message": "Nuevo Certification Period creado exitosamente.",
+        "certification_period_id": new_cert.id
+    }
