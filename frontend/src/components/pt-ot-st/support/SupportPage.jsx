@@ -5,7 +5,7 @@ import Header from '../../header/Header';
 import FloatingSupportButton from './FloatingSupportButton';
 import '../../../styles/developer/support/SupportPage.scss';
 
-const TPSupportPage = () => {
+const SupportPage = () => {
   const navigate = useNavigate();
   const { currentUser, logout } = useAuth();
   
@@ -256,4 +256,4 @@ const TPSupportPage = () => {
   );
 };
 
-export default TPSupportPage;
+export default SupportPage;

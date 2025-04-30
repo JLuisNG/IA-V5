@@ -456,31 +456,6 @@ const AdminStaffingPage = () => {
                 <i className="fas fa-user-md"></i>
               </div>
             </div>
-            
-            <div 
-              className={`staffing-option-card ${selectedOption === 'scheduling' ? 'selected' : ''}`}
-              onClick={() => handleOptionSelect('scheduling')}
-            >
-              <div className="option-icon">
-                <i className="fas fa-calendar-alt"></i>
-              </div>
-              <div className="option-content">
-                <h3>Scheduling & Assignments</h3>
-                <p>Manage visit schedules and therapist assignments</p>
-                <div className="option-actions">
-                  <button className="option-btn" disabled={isLoggingOut}>
-                    <i className="fas fa-calendar-week"></i> View Calendar
-                  </button>
-                  <button className="option-btn" disabled={isLoggingOut}>
-                    <i className="fas fa-tasks"></i> Manage Assignments
-                  </button>
-                </div>
-              </div>
-              <div className="option-glow"></div>
-              <div className="option-bg-icon">
-                <i className="fas fa-calendar-alt"></i>
-              </div>
-            </div>
           </div>
           
           {/* Contenedor de estadísticas */}

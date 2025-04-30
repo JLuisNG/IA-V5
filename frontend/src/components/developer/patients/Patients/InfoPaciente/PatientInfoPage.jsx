@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../../login/AuthContext';
 import logoImg from '../../../../../assets/LogoMHC.jpeg';
@@ -8,7 +8,9 @@ import MedicalInfoComponent from './MedicalInfoComponent';
 import DisciplinesComponent from './DisciplinesComponent';
 import ScheduleComponent from './ScheduleComponent';
 import ExercisesComponent from './ExercisesComponent';
-import DocumentsComponent from './DocumentsComponent'; // Importamos el nuevo componente de Documentos
+import DocumentsComponent from './DocumentsComponent';
+import NotesComponent from './NotesComponent';
+import LogoutAnimation from '../../../../../components/LogOut/LogOut';
 import '../../../../../styles/developer/Patients/InfoPaciente/PatientInfoPage.scss';
 
 // Patient Info Header Component
@@ -185,17 +187,28 @@ const formatDateForInput = (dateStr) => {
 };
 
 // General Information Section Component
-const GeneralInformationSection = ({ patient }) => {
+const GeneralInformationSection = ({ patient, setCertPeriodDates }) => {
+
   // Handler for certification period updates
   const handleUpdateCertPeriod = (updatedCertData) => {
     console.log('Certification period updated:', updatedCertData);
-    // Here you would typically update the state or send data to an API
+    if (updatedCertData.startDate && updatedCertData.endDate) {
+      setCertPeriodDates({ 
+        startDate: updatedCertData.startDate, 
+        endDate: updatedCertData.endDate 
+      });
+    }
   };
+  
   
   return (
     <div className="general-info-section">
       <PersonalInfoCard patient={patient} />
-      <CertificationPeriodComponent patient={patient} onUpdateCertPeriod={handleUpdateCertPeriod} />
+      <CertificationPeriodComponent 
+  patient={patient} 
+  onUpdateCertPeriod={handleUpdateCertPeriod}
+/>
+
       <EmergencyContactsComponent patient={patient} />
     </div>
   );
@@ -232,7 +245,8 @@ const DisciplinesSection = ({ patient }) => {
 };
 
 // Schedule Section Component
-const ScheduleSection = ({ patient }) => {
+// Schedule Section Component
+const ScheduleSection = ({ patient, certPeriodDates }) => {
   // Handler for schedule updates
   const handleUpdateSchedule = (updatedSchedule) => {
     console.log('Schedule updated:', updatedSchedule);
@@ -241,10 +255,15 @@ const ScheduleSection = ({ patient }) => {
   
   return (
     <div className="schedule-section">
-      <ScheduleComponent patient={patient} onUpdateSchedule={handleUpdateSchedule} />
+      <ScheduleComponent 
+        patient={patient} 
+        onUpdateSchedule={handleUpdateSchedule} 
+        certPeriodDates={certPeriodDates}
+      />
     </div>
   );
 };
+
 
 // Exercises Section Component
 const ExercisesSection = ({ patient }) => {
@@ -276,15 +295,105 @@ const DocumentsSection = ({ patient }) => {
   );
 };
 
+// Notes Section Component
+const NotesSection = ({ patient }) => {
+  // Handler for notes updates
+  const handleUpdateNotes = (updatedNotes) => {
+    console.log('Notes updated:', updatedNotes);
+    // Here you would typically update the state or send data to an API
+  };
+  
+  return (
+    <div className="notes-section">
+      <NotesComponent patient={patient} onUpdateNotes={handleUpdateNotes} />
+    </div>
+  );
+};
+
 // Main Patient Information Page Component
 const PatientInfoPage = () => {
   const { patientId } = useParams();
   const [activeTab, setActiveTab] = useState('general');
   const [patient, setPatient] = useState(null);
   const [loading, setLoading] = useState(true);
-  const { currentUser } = useAuth();
+  const { currentUser, logout } = useAuth();
   const navigate = useNavigate();
   const rolePrefix = window.location.hash.split('/')[1]; // Extract role from URL (developer, admin, etc.)
+  const [showUserMenu, setShowUserMenu] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [notificationCount, setNotificationCount] = useState(5);
+  const [isMobile, setIsMobile] = useState(false);
+  const userMenuRef = useRef(null);
+  const [certPeriodDates, setCertPeriodDates] = useState({ startDate: '', endDate: '' });
+
+  
+  // Detect device size
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    handleResize(); // Initial check
+    window.addEventListener('resize', handleResize);
+    
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+  
+  // Function to get initials from name
+  function getInitials(name) {
+    if (!name) return "U";
+    const parts = name.split(' ');
+    if (parts.length >= 2) {
+      return (parts[0][0] + parts[1][0]).toUpperCase();
+    }
+    return name.substring(0, 2).toUpperCase();
+  }
+  
+  // Use user data from auth context
+  const userData = currentUser ? {
+    name: currentUser.fullname || currentUser.username,
+    avatar: getInitials(currentUser.fullname || currentUser.username),
+    email: currentUser.email,
+    role: currentUser.role,
+    status: 'online'
+  } : {
+    name: '',
+    avatar: '',
+    email: '',
+    role: '',
+    status: 'online'
+  };
+
+  // Handle logout
+  const handleLogout = () => {
+    setIsLoggingOut(true);
+    setShowUserMenu(false);
+    
+    // Add logout classes to body
+    document.body.classList.add('logging-out');
+  };
+  
+  // Handle logout animation completion
+  const handleLogoutAnimationComplete = () => {
+    // Execute the logout from auth context
+    logout();
+    // Navigate to the login page
+    navigate('/');
+  };
+
+  // Close user menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (userMenuRef.current && !userMenuRef.current.contains(event.target)) {
+        setShowUserMenu(false);
+      }
+    };
+    
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
   // Fetch patient data
   useEffect(() => {
@@ -314,7 +423,7 @@ const PatientInfoPage = () => {
           emergencyContact: "Mohammed Ali",
           emergencyPhone: "(310) 555-7890",
           notes: "Patient recovering well. Following exercise regimen as prescribed.",
-          // Datos médicos de ejemplo
+          // Medical data
           medicalInfo: {
             weight: 185.5,
             nursingDiagnosis: "Chronic Obstructive Pulmonary Disease (COPD) with decreased exercise tolerance",
@@ -323,7 +432,7 @@ const PatientInfoPage = () => {
             clinicalGrouping: "MMTA - Respiratory",
             homebound: "Patient experiences significant dyspnea with minimal exertion requiring intermittent rest periods"
           },
-          // Datos de disciplinas de ejemplo
+          // Disciplines data
           disciplines: {
             PT: {
               isActive: true,
@@ -358,7 +467,7 @@ const PatientInfoPage = () => {
               frequency: ''
             }
           },
-          // Datos de ejercicios de ejemplo
+          // Exercises data
           exercises: [
             {
               id: 1,
@@ -403,7 +512,7 @@ const PatientInfoPage = () => {
               isHEP: true
             }
           ],
-          // Datos de documentos de ejemplo
+          // Documents data
           documents: [
             {
               id: 1,
@@ -449,7 +558,7 @@ const PatientInfoPage = () => {
           emergencyContact: "Rick Grimes",
           emergencyPhone: "(310) 555-7890",
           notes: "Patient recovering well. Following exercise regimen as prescribed.",
-          // Datos médicos de ejemplo
+          // Medical data
           medicalInfo: {
             weight: 172.0,
             nursingDiagnosis: "Left CVA with right-sided hemiparesis",
@@ -458,7 +567,7 @@ const PatientInfoPage = () => {
             clinicalGrouping: "Neuro Rehabilitation",
             homebound: "Patient requires maximum assistance for transfers and ambulation due to right-sided weakness and balance deficits"
           },
-          // Datos de disciplinas de ejemplo
+          // Disciplines data
           disciplines: {
             PT: {
               isActive: true,
@@ -507,7 +616,7 @@ const PatientInfoPage = () => {
               frequency: ''
             }
           },
-          // Datos de ejercicios de ejemplo (añadir algunos para OT)
+          // Exercises data for OT
           exercises: [
             {
               id: 4,
@@ -538,7 +647,7 @@ const PatientInfoPage = () => {
               isHEP: true
             }
           ],
-          // Datos de documentos de ejemplo para el segundo paciente
+          // Documents data for second patient
           documents: [
             {
               id: 3,
@@ -631,7 +740,15 @@ const PatientInfoPage = () => {
   }
 
   return (
-    <div className="patient-info-page">
+    <div className={`patient-info-page ${isLoggingOut ? 'logging-out' : ''}`}>
+      {/* Logout Animation Component - Only show when logging out */}
+      {isLoggingOut && (
+        <LogoutAnimation 
+          isMobile={isMobile} 
+          onAnimationComplete={handleLogoutAnimationComplete} 
+        />
+      )}
+      
       {/* Page header */}
       <header className="main-header">
         <div className="header-container">
@@ -666,23 +783,119 @@ const PatientInfoPage = () => {
             </div>
           </div>
           
-          {/* User profile - simplified version */}
-          <div className="user-profile">
-            <div className="profile-button">
-              <div className="avatar">
-                {currentUser?.fullname?.[0] || 'U'}
+          {/* User profile with dropdown menu */}
+          <div className="support-user-profile" ref={userMenuRef}>
+            <div 
+              className={`support-profile-button ${showUserMenu ? 'active' : ''}`} 
+              onClick={() => !isLoggingOut && setShowUserMenu(!showUserMenu)}
+              data-tooltip="Your profile and settings"
+            >
+              <div className="support-avatar">
+                <div className="support-avatar-text">{userData.avatar}</div>
+                <div className={`support-avatar-status ${userData.status}`}></div>
               </div>
-              <div className="profile-info">
-                <span className="user-name">{currentUser?.fullname || 'User'}</span>
-                <span className="user-role">{currentUser?.role || 'Developer'}</span>
+              
+              <div className="support-profile-info">
+                <span className="support-user-name">{userData.name}</span>
+                <span className="support-user-role">{userData.role}</span>
               </div>
+              
+              <i className={`fas fa-chevron-${showUserMenu ? 'up' : 'down'}`}></i>
             </div>
+            
+            {/* Enhanced dropdown menu */}
+            {showUserMenu && !isLoggingOut && (
+              <div className="support-user-menu">
+                <div className="support-menu-header">
+                  <div className="support-user-info">
+                    <div className="support-user-avatar">
+                      <span>{userData.avatar}</span>
+                      <div className={`avatar-status ${userData.status}`}></div>
+                    </div>
+                    <div className="support-user-details">
+                      <h4>{userData.name}</h4>
+                      <span className="support-user-email">{userData.email}</span>
+                      <span className={`support-user-status ${userData.status}`}>
+                        <i className="fas fa-circle"></i> 
+                        {userData.status.charAt(0).toUpperCase() + userData.status.slice(1)}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="support-menu-section">
+                  <div className="section-title">Account</div>
+                  <div className="support-menu-items">
+                    <div 
+                      className="support-menu-item"
+                      onClick={() => navigate(`/${rolePrefix}/profile`)}
+                    >
+                      <i className="fas fa-user-circle"></i>
+                      <span>My Profile</span>
+                    </div>
+                    <div className="support-menu-item">
+                      <i className="fas fa-cog"></i>
+                      <span>Settings</span>
+                    </div>
+                    <div className="support-menu-item">
+                      <i className="fas fa-calendar-alt"></i>
+                      <span>My Schedule</span>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="support-menu-section">
+                  <div className="section-title">Preferences</div>
+                  <div className="support-menu-items">
+                  <div className="support-menu-item">
+                      <i className="fas fa-bell"></i>
+                      <span>Notifications</span>
+                      <div className="support-notification-badge">{notificationCount}</div>
+                    </div>
+                    <div className="support-menu-item toggle-item">
+                    <div className="toggle-item-content">
+                        <i className="fas fa-volume-up"></i>
+                        <span>Sound Alerts</span>
+                      </div>
+                      <div className="toggle-switch">
+                        <div className="toggle-handle"></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="support-menu-section">
+                  <div className="section-title">Support</div>
+                  <div className="support-menu-items">
+                    <div className="support-menu-item">
+                      <i className="fas fa-headset"></i>
+                      <span>Contact Support</span>
+                    </div>
+                    <div className="support-menu-item">
+                      <i className="fas fa-bug"></i>
+                      <span>Report Issue</span>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="support-menu-footer">
+                  <div className="support-menu-item logout" onClick={handleLogout}>
+                    <i className="fas fa-sign-out-alt"></i>
+                    <span>Log Out</span>
+                  </div>
+                  <div className="version-info">
+                    <span>TherapySync™ Support</span>
+                    <span>v2.7.0</span>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </header>
 
       {/* Main content */}
-      <main className="patient-info-content">
+      <main className={`patient-info-content ${isLoggingOut ? 'fade-out' : ''}`}>
         <div className="patient-info-container">
           {/* Patient header with back button and actions */}
           <PatientInfoHeader 
@@ -697,7 +910,11 @@ const PatientInfoPage = () => {
           {/* Tab content */}
           <div className="tab-content">
             {activeTab === 'general' && (
-              <GeneralInformationSection patient={patient} />
+              <GeneralInformationSection 
+              patient={patient} 
+              setCertPeriodDates={setCertPeriodDates}
+            />
+            
             )}
             {activeTab === 'medical' && (
               <MedicalInformationSection patient={patient} />
@@ -705,8 +922,11 @@ const PatientInfoPage = () => {
             {activeTab === 'disciplines' && (
               <DisciplinesSection patient={patient} />
             )}
-            {activeTab === 'schedule' && (
-              <ScheduleSection patient={patient} />
+           {activeTab === 'schedule' && (
+  <ScheduleSection 
+    patient={patient} 
+    certPeriodDates={certPeriodDates} 
+  />
             )}
             {activeTab === 'exercises' && (
               <ExercisesSection patient={patient} />
@@ -715,39 +935,13 @@ const PatientInfoPage = () => {
               <DocumentsSection patient={patient} />
             )}
             {activeTab === 'notes' && (
-              <div className="notes-placeholder">
-                <div className="placeholder-content">
-                  <i className="fas fa-sticky-note"></i>
-                  <p>Notes Section</p>
-                  <span>This section will be developed in the next phase</span>
-                </div>
-              </div>
+              <NotesSection patient={patient} />
             )}
           </div>
         </div>
       </main>
       
-      {/* Floating Action Button */}
-      <div className="floating-action-button">
-        <button className="fab-button">
-          <i className="fas fa-plus"></i>
-          <span className="fab-tooltip">Quick Actions</span>
-        </button>
-        <div className="fab-menu">
-          <button className="fab-item">
-            <i className="fas fa-calendar-plus"></i>
-            <span>Add Visit</span>
-          </button>
-          <button className="fab-item">
-            <i className="fas fa-file-upload"></i>
-            <span>Upload Document</span>
-          </button>
-          <button className="fab-item">
-            <i className="fas fa-sticky-note"></i>
-            <span>Add Note</span>
-          </button>
-        </div>
-      </div>
+ 
     </div>
   );
 };

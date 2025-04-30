@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import '../../../styles/developer/support/SupportModal.scss';
 
-const TPSupportModal = ({ isOpen, onClose, userRole }) => {
+const SupportModal = ({ isOpen, onClose, userRole }) => {
   // Estados para controlar los pasos y animaciones
   const [activeStep, setActiveStep] = useState(0);
   const [previousStep, setPreviousStep] = useState(null);
@@ -1403,4 +1403,4 @@ const TPSupportModal = ({ isOpen, onClose, userRole }) => {
 );
 };
 
-export default TPSupportModal;
+export default SupportModal;
