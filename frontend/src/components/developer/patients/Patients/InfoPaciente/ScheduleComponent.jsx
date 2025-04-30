@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import '../../../../../styles/developer/Patients/InfoPaciente/ScheduleComponent.scss';
 import VisitCompletionModal from './NotesAndSign/Evaluation/VisitCompletionModal';
+import SignaturePad from './SignaturePad';
 
 const ScheduleComponent = ({ patient, onUpdateSchedule, certPeriodDates }) => {
-  // States for views and data
+  // Estados para vistas y datos
   const [isCalendarView, setIsCalendarView] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [showAddVisitModal, setShowAddVisitModal] = useState(false);
-  const [showEditVisitModal, setShowEditVisitModal] = useState(false);
+  const [showVisitModal, setShowVisitModal] = useState(false);
   const [showDeleteConfirmModal, setShowDeleteConfirmModal] = useState(false);
   const [deleteVisitId, setDeleteVisitId] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -20,8 +20,24 @@ const ScheduleComponent = ({ patient, onUpdateSchedule, certPeriodDates }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [showCompletionModal, setShowCompletionModal] = useState(false);
   const [completionVisitData, setCompletionVisitData] = useState(null);
+  const [activeTab, setActiveTab] = useState('details');
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [rescheduleDate, setRescheduleDate] = useState('');
+  const [signatureData, setSignatureData] = useState({
+    patient: null,
+    therapist: null,
+    date: null,
+    patientOutside: false,
+    therapistOutside: false
+  });
+  const [missedVisitData, setMissedVisitData] = useState({
+    reason: '',
+    action: '',
+    mdNotified: false,
+    noShow: false
+  });
 
-  // Form data
+  // Datos del formulario
   const [formData, setFormData] = useState({
     visitType: '',
     therapist: '',
@@ -30,9 +46,19 @@ const ScheduleComponent = ({ patient, onUpdateSchedule, certPeriodDates }) => {
     notes: '',
     status: 'SCHEDULED',
     missedReason: '',
+    timeInHour: '01',
+    timeInMinute: '00',
+    timeInAmPm: 'PM',
+    timeOutHour: '02',
+    timeOutMinute: '00',
+    timeOutAmPm: 'PM',
+    gCode: '',
+    physician: 'Dr. John Smith',
+    certPeriod: '',
+    documents: []
   });
 
-  // Visit types
+  // Tipos de visita
   const visitTypes = [
     { id: 'INITIAL', label: 'Initial Eval' },
     { id: 'REGULAR', label: 'Regular therapy session' },
@@ -48,7 +74,7 @@ const ScheduleComponent = ({ patient, onUpdateSchedule, certPeriodDates }) => {
     { id: 'SUPERVISION', label: 'Supervision Assessment' },
   ];
 
-  // Visit statuses
+  // Estados de visita
   const visitStatus = [
     { id: 'SCHEDULED', label: 'Scheduled', color: '#10b981' },
     { id: 'COMPLETED', label: 'Completed', color: '#3b82f6' },
@@ -57,7 +83,41 @@ const ScheduleComponent = ({ patient, onUpdateSchedule, certPeriodDates }) => {
     { id: 'CANCELLED', label: 'Cancelled', color: '#64748b' },
   ];
 
-  // Therapist type colors
+  // Tipo de acción de visita
+  const visitActions = [
+    { id: 'PT_EVAL', label: 'PT Evaluation' },
+    { id: 'OT_EVAL', label: 'OT Evaluation' },
+    { id: 'RESCHEDULE_VISIT', label: 'Reschedule Visit' },
+  ];
+
+  // Razones para visitas perdidas
+  const missedReasons = [
+    'Select an option',
+    'Caregiver Provided Care',
+    'Patient/Caregiver Refused',
+    'Patient Had Physician Appointment',
+    'No Answer Door/Phone',
+    'Inclement Weather',
+    'Medical Treatment Only',
+    'Transition Recert',
+    'Patient Expired',
+    'Patient Declined This Discipline',
+    'HH Initiation Visit Missed',
+    'Patient Hospitalized',
+    'Awaiting Insurance Authorization',
+    'Awaiting Verbal Orders',
+    'Waiting on authorization patient declined private pay',
+    'Other'
+  ];
+
+  // Períodos de certificación
+  const certPeriods = [
+    { id: 'period1', label: '11/30/2024 - 1/28/2025' },
+    { id: 'period2', label: '8/30/2024 - 10/28/2024' },
+    { id: 'period3', label: '5/30/2024 - 7/28/2024' },
+  ];
+
+  // Colores para tipos de terapeutas
   const therapistTypeColors = {
     PT: { primary: '#4f46e5', secondary: '#e0e7ff' },
     PTA: { primary: '#6366f1', secondary: '#e0e7ff' },
@@ -67,7 +127,7 @@ const ScheduleComponent = ({ patient, onUpdateSchedule, certPeriodDates }) => {
     STA: { primary: '#2dd4bf', secondary: '#d1fae5' },
   };
 
-  // Therapists data
+  // Datos de terapeutas
   const therapists = [
     { id: 'pt1', name: 'Dr. Michael Chen', type: 'PT' },
     { id: 'pta1', name: 'Maria Gonzalez', type: 'PTA' },
@@ -77,12 +137,16 @@ const ScheduleComponent = ({ patient, onUpdateSchedule, certPeriodDates }) => {
     { id: 'sta1', name: 'Robert Williams', type: 'STA' },
   ];
 
-  // Simulated API for fetching visits
+  // Horas y minutos para selección de tiempo
+  const hours = Array.from({ length: 12 }, (_, i) => String(i + 1).padStart(2, '0'));
+  const minutes = Array.from({ length: 60 }, (_, i) => String(i).padStart(2, '0'));
+
+  // API simulada para obtener visitas
   const fetchVisits = async (patientId) => {
-    // Replace with actual API call
+    // Reemplazar con llamada API real
     return new Promise((resolve) => {
       setTimeout(() => {
-        // Mock visits data - replace with API response
+        // Datos de visitas de ejemplo - reemplazar con respuesta de API
         const mockVisits = [
           {
             id: 1,
@@ -93,6 +157,13 @@ const ScheduleComponent = ({ patient, onUpdateSchedule, certPeriodDates }) => {
             notes: 'Initial evaluation for physical therapy',
             status: 'COMPLETED',
             documents: ['evaluation_form.pdf'],
+            physician: 'Dr. John Smith',
+            gCode: 'G0151',
+            signatures: {
+              patient: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEU...',
+              therapist: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEU...',
+              date: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEU...'
+            }
           },
           {
             id: 2,
@@ -103,6 +174,7 @@ const ScheduleComponent = ({ patient, onUpdateSchedule, certPeriodDates }) => {
             notes: 'Follow-up session for gait training',
             status: 'MISSED',
             missedReason: 'Patient was not available',
+            physician: 'Dr. John Smith'
           },
           {
             id: 3,
@@ -113,6 +185,7 @@ const ScheduleComponent = ({ patient, onUpdateSchedule, certPeriodDates }) => {
             notes: 'Recertification evaluation for continued therapy',
             status: 'SCHEDULED',
             documents: [],
+            physician: 'Dr. John Smith'
           },
           {
             id: 4,
@@ -123,6 +196,7 @@ const ScheduleComponent = ({ patient, onUpdateSchedule, certPeriodDates }) => {
             notes: 'Regular therapy session',
             status: 'COMPLETED',
             documents: ['progress_note.pdf'],
+            physician: 'Dr. Sarah Johnson'
           },
           {
             id: 5,
@@ -133,6 +207,7 @@ const ScheduleComponent = ({ patient, onUpdateSchedule, certPeriodDates }) => {
             notes: 'PTA follow-up session',
             status: 'COMPLETED',
             documents: ['progress_note.pdf'],
+            physician: 'Dr. John Smith'
           },
           {
             id: 6,
@@ -143,6 +218,7 @@ const ScheduleComponent = ({ patient, onUpdateSchedule, certPeriodDates }) => {
             notes: 'PTA follow-up session',
             status: 'COMPLETED',
             documents: ['progress_note.pdf'],
+            physician: 'Dr. Sarah Johnson'
           },
           {
             id: 7,
@@ -152,6 +228,7 @@ const ScheduleComponent = ({ patient, onUpdateSchedule, certPeriodDates }) => {
             time: '15:30',
             notes: 'PTA follow-up session',
             status: 'SCHEDULED',
+            physician: 'Dr. John Smith'
           },
           {
             id: 8,
@@ -161,6 +238,7 @@ const ScheduleComponent = ({ patient, onUpdateSchedule, certPeriodDates }) => {
             time: '13:45',
             notes: 'PTA follow-up session',
             status: 'SCHEDULED',
+            physician: 'Dr. John Smith'
           },
           {
             id: 9,
@@ -170,6 +248,7 @@ const ScheduleComponent = ({ patient, onUpdateSchedule, certPeriodDates }) => {
             time: '13:45',
             notes: 'PTA follow-up session',
             status: 'SCHEDULED',
+            physician: 'Dr. John Smith'
           },
           {
             id: 10,
@@ -179,6 +258,7 @@ const ScheduleComponent = ({ patient, onUpdateSchedule, certPeriodDates }) => {
             time: '',
             notes: 'Reassessment for progress evaluation',
             status: 'SCHEDULED',
+            physician: 'Dr. John Smith'
           },
           {
             id: 11,
@@ -188,6 +268,7 @@ const ScheduleComponent = ({ patient, onUpdateSchedule, certPeriodDates }) => {
             time: '',
             notes: 'Regular PTA session',
             status: 'SCHEDULED',
+            physician: 'Dr. Sarah Johnson'
           },
           {
             id: 12,
@@ -197,6 +278,7 @@ const ScheduleComponent = ({ patient, onUpdateSchedule, certPeriodDates }) => {
             time: '',
             notes: 'Occupational therapy session',
             status: 'SCHEDULED',
+            physician: 'Dr. John Smith'
           },
           {
             id: 13,
@@ -207,6 +289,7 @@ const ScheduleComponent = ({ patient, onUpdateSchedule, certPeriodDates }) => {
             notes: 'COTA session',
             status: 'PENDING',
             pendingReason: 'Pending cosignature',
+            physician: 'Dr. Mark Wilson'
           },
           {
             id: 14,
@@ -217,28 +300,30 @@ const ScheduleComponent = ({ patient, onUpdateSchedule, certPeriodDates }) => {
             notes: 'Speech therapy session',
             status: 'PENDING',
             pendingReason: 'Pending cosignature',
+            physician: 'Dr. John Smith'
           },
           {
             id: 15,
             visitType: 'REGULAR',
-            therapist: 'sta1',
-            date: '2025-04-05',
+            therapist: 'pta1',
+            date: '2025-04-28',
             time: '10:30',
-            notes: 'Speech therapy assistant session',
+            notes: 'Initial evaluation with Maria Gonzalez',
             status: 'SCHEDULED',
+            physician: 'Dr. John Smith'
           },
         ];
-        resolve(mockVisits.filter((visit) => visit.patientId === patientId));
+        resolve(mockVisits);
       }, 1000);
     });
   };
 
-  // Fetch visits on component mount
+  // Cargar visitas al montar el componente
   useEffect(() => {
     const loadVisits = async () => {
       setIsLoading(true);
       try {
-        const fetchedVisits = await fetchVisits(patient.id);
+        const fetchedVisits = await fetchVisits(patient?.id);
         setVisits(fetchedVisits);
       } catch (err) {
         setError('Failed to fetch visits');
@@ -247,9 +332,85 @@ const ScheduleComponent = ({ patient, onUpdateSchedule, certPeriodDates }) => {
       }
     };
     loadVisits();
-  }, [patient.id]);
+  }, [patient?.id]);
 
-  // Simulated API for adding a visit
+  // Inicializar datos de formulario cuando cambia la visita seleccionada
+  useEffect(() => {
+    if (selectedVisit) {
+      setFormData({
+        visitType: selectedVisit.visitType || 'INITIAL',
+        therapist: selectedVisit.therapist || '',
+        date: selectedVisit.date || formatDateToLocalISOString(new Date()),
+        time: selectedVisit.time || '',
+        notes: selectedVisit.notes || '',
+        status: selectedVisit.status || 'SCHEDULED',
+        missedReason: selectedVisit.missedReason || '',
+        timeInHour: selectedVisit.timeInHour || '01',
+        timeInMinute: selectedVisit.timeInMinute || '00',
+        timeInAmPm: selectedVisit.timeInAmPm || 'PM',
+        timeOutHour: selectedVisit.timeOutHour || '02',
+        timeOutMinute: selectedVisit.timeOutMinute || '00',
+        timeOutAmPm: selectedVisit.timeOutAmPm || 'PM',
+        gCode: selectedVisit.gCode || 'G0151',
+        physician: selectedVisit.physician || 'Dr. John Smith',
+        certPeriod: selectedVisit.certPeriod || certPeriods[0].id,
+        documents: selectedVisit.documents || []
+      });
+
+      if (selectedVisit.rescheduledDate) {
+        setRescheduleDate(selectedVisit.rescheduledDate);
+      }
+
+      if (selectedVisit.signatures) {
+        setSignatureData({
+          patient: selectedVisit.signatures.patient || null,
+          therapist: selectedVisit.signatures.therapist || null,
+          date: selectedVisit.signatures.date || null,
+          patientOutside: selectedVisit.signatures.patientOutside || false,
+          therapistOutside: selectedVisit.signatures.therapistOutside || false
+        });
+      }
+
+      // Establecer pestaña activa según el estado
+      if (selectedVisit.status === 'COMPLETED') {
+        setActiveTab('details');
+      } else {
+        setActiveTab('details');
+      }
+    } else {
+      // Visita nueva
+      setFormData({
+        visitType: 'INITIAL',
+        therapist: '',
+        date: formatDateToLocalISOString(new Date()),
+        time: '',
+        notes: '',
+        status: 'SCHEDULED',
+        missedReason: '',
+        timeInHour: '01',
+        timeInMinute: '00',
+        timeInAmPm: 'PM',
+        timeOutHour: '02',
+        timeOutMinute: '00',
+        timeOutAmPm: 'PM',
+        gCode: 'G0151',
+        physician: 'Dr. John Smith',
+        certPeriod: certPeriods[0].id,
+        documents: []
+      });
+      setSignatureData({
+        patient: null,
+        therapist: null,
+        date: null,
+        patientOutside: false,
+        therapistOutside: false
+      });
+      setRescheduleDate('');
+      setActiveTab('details');
+    }
+  }, [selectedVisit]);
+
+  // API simulada para agregar una visita
   const addVisit = async (visitData) => {
     return new Promise((resolve) => {
       setTimeout(() => {
@@ -263,7 +424,7 @@ const ScheduleComponent = ({ patient, onUpdateSchedule, certPeriodDates }) => {
     });
   };
 
-  // Simulated API for updating a visit
+  // API simulada para actualizar una visita
   const updateVisit = async (visitId, visitData) => {
     return new Promise((resolve) => {
       setTimeout(() => {
@@ -273,7 +434,7 @@ const ScheduleComponent = ({ patient, onUpdateSchedule, certPeriodDates }) => {
     });
   };
 
-  // Simulated API for deleting a visit
+  // API simulada para eliminar una visita
   const deleteVisitApi = async (visitId) => {
     return new Promise((resolve) => {
       setTimeout(() => {
@@ -282,7 +443,7 @@ const ScheduleComponent = ({ patient, onUpdateSchedule, certPeriodDates }) => {
     });
   };
 
-  // Show calendar
+  // Mostrar calendario
   const handleShowCalendar = () => {
     setIsLoading(true);
     setTimeout(() => {
@@ -291,13 +452,13 @@ const ScheduleComponent = ({ patient, onUpdateSchedule, certPeriodDates }) => {
     }, 1000);
   };
 
-  // Back to visits view
+  // Volver a la vista de visitas
   const handleBackToVisits = () => {
     setIsCalendarView(false);
     setSelectedDate(null);
   };
 
-  // Format date to local ISO string
+  // Formatear fecha a cadena ISO local
   const formatDateToLocalISOString = (date) => {
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -305,44 +466,37 @@ const ScheduleComponent = ({ patient, onUpdateSchedule, certPeriodDates }) => {
     return `${year}-${month}-${day}`;
   };
 
-  // Handle date click in calendar
+  // Manejar clic en fecha del calendario
   const handleDateClick = (date) => {
     setSelectedDate(date);
-    setShowAddVisitModal(true);
+    setSelectedVisit(null);
     setFormData({
       ...formData,
       date: formatDateToLocalISOString(date),
       time: '',
-      visitType: '',
+      visitType: 'INITIAL',
       therapist: '',
       notes: '',
       status: 'SCHEDULED',
       missedReason: '',
     });
+    setShowVisitModal(true);
   };
 
-  // Open edit visit modal
-  const handleEditVisit = (visit) => {
+  // Abrir modal de visita
+  const handleOpenVisitModal = (visit = null) => {
     setSelectedVisit(visit);
-    setFormData({
-      visitType: visit.visitType,
-      therapist: visit.therapist,
-      date: visit.date,
-      time: visit.time || '',
-      notes: visit.notes || '',
-      status: visit.status,
-      missedReason: visit.missedReason || '',
-    });
-    setShowEditVisitModal(true);
+    setShowVisitModal(true);
   };
 
-  // Initiate visit deletion
-  const handleInitiateDelete = (visitId) => {
+  // Iniciar eliminación de visita
+  const handleInitiateDelete = (visitId, e) => {
+    e.stopPropagation();
     setDeleteVisitId(visitId);
     setShowDeleteConfirmModal(true);
   };
 
-  // Delete a visit
+  // Eliminar una visita
   const handleDeleteVisit = async () => {
     setIsDeleting(true);
     try {
@@ -361,17 +515,84 @@ const ScheduleComponent = ({ patient, onUpdateSchedule, certPeriodDates }) => {
     }
   };
 
-  // Handle form input changes
+  // Manejar cambios en el formulario
   const handleInputChange = (e) => {
-    const { name, value } = e.target;
+    const { name, value, type, checked } = e.target;
     setFormData({
       ...formData,
-      [name]: value,
+      [name]: type === 'checkbox' ? checked : value,
     });
     setError('');
   };
 
-  // Check if time slot is available
+  // Manejar cambios en el formulario de visita perdida
+  const handleMissedVisitChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    setMissedVisitData({
+      ...missedVisitData,
+      [name]: type === 'checkbox' ? checked : value,
+    });
+  };
+
+  // Manejar cambios de firma
+  const handleSignatureChange = (type, data) => {
+    setSignatureData({
+      ...signatureData,
+      [type]: data
+    });
+  };
+
+  // Manejar cambios en checkboxes de firma
+  const handleSignatureCheckboxChange = (e) => {
+    const { name, checked } = e.target;
+    setSignatureData({
+      ...signatureData,
+      [name]: checked
+    });
+  };
+
+  // Manejar selección de archivo
+  const handleFileSelect = (e) => {
+    if (e.target.files && e.target.files.length > 0) {
+      setSelectedFile(e.target.files[0]);
+    }
+  };
+
+  // Manejar carga de archivo
+  const handleFileUpload = () => {
+    if (!selectedFile) return;
+
+    // Simular carga de archivo
+    setIsLoading(true);
+    setTimeout(() => {
+      const newDocuments = [...formData.documents, {
+        id: Date.now().toString(),
+        name: selectedFile.name,
+        type: selectedFile.type,
+        size: selectedFile.size,
+        uploadDate: new Date().toISOString()
+      }];
+      
+      setFormData({
+        ...formData,
+        documents: newDocuments
+      });
+      
+      setSelectedFile(null);
+      setIsLoading(false);
+    }, 1000);
+  };
+
+  // Eliminar un documento
+  const handleRemoveDocument = (docId) => {
+    const updatedDocs = formData.documents.filter(doc => doc.id !== docId);
+    setFormData({
+      ...formData,
+      documents: updatedDocs
+    });
+  };
+
+  // Verificar si la franja horaria está disponible
   const isTimeAvailable = (date, time, therapistId, visitId = null) => {
     const existingVisits = visits.filter(
       (visit) =>
@@ -383,19 +604,19 @@ const ScheduleComponent = ({ patient, onUpdateSchedule, certPeriodDates }) => {
     return existingVisits.length === 0;
   };
 
-  // Save a new visit
+  // Guardar una visita (nueva o actualizada)
   const handleSaveVisit = async () => {
     if (!formData.visitType || !formData.therapist || !formData.date) {
       setError('Please fill in all required fields');
       return;
     }
 
-    if (formData.time && !isTimeAvailable(formData.date, formData.time, formData.therapist)) {
+    if (formData.time && !isTimeAvailable(formData.date, formData.time, formData.therapist, selectedVisit?.id)) {
       setError('This time slot is already booked for the selected therapist');
       return;
     }
 
-    // Check if the visit date is within the certification period
+    // Verificar si la fecha de la visita está dentro del período de certificación
     if (certPeriodDates.startDate && certPeriodDates.endDate) {
       const visitDate = new Date(formData.date);
       const startDate = new Date(certPeriodDates.startDate);
@@ -406,24 +627,65 @@ const ScheduleComponent = ({ patient, onUpdateSchedule, certPeriodDates }) => {
       }
     }
 
+    // Si la visita es reprogramada, verificar fecha de reprogramación
+    if (activeTab === 'reschedule' && !rescheduleDate) {
+      setError('Please select a new date for rescheduling');
+      return;
+    }
+
     setIsLoading(true);
     try {
-      const newVisit = await addVisit(formData);
-      const updatedVisits = [...visits, newVisit];
+      // Preparar datos para guardar
+      let visitDataToSave = { ...formData };
+
+      // Agregar datos adicionales según la pestaña activa
+      if (activeTab === 'missedVisit') {
+        visitDataToSave.status = 'MISSED';
+        visitDataToSave.missedReason = missedVisitData.reason;
+        visitDataToSave.missedAction = missedVisitData.action;
+        visitDataToSave.mdNotified = missedVisitData.mdNotified;
+        visitDataToSave.noShow = missedVisitData.noShow;
+      } else if (activeTab === 'reschedule') {
+        visitDataToSave.rescheduledDate = rescheduleDate;
+        // Mantener el estado actual
+      }
+
+      // Agregar firmas si están disponibles
+      if (signatureData.patient || signatureData.therapist || signatureData.date) {
+        visitDataToSave.signatures = signatureData;
+      }
+
+      let updatedVisit;
+      let updatedVisits;
+
+      if (selectedVisit) {
+        // Actualizar visita existente
+        updatedVisit = await updateVisit(selectedVisit.id, visitDataToSave);
+        updatedVisits = visits.map((v) => (v.id === selectedVisit.id ? updatedVisit : v));
+      } else {
+        // Agregar nueva visita
+        updatedVisit = await addVisit(visitDataToSave);
+        updatedVisits = [...visits, updatedVisit];
+      }
+
       setVisits(updatedVisits);
       if (onUpdateSchedule) {
         onUpdateSchedule(updatedVisits);
       }
-      setShowAddVisitModal(false);
-      setFormData({
-        visitType: '',
-        therapist: '',
-        date: '',
-        time: '',
-        notes: '',
-        status: 'SCHEDULED',
-        missedReason: '',
-      });
+
+      // Si se está completando la visita, mostrar modal de finalización
+      const isCompletingVisit = visitDataToSave.status === 'COMPLETED' && 
+                              (selectedVisit ? selectedVisit.status !== 'COMPLETED' : true);
+      
+      if (isCompletingVisit) {
+        setCompletionVisitData(updatedVisit);
+        setShowCompletionModal(true);
+      }
+
+      // Limpiar y cerrar
+      setShowVisitModal(false);
+      setSelectedVisit(null);
+      setActiveTab('details');
     } catch (err) {
       setError('Failed to save visit');
     } finally {
@@ -431,55 +693,7 @@ const ScheduleComponent = ({ patient, onUpdateSchedule, certPeriodDates }) => {
     }
   };
 
-  // Update an existing visit
-  const handleUpdateVisit = async (visit) => {
-    setIsLoading(true);
-    try {
-      // Check if the visit date is within the certification period
-      if (certPeriodDates.startDate && certPeriodDates.endDate) {
-        const visitDate = new Date(visit.date);
-        const startDate = new Date(certPeriodDates.startDate);
-        const endDate = new Date(certPeriodDates.endDate);
-        if (visitDate < startDate || visitDate > endDate) {
-          setError('Visit date must be within the current certification period');
-          setIsLoading(false);
-          return;
-        }
-      }
-
-      const isCompletingVisit = visit.status === 'COMPLETED' && selectedVisit.status !== 'COMPLETED';
-      const updatedVisit = await updateVisit(selectedVisit.id, visit);
-      const updatedVisits = visits.map((v) => (v.id === selectedVisit.id ? updatedVisit : v));
-      setVisits(updatedVisits);
-      if (onUpdateSchedule) {
-        onUpdateSchedule(updatedVisits);
-      }
-
-      if (isCompletingVisit) {
-        const visitData = updatedVisits.find((v) => v.id === selectedVisit.id);
-        setCompletionVisitData(visitData);
-        setShowCompletionModal(true);
-      }
-
-      setShowEditVisitModal(false);
-      setSelectedVisit(null);
-      setFormData({
-        visitType: '',
-        therapist: '',
-        date: '',
-        time: '',
-        notes: '',
-        status: 'SCHEDULED',
-        missedReason: '',
-      });
-    } catch (err) {
-      setError('Failed to update visit');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // Handle completion form save
+  // Manejar guardado del formulario de finalización
   const handleCompletionFormSave = async (formData) => {
     console.log('Saving completion form data:', formData);
     return new Promise((resolve) => {
@@ -502,19 +716,19 @@ const ScheduleComponent = ({ patient, onUpdateSchedule, certPeriodDates }) => {
     });
   };
 
-  // Get therapist name by ID
+  // Obtener nombre del terapeuta por ID
   const getTherapistName = (therapistId) => {
     const therapist = therapists.find((t) => t.id === therapistId);
     return therapist ? therapist.name : 'Unknown';
   };
 
-  // Get therapist type by ID
+  // Obtener tipo de terapeuta por ID
   const getTherapistType = (therapistId) => {
     const therapist = therapists.find((t) => t.id === therapistId);
     return therapist ? therapist.type : null;
   };
 
-  // Get colors for a specific therapist
+  // Obtener colores para un terapeuta específico
   const getTherapistColors = (therapistId) => {
     const therapistType = getTherapistType(therapistId);
     return therapistType && therapistTypeColors[therapistType]
@@ -522,25 +736,25 @@ const ScheduleComponent = ({ patient, onUpdateSchedule, certPeriodDates }) => {
       : { primary: '#64748b', secondary: '#f1f5f9' };
   };
 
-  // Get visit type label by ID
+  // Obtener etiqueta de tipo de visita por ID
   const getVisitTypeLabel = (typeId) => {
     const type = visitTypes.find((t) => t.id === typeId);
     return type ? type.label : typeId;
   };
 
-  // Get status color by ID
+  // Obtener color de estado por ID
   const getStatusColor = (statusId) => {
     const status = visitStatus.find((s) => s.id === statusId);
     return status ? status.color : '#64748b';
   };
 
-  // Get status label by ID
+  // Obtener etiqueta de estado por ID
   const getStatusLabel = (statusId) => {
     const status = visitStatus.find((s) => s.id === statusId);
     return status ? status.label : statusId;
   };
 
-  // Check if visit is within certification period
+  // Verificar si la visita está dentro del período de certificación
   const isWithinCertPeriod = (visitDateStr) => {
     if (!certPeriodDates?.startDate || !certPeriodDates?.endDate) return true;
     const visitDate = new Date(visitDateStr);
@@ -549,19 +763,26 @@ const ScheduleComponent = ({ patient, onUpdateSchedule, certPeriodDates }) => {
     return visitDate >= startDate && visitDate <= endDate;
   };
 
-  // Filter visits based on active filter, search, and certification period
+  // Formatear tamaño de archivo
+  const formatFileSize = (bytes) => {
+    if (bytes < 1024) return bytes + ' B';
+    else if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
+    else return (bytes / 1048576).toFixed(1) + ' MB';
+  };
+
+  // Filtrar visitas basadas en filtro activo, búsqueda y período de certificación
   const getFilteredVisits = () => {
     let filtered = [...visits];
 
-    // Filter by certification period
+    // Filtrar por período de certificación
     filtered = filtered.filter((visit) => isWithinCertPeriod(visit.date));
 
-    // Filter by active status
+    // Filtrar por estado activo
     if (activeFilter !== 'ALL') {
       filtered = filtered.filter((visit) => visit.status === activeFilter);
     }
 
-    // Filter by search query
+    // Filtrar por texto de búsqueda
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
       filtered = filtered.filter((visit) => {
@@ -580,7 +801,40 @@ const ScheduleComponent = ({ patient, onUpdateSchedule, certPeriodDates }) => {
     return filtered;
   };
 
-  // Render calendar
+  // Agrupar visitas por mes
+  const groupVisitsByMonth = () => {
+    const filtered = getFilteredVisits();
+    const grouped = {};
+
+    filtered.forEach((visit) => {
+      const date = new Date(visit.date);
+      const monthYear = date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+
+      if (!grouped[monthYear]) {
+        grouped[monthYear] = [];
+      }
+
+      grouped[monthYear].push(visit);
+    });
+
+    Object.keys(grouped).forEach((month) => {
+      grouped[month].sort((a, b) => new Date(a.date) - new Date(b.date));
+    });
+
+    return grouped;
+  };
+
+  // Formatear hora
+  const formatTime = (timeString) => {
+    if (!timeString) return '';
+    const [hours, minutes] = timeString.split(':');
+    const hour = parseInt(hours);
+    const ampm = hour >= 12 ? 'PM' : 'AM';
+    const hour12 = hour % 12 || 12;
+    return `${hour12}:${minutes} ${ampm}`;
+  };
+
+  // Renderizar calendario
   const renderCalendar = () => {
     const firstDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
     const lastDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
@@ -651,6 +905,8 @@ const ScheduleComponent = ({ patient, onUpdateSchedule, certPeriodDates }) => {
                   <div className="day-visits-preview">
                     {dayVisits.slice(0, 3).map((visit, vIndex) => {
                       const therapistColors = getTherapistColors(visit.therapist);
+                      const statusColor = getStatusColor(visit.status);
+                      
                       return (
                         <div
                           key={vIndex}
@@ -659,12 +915,21 @@ const ScheduleComponent = ({ patient, onUpdateSchedule, certPeriodDates }) => {
                             backgroundColor: therapistColors.secondary,
                             borderLeft: `3px solid ${therapistColors.primary}`,
                           }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleOpenVisitModal(visit);
+                          }}
                         >
                           <span className="visit-time">{visit.time ? formatTime(visit.time) : '—'}</span>
                           <span className="visit-title" style={{ color: therapistColors.primary }}>
                             {getVisitTypeLabel(visit.visitType).substring(0, 15)}
                             {getVisitTypeLabel(visit.visitType).length > 15 ? '...' : ''}
                           </span>
+                          <span 
+                            className="visit-status-dot"
+                            style={{ backgroundColor: statusColor }}
+                            title={getStatusLabel(visit.status)}
+                          ></span>
                         </div>
                       );
                     })}
@@ -682,7 +947,7 @@ const ScheduleComponent = ({ patient, onUpdateSchedule, certPeriodDates }) => {
     );
   };
 
-  // Render visit card
+  // Renderizar tarjeta de visita
   const renderVisitCard = (visit) => {
     const therapistColors = getTherapistColors(visit.therapist);
     const statusColor = getStatusColor(visit.status);
@@ -695,6 +960,7 @@ const ScheduleComponent = ({ patient, onUpdateSchedule, certPeriodDates }) => {
       <div
         className="visit-card"
         key={visit.id}
+        onClick={() => handleOpenVisitModal(visit)}
         style={{
           borderTopColor: therapistColors.primary,
           borderTopWidth: '4px',
@@ -771,14 +1037,17 @@ const ScheduleComponent = ({ patient, onUpdateSchedule, certPeriodDates }) => {
         <div className="visit-card-actions">
           <button
             className="edit-btn"
-            onClick={() => handleEditVisit(visit)}
+            onClick={(e) => {
+              e.stopPropagation();
+              handleOpenVisitModal(visit);
+            }}
             aria-label="Edit visit"
           >
             <i className="fas fa-edit"></i>
           </button>
           <button
             className="delete-btn"
-            onClick={() => handleInitiateDelete(visit.id)}
+            onClick={(e) => handleInitiateDelete(visit.id, e)}
             aria-label="Delete visit"
           >
             <i className="fas fa-trash"></i>
@@ -788,432 +1057,7 @@ const ScheduleComponent = ({ patient, onUpdateSchedule, certPeriodDates }) => {
     );
   };
 
-  // Format time
-  const formatTime = (timeString) => {
-    if (!timeString) return '';
-    const [hours, minutes] = timeString.split(':');
-    const hour = parseInt(hours);
-    const ampm = hour >= 12 ? 'PM' : 'AM';
-    const hour12 = hour % 12 || 12;
-    return `${hour12}:${minutes} ${ampm}`;
-  };
-
-  // Group visits by month
-  const groupVisitsByMonth = () => {
-    const filtered = getFilteredVisits();
-    const grouped = {};
-
-    filtered.forEach((visit) => {
-      const date = new Date(visit.date);
-      const monthYear = date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
-
-      if (!grouped[monthYear]) {
-        grouped[monthYear] = [];
-      }
-
-      grouped[monthYear].push(visit);
-    });
-
-    Object.keys(grouped).forEach((month) => {
-      grouped[month].sort((a, b) => new Date(a.date) - new Date(b.date));
-    });
-
-    return grouped;
-  };
-
-  // Render add visit modal
-  const renderAddVisitModal = () => {
-    return (
-      <div className="modal-overlay">
-        <div className="modal-content">
-          <div className="modal-header">
-            <h3>Schedule New Visit</h3>
-            <button className="close-btn" onClick={() => setShowAddVisitModal(false)}>
-              <i className="fas fa-times"></i>
-            </button>
-          </div>
-
-          <div className="modal-body">
-            {error && <div className="error-message">{error}</div>}
-
-            <div className="form-group">
-              <label>Visit Type</label>
-              <select
-                name="visitType"
-                value={formData.visitType}
-                onChange={handleInputChange}
-                className="form-input"
-              >
-                <option value="">Select visit type</option>
-                {visitTypes.map((type) => (
-                  <option key={type.id} value={type.id}>{type.label}</option>
-                ))}
-              </select>
-            </div>
-
-            <div className="form-group">
-              <label>Therapist</label>
-              <select
-                name="therapist"
-                value={formData.therapist}
-                onChange={handleInputChange}
-                className="form-input"
-              >
-                <option value="">Select therapist</option>
-                {therapists.map((therapist) => (
-                  <option key={therapist.id} value={therapist.id}>
-                    {therapist.name} ({therapist.type})
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div className="form-row">
-              <div className="form-group">
-                <label>Date</label>
-                <input
-                  type="date"
-                  name="date"
-                  value={formData.date}
-                  onChange={handleInputChange}
-                  className="form-input"
-                  min={certPeriodDates.startDate || undefined}
-                  max={certPeriodDates.endDate || undefined}
-                />
-              </div>
-
-              <div className="form-group">
-                <label>Time</label>
-                <input
-                  type="time"
-                  name="time"
-                  value={formData.time}
-                  onChange={handleInputChange}
-                  className="form-input"
-                />
-              </div>
-            </div>
-
-            <div className="form-group">
-              <label>Status</label>
-              <select
-                name="status"
-                value={formData.status}
-                onChange={handleInputChange}
-                className="form-input"
-              >
-                {visitStatus.map((status) => (
-                  <option key={status.id} value={status.id}>{status.label}</option>
-                ))}
-              </select>
-            </div>
-
-            {formData.status === 'MISSED' && (
-              <div className="form-group">
-                <label>Reason for Missing</label>
-                <input
-                  type="text"
-                  name="missedReason"
-                  value={formData.missedReason}
-                  onChange={handleInputChange}
-                  placeholder="Enter reason"
-                  className="form-input"
-                />
-              </div>
-            )}
-
-            <div className="form-group">
-              <label>Notes</label>
-              <textarea
-                name="notes"
-                value={formData.notes}
-                onChange={handleInputChange}
-                placeholder="Add visit notes"
-                className="form-input"
-                rows="3"
-              ></textarea>
-            </div>
-          </div>
-
-          <div className="modal-footer">
-            <button
-              className="cancel-btn"
-              onClick={() => setShowAddVisitModal(false)}
-            >
-              Cancel
-            </button>
-            <button
-              className="save-btn"
-              onClick={handleSaveVisit}
-              disabled={isLoading}
-            >
-              {isLoading ? (
-                <span className="btn-loading">
-                  <i className="fas fa-spinner fa-spin"></i> Saving...
-                </span>
-              ) : (
-                'Save Visit'
-              )}
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  };
-
-  // Render edit visit modal
-  const renderEditVisitModal = () => {
-    return (
-      <div className="modal-overlay">
-        <div className="modal-content">
-          <div className="modal-header">
-            <h3>Edit Visit</h3>
-            <button className="close-btn" onClick={() => setShowEditVisitModal(false)}>
-              <i className="fas fa-times"></i>
-            </button>
-          </div>
-
-          <div className="modal-body">
-            {error && <div className="error-message">{error}</div>}
-
-            <div className="form-group">
-              <label>Visit Type</label>
-              <select
-                name="visitType"
-                value={formData.visitType}
-                onChange={handleInputChange}
-                className="form-input"
-              >
-                <option value="">Select visit type</option>
-                {visitTypes.map((type) => (
-                  <option key={type.id} value={type.id}>{type.label}</option>
-                ))}
-              </select>
-            </div>
-
-            <div className="form-group">
-              <label>Therapist</label>
-              <select
-                name="therapist"
-                value={formData.therapist}
-                onChange={handleInputChange}
-                className="form-input"
-              >
-                <option value="">Select therapist</option>
-                {therapists.map((therapist) => (
-                  <option key={therapist.id} value={therapist.id}>
-                    {therapist.name} ({therapist.type})
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div className="form-row">
-              <div className="form-group">
-                <label>Date</label>
-                <input
-                  type="date"
-                  name="date"
-                  value={formData.date}
-                  onChange={handleInputChange}
-                  className="form-input"
-                  min={certPeriodDates.startDate || undefined}
-                  max={certPeriodDates.endDate || undefined}
-                />
-              </div>
-
-              <div className="form-group">
-                <label>Time</label>
-                <input
-                  type="time"
-                  name="time"
-                  value={formData.time}
-                  onChange={handleInputChange}
-                  className="form-input"
-                />
-              </div>
-            </div>
-
-            <div className="form-group">
-              <label>Status</label>
-              <select
-                name="status"
-                value={formData.status}
-                onChange={handleInputChange}
-                className="form-input"
-              >
-                {visitStatus.map((status) => (
-                  <option key={status.id} value={status.id}>{status.label}</option>
-                ))}
-              </select>
-            </div>
-
-            {formData.status === 'MISSED' && (
-              <div className="form-group">
-                <label>Reason for Missing</label>
-                <input
-                  type="text"
-                  name="missedReason"
-                  value={formData.missedReason}
-                  onChange={handleInputChange}
-                  placeholder="Enter reason"
-                  className="form-input"
-                />
-              </div>
-            )}
-
-            <div className="form-group">
-              <label>Notes</label>
-              <textarea
-                name="notes"
-                value={formData.notes}
-                onChange={handleInputChange}
-                placeholder="Add visit notes"
-                className="form-input"
-                rows="3"
-              ></textarea>
-            </div>
-          </div>
-
-          <div className="modal-footer">
-            <button
-              className="cancel-btn"
-              onClick={() => setShowEditVisitModal(false)}
-            >
-              Cancel
-            </button>
-            <button
-              className="save-btn"
-              onClick={() => handleUpdateVisit(formData)}
-              disabled={isLoading}
-            >
-              {isLoading ? (
-                <span className="btn-loading">
-                  <i className="fas fa-spinner fa-spin"></i> Updating...
-                </span>
-              ) : (
-                'Update Visit'
-              )}
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  };
-
-  // Render delete confirmation modal
-  const renderDeleteConfirmModal = () => {
-    const visit = visits.find((v) => v.id === deleteVisitId);
-    if (!visit) return null;
-
-    const visitDate = new Date(visit.date).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    });
-
-    return (
-      <div className="modal-overlay">
-        <div className="modal-content delete-confirm-modal">
-          <div className="modal-header delete-header">
-            <h3>Delete Visit</h3>
-            <button
-              className="close-btn"
-              onClick={() => setShowDeleteConfirmModal(false)}
-              disabled={isDeleting}
-            >
-              <i className="fas fa-times"></i>
-            </button>
-          </div>
-
-          <div className="modal-body delete-body">
-            <div className="delete-warning-icon">
-              <i className="fas fa-exclamation-triangle"></i>
-            </div>
-
-            <div className="delete-message">
-              <h4>Are you sure you want to delete this visit?</h4>
-              <p>
-                <strong>{getVisitTypeLabel(visit.visitType)}</strong> with{' '}
-                {getTherapistName(visit.therapist)} on {visitDate}
-                {visit.time ? ` at ${formatTime(visit.time)}` : ''}
-              </p>
-              <p className="delete-warning">This action cannot be undone.</p>
-            </div>
-          </div>
-
-          <div className="modal-footer delete-footer">
-            <button
-              className="cancel-btn"
-              onClick={() => setShowDeleteConfirmModal(false)}
-              disabled={isDeleting}
-            >
-              Cancel
-            </button>
-            <button
-              className="delete-confirm-btn"
-              onClick={handleDeleteVisit}
-              disabled={isDeleting}
-            >
-              {isDeleting ? (
-                <span className="btn-loading">
-                  <i className="fas fa-spinner fa-spin"></i> Deleting...
-                </span>
-              ) : (
-                'Delete Visit'
-              )}
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  };
-
-  // Render loading screen
-  const renderLoadingScreen = () => {
-    return (
-      <div className="loading-overlay">
-        <div className="loading-container">
-          <div className="loading-spinner">
-            <div className="spinner-orbit"></div>
-            <div className="spinner-orbit-secondary"></div>
-            <svg className="spinner-circle" viewBox="0 0 50 50">
-              <defs>
-                <linearGradient id="gradient-stroke" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor="#4f46e5" />
-                  <stop offset="50%" stopColor="#818cf8" />
-                  <stop offset="100%" stopColor="#3b82f6" />
-                </linearGradient>
-              </defs>
-              <circle
-                className="path"
-                cx="25"
-                cy="25"
-                r="20"
-                fill="none"
-                strokeWidth="4"
-              />
-            </svg>
-            <div className="loading-particles">
-              {Array.from({ length: 12 }).map((_, index) => (
-                <div key={index} className="particle"></div>
-              ))}
-            </div>
-          </div>
-          <div className="loading-text">
-            <span data-text="Loading">Loading</span>
-            <div className="loading-dots">
-              <span></span>
-              <span></span>
-              <span></span>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  };
-
-  // Render visits list
+  // Renderizar lista de visitas
   const renderVisitsList = () => {
     const groupedVisits = groupVisitsByMonth();
     const sortedMonths = Object.keys(groupedVisits).sort((a, b) => {
@@ -1248,11 +1092,8 @@ const ScheduleComponent = ({ patient, onUpdateSchedule, certPeriodDates }) => {
             <button
               className="quick-add-btn"
               onClick={() => {
-                setShowAddVisitModal(true);
-                setFormData({
-                  ...formData,
-                  date: formatDateToLocalISOString(new Date()),
-                });
+                setSelectedVisit(null);
+                setShowVisitModal(true);
               }}
             >
               <i className="fas fa-plus"></i>
@@ -1338,11 +1179,8 @@ const ScheduleComponent = ({ patient, onUpdateSchedule, certPeriodDates }) => {
           <button
             className="add-visit-btn"
             onClick={() => {
-              setShowAddVisitModal(true);
-              setFormData({
-                ...formData,
-                date: formatDateToLocalISOString(new Date()),
-              });
+              setSelectedVisit(null);
+              setShowVisitModal(true);
             }}
             aria-label="Add new visit"
           >
@@ -1354,62 +1192,660 @@ const ScheduleComponent = ({ patient, onUpdateSchedule, certPeriodDates }) => {
     );
   };
 
-  // Render calendar day
-  const renderCalendarDay = (date, visits) => {
-    const dayVisits = visits.filter(
-      (visit) => visit.date === formatDateToLocalISOString(date) && isWithinCertPeriod(visit.date)
+  // Renderizar pantalla de carga
+  const renderLoadingScreen = () => {
+    return (
+      <div className="loading-overlay">
+        <div className="loading-container">
+          <div className="loading-spinner">
+            <div className="spinner-orbit"></div>
+            <div className="spinner-orbit-secondary"></div>
+            <svg className="spinner-circle" viewBox="0 0 50 50">
+              <defs>
+                <linearGradient id="gradient-stroke" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#4f46e5" />
+                  <stop offset="50%" stopColor="#818cf8" />
+                  <stop offset="100%" stopColor="#3b82f6" />
+                </linearGradient>
+              </defs>
+              <circle
+                className="path"
+                cx="25"
+                cy="25"
+                r="20"
+                fill="none"
+                strokeWidth="4"
+              />
+            </svg>
+            <div className="loading-particles">
+              {Array.from({ length: 12 }).map((_, index) => (
+                <div key={index} className="particle"></div>
+              ))}
+            </div>
+          </div>
+          <div className="loading-text">
+            <span data-text="Loading">Loading</span>
+            <div className="loading-dots">
+              <span></span>
+              <span></span>
+              <span></span>
+            </div>
+          </div>
+        </div>
+      </div>
     );
+  };
 
-    if (dayVisits.length === 0) return null;
+  // Renderizar modal de confirmación de eliminación
+  const renderDeleteConfirmModal = () => {
+    const visit = visits.find((v) => v.id === deleteVisitId);
+    if (!visit) return null;
+
+    const visitDate = new Date(visit.date).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    });
 
     return (
-      <div className="calendar-day-detail">
-        <div className="day-date">
-          <span className="day-name">{date.toLocaleDateString('en-US', { weekday: 'short' })}</span>
-          <span className="day-number">{date.getDate()}</span>
-        </div>
+      <div className="modal-overlay">
+        <div className="modal-content delete-confirm-modal">
+          <div className="modal-header delete-header">
+            <h3>Delete Visit</h3>
+            <button
+              className="close-btn"
+              onClick={() => setShowDeleteConfirmModal(false)}
+              disabled={isDeleting}
+            >
+              <i className="fas fa-times"></i>
+            </button>
+          </div>
 
-        <div className="day-visits">
-          {dayVisits.map((visit) => {
-            const therapistColors = getTherapistColors(visit.therapist);
-            return (
-              <div
-                key={visit.id}
-                className="calendar-visit-item"
-                style={{
-                  borderLeft: `4px solid ${therapistColors.primary}`,
-                  backgroundColor: therapistColors.secondary,
-                }}
-              >
-                <div className="visit-time">{visit.time ? formatTime(visit.time) : 'No time set'}</div>
-                <div className="visit-details">
-                  <div className="visit-title">{getVisitTypeLabel(visit.visitType)}</div>
-                  <div className="visit-therapist">{getTherapistName(visit.therapist)}</div>
-                  {visit.notes && <div className="visit-notes">{visit.notes}</div>}
-                </div>
-                <div
-                  className="visit-status-indicator"
-                  style={{ backgroundColor: getStatusColor(visit.status) }}
-                >
-                  {getStatusLabel(visit.status)}
-                </div>
-                <div className="visit-actions">
-                  <button
-                    className="edit-visit-btn"
-                    onClick={() => handleEditVisit(visit)}
+          <div className="modal-body delete-body">
+            <div className="delete-warning-icon">
+              <i className="fas fa-exclamation-triangle"></i>
+            </div>
+
+            <div className="delete-message">
+              <h4>Are you sure you want to delete this visit?</h4>
+              <p>
+                <strong>{getVisitTypeLabel(visit.visitType)}</strong> with{' '}
+                {getTherapistName(visit.therapist)} on {visitDate}
+                {visit.time ? ` at ${formatTime(visit.time)}` : ''}
+              </p>
+              <p className="delete-warning">This action cannot be undone.</p>
+            </div>
+          </div>
+
+          <div className="modal-footer delete-footer">
+            <button
+              className="cancel-btn"
+              onClick={() => setShowDeleteConfirmModal(false)}
+              disabled={isDeleting}
+            >
+              Cancel
+            </button>
+            <button
+              className="delete-confirm-btn"
+              onClick={handleDeleteVisit}
+              disabled={isDeleting}
+            >
+              {isDeleting ? (
+                <span className="btn-loading">
+                  <i className="fas fa-spinner fa-spin"></i> Deleting...
+                </span>
+              ) : (
+                'Delete Visit'
+              )}
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  // Renderizar modal de visita
+  const renderVisitModal = () => {
+    if (!showVisitModal) return null;
+
+    const isCompletedView = selectedVisit && selectedVisit.status === 'COMPLETED';
+
+    return (
+      <div className="modal-overlay">
+        <div className="modal-content modal-large">
+          <div className="modal-header">
+            <h3>
+              {selectedVisit 
+                ? isCompletedView 
+                  ? 'Visit Detail' 
+                  : 'Edit Visit'
+                : 'Schedule New Visit'}
+            </h3>
+            <button className="close-btn" onClick={() => setShowVisitModal(false)}>
+              <i className="fas fa-times"></i>
+            </button>
+          </div>
+
+          <div className="modal-body">
+            {error && <div className="error-message">{error}</div>}
+
+            {isCompletedView ? (
+              // Vista de visita completada
+              <div className="completed-visit-view">
+                {/* Columna de detalles */}
+                <div className="visit-details-column">
+                  <h4>Visit Details</h4>
+                  
+                  <div className="form-row">
+                    <div className="form-group">
+                      <label>Date</label>
+                      <input
+                        type="date"
+                        name="date"
+                        value={formData.date}
+                        onChange={handleInputChange}
+                        className="form-input"
+                      />
+                    </div>
+
+                    <div className="form-group">
+                      <label>Type</label>
+                      <select
+                        name="visitType"
+                        value={formData.visitType}
+                        onChange={handleInputChange}
+                        className="form-input"
+                      >
+                        {visitTypes.map((type) => (
+                          <option key={type.id} value={type.id}>{type.label}</option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="form-group">
+                    <label>G-Code</label>
+                    <input
+                      type="text"
+                      name="gCode"
+                      value={formData.gCode}
+                      onChange={handleInputChange}
+                      className="form-input"
+                    />
+                  </div>
+
+                  <div className="form-row time-row">
+                    <div className="form-group time-group">
+                      <label>Time In</label>
+                      <div className="time-inputs">
+                        <select 
+                          name="timeInHour"
+                          value={formData.timeInHour}
+                          onChange={handleInputChange}
+                        >
+                          {hours.map(hour => (
+                            <option key={`in-hour-${hour}`} value={hour}>{hour}</option>
+                          ))}
+                        </select>
+                        <span className="time-separator">:</span>
+                        <select 
+                          name="timeInMinute"
+                          value={formData.timeInMinute}
+                          onChange={handleInputChange}
+                        >
+                          {minutes.map(minute => (
+                            <option key={`in-min-${minute}`} value={minute}>{minute}</option>
+                          ))}
+                        </select>
+                        <select 
+                          name="timeInAmPm"
+                          value={formData.timeInAmPm}
+                          onChange={handleInputChange}
+                        >
+                          <option value="AM">AM</option>
+                          <option value="PM">PM</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <div className="form-group time-group">
+                      <label>Time Out</label>
+                      <div className="time-inputs">
+                        <select 
+                          name="timeOutHour"
+                          value={formData.timeOutHour}
+                          onChange={handleInputChange}
+                        >
+                          {hours.map(hour => (
+                            <option key={`out-hour-${hour}`} value={hour}>{hour}</option>
+                          ))}
+                        </select>
+                        <span className="time-separator">:</span>
+                        <select 
+                          name="timeOutMinute"
+                          value={formData.timeOutMinute}
+                          onChange={handleInputChange}
+                        >
+                          {minutes.map(minute => (
+                            <option key={`out-min-${minute}`} value={minute}>{minute}</option>
+                          ))}
+                        </select>
+                        <select 
+                          name="timeOutAmPm"
+                          value={formData.timeOutAmPm}
+                          onChange={handleInputChange}
+                        >
+                          <option value="AM">AM</option>
+                          <option value="PM">PM</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="form-group">
+                    <label>Physician</label>
+                    <input
+                      type="text"
+                      name="physician"
+                      value={formData.physician}
+                      onChange={handleInputChange}
+                      className="form-input"
+                    />
+                  </div>
+
+
+                  <div className="form-group">
+                    <label>Cert Period</label>
+                    <select
+                      name="certPeriod"
+                      value={formData.certPeriod}
+                      onChange={handleInputChange}
+                      className="form-input"
+                    >
+                      {certPeriods.map((period) => (
+                        <option key={period.id} value={period.id}>{period.label}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="form-group">
+                    <label>Additional Notes</label>
+                    <textarea
+                      name="notes"
+                      value={formData.notes}
+                      onChange={handleInputChange}
+                      className="form-input"
+                      rows="5"
+                    ></textarea>
+                  </div>
+
+                  <button 
+                    className="update-button"
+                    onClick={handleSaveVisit}
+                    disabled={isLoading}
                   >
-                    <i className="fas fa-edit"></i>
+                    {isLoading ? (
+                      <span className="btn-loading">
+                        <i className="fas fa-spinner fa-spin"></i> Updating...
+                      </span>
+                    ) : (
+                      'UPDATE'
+                    )}
                   </button>
-                  <button
-                    className="delete-visit-btn"
-                    onClick={() => handleInitiateDelete(visit.id)}
-                  >
-                    <i className="fas fa-trash"></i>
-                  </button>
+                </div>
+
+                {/* Columna de evaluación */}
+                <div className="evaluation-column">
+                  <div className="evaluation-section">
+                    <div className="evaluation-header">
+                      <h4>OT EVALUATION</h4>
+                      <div className="status-badge incomplete">Incomplete</div>
+                    </div>
+                    <div className="evaluation-info">
+                      <p>Therapist: {getTherapistName(formData.therapist)}</p>
+                    </div>
+                    <div className="evaluation-actions">
+                      <button className="edit-button">EDIT</button>
+                      <button className="view-button">VIEW</button>
+                    </div>
+                  </div>
+
+                  <div className="documents-section">
+                    <h4>UPLOADED DOCUMENTS</h4>
+                    
+                    {formData.documents.length === 0 ? (
+                      <p className="no-documents">No files uploaded</p>
+                    ) : (
+                      <ul className="documents-list">
+                        {formData.documents.map(doc => (
+                          <li key={doc.id || doc} className="document-item">
+                            <div className="document-icon">
+                              <i className="fas fa-file-alt"></i>
+                            </div>
+                            <div className="document-info">
+                              <span className="document-name">{typeof doc === 'string' ? doc : doc.name}</span>
+                              {doc.size && (
+                                <span className="document-size">{formatFileSize(doc.size)}</span>
+                              )}
+                            </div>
+                            <button 
+                              className="remove-document"
+                              onClick={() => handleRemoveDocument(doc.id || doc)}
+                            >
+                              <i className="fas fa-times"></i>
+                            </button>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+
+                    <div className="upload-container">
+                      <div className="file-input-container">
+                        <input 
+                          type="file" 
+                          id="document-upload" 
+                          className="hidden-file-input" 
+                          onChange={handleFileSelect}
+                        />
+                        <label htmlFor="document-upload" className="file-label">
+                          {selectedFile ? selectedFile.name : 'No file selected'}
+                        </label>
+                        <button className="choose-file-btn">CHOOSE FILE</button>
+                      </div>
+                      <button 
+                        className="upload-btn"
+                        onClick={handleFileUpload}
+                        disabled={!selectedFile || isLoading}
+                      >
+                        {isLoading ? (
+                          <i className="fas fa-spinner fa-spin"></i>
+                        ) : (
+                          'UPLOAD'
+                        )}
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="forms-section">
+                    <h4>OTHER FORMS</h4>
+                    <div className="forms-buttons">
+                      <button className="form-btn">ADD ADDENDUM</button>
+                      <button className="form-btn">ADD SIGNATURES</button>
+                      <button className="form-btn">ADD OQBI</button>
+                      <button className="form-btn">ADD DC</button>
+                      <button className="form-btn other-forms">OTHER FORMS</button>
+                      <button className="form-btn sticky">ADD STICKY</button>
+                      <button className="form-btn expense">ADD EXPENSE</button>
+                    </div>
+                  </div>
+
                 </div>
               </div>
-            );
-          })}
+            ) : (
+              // Vista de visita regular o nueva
+              <div className="visit-tabs">
+                <div className="tabs-header">
+                  <button 
+                    className={`tab-button ${activeTab === 'details' ? 'active' : ''}`}
+                    onClick={() => setActiveTab('details')}
+                  >
+                    <i className="fas fa-info-circle"></i>
+                    Details
+                  </button>
+                  <button 
+                    className={`tab-button ${activeTab === 'missedVisit' ? 'active' : ''}`}
+                    onClick={() => setActiveTab('missedVisit')}
+                  >
+                    <i className="fas fa-calendar-times"></i>
+                    Missed Visit
+                  </button>
+                  <button 
+                    className={`tab-button ${activeTab === 'reschedule' ? 'active' : ''}`}
+                    onClick={() => setActiveTab('reschedule')}
+                  >
+                    <i className="fas fa-calendar-alt"></i>
+                    Reschedule
+                  </button>
+                </div>
+                
+                <div className="tab-content">
+                  {activeTab === 'details' && (
+                    <div className="details-tab">
+                      <div className="form-group">
+                        <label>Visit Type</label>
+                        <select
+                          name="visitType"
+                          value={formData.visitType}
+                          onChange={handleInputChange}
+                          className="form-input"
+                        >
+                          <option value="">Select visit type</option>
+                          {visitTypes.map((type) => (
+                            <option key={type.id} value={type.id}>{type.label}</option>
+                          ))}
+                        </select>
+                      </div>
+
+                      <div className="form-group">
+                        <label>Therapist</label>
+                        <select
+                          name="therapist"
+                          value={formData.therapist}
+                          onChange={handleInputChange}
+                          className="form-input"
+                        >
+                          <option value="">Select therapist</option>
+                          {therapists.map((therapist) => (
+                            <option key={therapist.id} value={therapist.id}>
+                              {therapist.name} ({therapist.type})
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+
+                      <div className="form-row">
+                        <div className="form-group">
+                          <label>Date</label>
+                          <input
+                            type="date"
+                            name="date"
+                            value={formData.date}
+                            onChange={handleInputChange}
+                            className="form-input"
+                            min={certPeriodDates.startDate || undefined}
+                            max={certPeriodDates.endDate || undefined}
+                          />
+                        </div>
+
+                        <div className="form-group">
+                          <label>Time</label>
+                          <input
+                            type="time"
+                            name="time"
+                            value={formData.time}
+                            onChange={handleInputChange}
+                            className="form-input"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="form-group">
+                        <label>Status</label>
+                        <select
+                          name="status"
+                          value={formData.status}
+                          onChange={handleInputChange}
+                          className="form-input"
+                        >
+                          {visitStatus.map((status) => (
+                            <option key={status.id} value={status.id}>{status.label}</option>
+                          ))}
+                        </select>
+                      </div>
+
+                      {formData.status === 'MISSED' && (
+                        <div className="form-group">
+                          <label>Reason for Missing</label>
+                          <input
+                            type="text"
+                            name="missedReason"
+                            value={formData.missedReason}
+                            onChange={handleInputChange}
+                            placeholder="Enter reason"
+                            className="form-input"
+                          />
+                        </div>
+                      )}
+
+                      <div className="form-group">
+                        <label>Notes</label>
+                        <textarea
+                          name="notes"
+                          value={formData.notes}
+                          onChange={handleInputChange}
+                          placeholder="Add visit notes"
+                          className="form-input"
+                          rows="5"
+                        ></textarea>
+                      </div>
+
+                      <div className="action-buttons">
+                        <button 
+                          className="action-button missed"
+                          onClick={() => setActiveTab('missedVisit')}
+                        >
+                          <i className="fas fa-calendar-times"></i> Mark as Missed
+                        </button>
+                        <button 
+                          className="action-button reschedule"
+                          onClick={() => setActiveTab('reschedule')}
+                        >
+                          <i className="fas fa-calendar-alt"></i> Reschedule
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                  
+                  {activeTab === 'missedVisit' && (
+                    <div className="missed-visit-tab">
+                      <h4>Missed Visit Report</h4>
+                      
+                      <div className="form-group">
+                        <label>REASON FOR MISSED VISIT:</label>
+                        <select
+                          name="reason"
+                          value={missedVisitData.reason}
+                          onChange={handleMissedVisitChange}
+                          className="form-input"
+                        >
+                          {missedReasons.map((reason, index) => (
+                            <option key={index} value={reason}>{reason}</option>
+                          ))}
+                        </select>
+                      </div>
+
+                      <div className="form-group">
+                        <label>ACTION TAKEN:</label>
+                        <textarea
+                          name="action"
+                          value={missedVisitData.action}
+                          onChange={handleMissedVisitChange}
+                          className="form-input"
+                          rows="5"
+                        ></textarea>
+                      </div>
+
+                      <div className="form-check">
+                        <input
+                          type="checkbox"
+                          id="mdNotified"
+                          name="mdNotified"
+                          checked={missedVisitData.mdNotified}
+                          onChange={handleMissedVisitChange}
+                        />
+                        <label htmlFor="mdNotified">MD WAS NOTIFIED BY PHONE OF MISSED VISIT.</label>
+                      </div>
+
+                      <div className="form-check">
+                        <input
+                          type="checkbox"
+                          id="noShow"
+                          name="noShow"
+                          checked={missedVisitData.noShow}
+                          onChange={handleMissedVisitChange}
+                        />
+                        <label htmlFor="noShow">PATIENT WAS A NO-SHOW.</label>
+                      </div>
+                    </div>
+                  )}
+                  
+                  {activeTab === 'reschedule' && (
+                    <div className="reschedule-tab">
+                      <div className="info-message">
+                        <i className="fas fa-info-circle"></i>
+                        <p>Please select a new date for this visit. The current visit details will be preserved.</p>
+                      </div>
+
+                      <div className="form-group">
+                        <label>Original Date</label>
+                        <input
+                          type="date"
+                          value={formData.date}
+                          readOnly
+                          className="form-input readonly"
+                        />
+                      </div>
+
+                      <div className="form-group">
+                        <label>New Date <span className="required">*</span></label>
+                        <input
+                          type="date"
+                          value={rescheduleDate}
+                          onChange={(e) => setRescheduleDate(e.target.value)}
+                          className="form-input"
+                          min={certPeriodDates.startDate || undefined}
+                          max={certPeriodDates.endDate || undefined}
+                        />
+                      </div>
+
+                      <div className="form-group">
+                        <label>Reason for Rescheduling</label>
+                        <textarea
+                          name="rescheduleReason"
+                          value={formData.notes}
+                          onChange={handleInputChange}
+                          placeholder="Enter reason for rescheduling"
+                          className="form-input"
+                          rows="4"
+                        ></textarea>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+
+          <div className="modal-footer">
+            <button className="cancel-btn" onClick={() => setShowVisitModal(false)}>
+              Cancel
+            </button>
+            <button
+              className="save-btn"
+              onClick={handleSaveVisit}
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <span className="btn-loading">
+                  <i className="fas fa-spinner fa-spin"></i> Saving...
+                </span>
+              ) : (
+                activeTab === 'missedVisit' ? 'Submit Missed Visit' :
+                activeTab === 'reschedule' ? 'Reschedule Visit' :
+                selectedVisit ? 'Update Visit' : 'Save Visit'
+              )}
+            </button>
+          </div>
         </div>
       </div>
     );
@@ -1446,11 +1882,8 @@ const ScheduleComponent = ({ patient, onUpdateSchedule, certPeriodDates }) => {
               <button
                 className="add-visit-calendar"
                 onClick={() => {
-                  setShowAddVisitModal(true);
-                  setFormData({
-                    ...formData,
-                    date: formatDateToLocalISOString(new Date()),
-                  });
+                  setSelectedVisit(null);
+                  setShowVisitModal(true);
                 }}
               >
                 <i className="fas fa-plus"></i>
@@ -1462,8 +1895,7 @@ const ScheduleComponent = ({ patient, onUpdateSchedule, certPeriodDates }) => {
         )}
       </div>
 
-      {showAddVisitModal && renderAddVisitModal()}
-      {showEditVisitModal && renderEditVisitModal()}
+      {showVisitModal && renderVisitModal()}
       {showDeleteConfirmModal && renderDeleteConfirmModal()}
     </div>
   );

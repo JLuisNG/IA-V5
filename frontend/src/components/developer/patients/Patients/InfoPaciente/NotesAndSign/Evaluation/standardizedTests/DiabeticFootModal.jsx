@@ -1,4 +1,4 @@
-// components/standardizedTests/DiabeticFootModal.jsx
+// Enhanced DiabeticFootModal.jsx
 import React, { useState } from 'react';
 import '../../../../../../../../styles/developer/Patients/InfoPaciente/NotesAndSign/standardizedTests/DiabeticFootModal.scss';
 
@@ -7,6 +7,7 @@ const DiabeticFootModal = ({ isOpen, onClose, initialData = null }) => {
   const [formData, setFormData] = useState({
     frequency: initialData?.frequency || '',
     examBy: initialData?.examBy || 'RN/PT',
+    examByClinician: initialData?.examByClinician || 'No',
     integumentFindings: initialData?.integumentFindings || '',
     
     pedalPulsesPresent: {
@@ -110,6 +111,54 @@ const DiabeticFootModal = ({ isOpen, onClose, initialData = null }) => {
     });
   };
 
+  // Función para calcular el número de hallazgos seleccionados
+  const calculateFindings = () => {
+    let count = 0;
+    
+    // Contar los pulsos pedales
+    if (formData.pedalPulsesPresent.right) count++;
+    if (formData.pedalPulsesPresent.left) count++;
+    if (formData.pedalPulsesAbsent.right) count++;
+    if (formData.pedalPulsesAbsent.left) count++;
+    
+    // Contar pérdida de sensación
+    if (formData.lossOfSenseWarm.right) count++;
+    if (formData.lossOfSenseWarm.left) count++;
+    if (formData.lossOfSenseCold.right) count++;
+    if (formData.lossOfSenseCold.left) count++;
+    
+    // Contar neuropatía
+    if (formData.neuropathy.right) count++;
+    if (formData.neuropathy.left) count++;
+    
+    // Contar hormigueo
+    if (formData.tingling.right) count++;
+    if (formData.tingling.left) count++;
+    
+    // Contar vello en la pierna
+    if (formData.legHairPresent.right) count++;
+    if (formData.legHairPresent.left) count++;
+    if (formData.legHairAbsent.right) count++;
+    if (formData.legHairAbsent.left) count++;
+    
+    return count;
+  };
+  
+  // Calcular el porcentaje de finalización
+  const completionPercentage = () => {
+    const totalFields = 6; // Número de secciones en el formulario
+    let completedFields = 0;
+    
+    if (formData.frequency) completedFields++;
+    if (formData.examBy) completedFields++;
+    if (formData.integumentFindings) completedFields++;
+    if (calculateFindings() > 0) completedFields++;
+    if (formData.pedalPulsesNotes || formData.lossOfSenseNotes) completedFields++;
+    if (formData.ascendingCalf.right || formData.ascendingCalf.left) completedFields++;
+    
+    return Math.round((completedFields / totalFields) * 100);
+  };
+
   // Si el modal no está abierto, no renderizar nada
   if (!isOpen) return null;
 
@@ -127,304 +176,468 @@ const DiabeticFootModal = ({ isOpen, onClose, initialData = null }) => {
         </div>
         
         <div className="modal-content">
-          <div className="info-note">
-            <p>Prior scores are for reference only. To print previous scores please type in additional boxes below.</p>
-          </div>
-          
-          <div className="exam-header">
-            <div className="frequency-group">
-              <label>FREQUENCY OF DIABETIC FOOT EXAM:</label>
-              <input
-                type="text"
-                value={formData.frequency}
-                onChange={(e) => handleTextChange('frequency', e.target.value)}
-                placeholder="E.g., Weekly, Monthly, etc."
-              />
+          <div className="exam-summary">
+            <div className="summary-card">
+              <div className="summary-icon">
+                <i className="fas fa-calendar-alt"></i>
+              </div>
+              <div className="summary-info">
+                <div className="summary-label">Exam Frequency</div>
+                <div className="summary-value">{formData.frequency || 'Not specified'}</div>
+              </div>
             </div>
             
-            <div className="examiner-group">
-              <label>DONE BY:</label>
-              <div className="radio-group">
-                {examinerOptions.map(option => (
-                  <label key={option} className="radio-option">
-                    <input
-                      type="radio"
-                      name="examiner"
-                      checked={formData.examBy === option}
-                      onChange={() => handleExaminerChange(option)}
-                    />
-                    <span>{option}</span>
-                  </label>
-                ))}
+            <div className="summary-card">
+              <div className="summary-icon">
+                <i className="fas fa-user-md"></i>
+              </div>
+              <div className="summary-info">
+                <div className="summary-label">Examiner</div>
+                <div className="summary-value">{formData.examBy}</div>
+              </div>
+            </div>
+            
+            <div className="summary-card">
+              <div className="summary-icon">
+                <i className="fas fa-search"></i>
+              </div>
+              <div className="summary-info">
+                <div className="summary-label">Findings</div>
+                <div className="summary-value">{calculateFindings()} observations</div>
+              </div>
+            </div>
+            
+            <div className="summary-card">
+              <div className="summary-icon">
+                <i className="fas fa-clipboard-check"></i>
+              </div>
+              <div className="summary-info">
+                <div className="summary-label">Completion</div>
+                <div className="progress-bar">
+                  <div 
+                    className="progress-fill"
+                    style={{ width: `${completionPercentage()}%` }}
+                  ></div>
+                  <span className="progress-text">{completionPercentage()}%</span>
+                </div>
               </div>
             </div>
           </div>
           
-          <div className="exam-by-clinician">
-            <label>EXAM BY CLINICIAN THIS VISIT:</label>
-            <select
-              value={formData.examByClinician}
-              onChange={(e) => handleTextChange('examByClinician', e.target.value)}
-            >
-              <option value="No">No</option>
-              <option value="Yes">Yes</option>
-            </select>
-          </div>
-          
-          <div className="integument-findings">
-            <label>INTEGUMENT FINDINGS:</label>
-            <textarea
-              value={formData.integumentFindings}
-              onChange={(e) => handleTextChange('integumentFindings', e.target.value)}
-              rows={4}
-              placeholder="Document any integument findings here"
-            />
-          </div>
-          
-          <div className="assessment-section">
-            <div className="assessment-row">
-              <div className="assessment-header">
-                <h3>PEDAL PULSES</h3>
+          <div className="exam-section">
+            <div className="section-header">
+              <h3>
+                <i className="fas fa-info-circle"></i>
+                Exam Information
+              </h3>
+            </div>
+            
+            <div className="section-content">
+              <div className="form-row">
+                <div className="form-group">
+                  <label>
+                    <i className="fas fa-calendar-day"></i>
+                    Frequency of Diabetic Foot Exam
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.frequency}
+                    onChange={(e) => handleTextChange('frequency', e.target.value)}
+                    placeholder="E.g., Weekly, Monthly, etc."
+                    className="form-control"
+                  />
+                </div>
               </div>
-              <div className="assessment-content">
-                <div className="assessment-item">
-                  <label>PRESENT:</label>
-                  <div className="checkbox-group">
-                    <label className="checkbox-option">
-                      <input
-                        type="checkbox"
-                        checked={formData.pedalPulsesPresent.right}
-                        onChange={() => handleCheckboxChange('pedalPulsesPresent', 'right')}
-                      />
-                      <span>Right</span>
-                    </label>
-                    <label className="checkbox-option">
-                      <input
-                        type="checkbox"
-                        checked={formData.pedalPulsesPresent.left}
-                        onChange={() => handleCheckboxChange('pedalPulsesPresent', 'left')}
-                      />
-                      <span>Left</span>
+              
+              <div className="form-row">
+                <div className="form-group">
+                  <label>
+                    <i className="fas fa-user-md"></i>
+                    Exam Performed By
+                  </label>
+                  <div className="option-cards">
+                    {examinerOptions.map(option => (
+                      <div 
+                        key={option} 
+                        className={`option-card ${formData.examBy === option ? 'selected' : ''}`}
+                        onClick={() => handleExaminerChange(option)}
+                      >
+                        <div className="option-icon">
+                          {option === 'Patient' && <i className="fas fa-user"></i>}
+                          {option === 'Caregiver' && <i className="fas fa-user-nurse"></i>}
+                          {option === 'RN/PT' && <i className="fas fa-user-md"></i>}
+                          {option === 'Other' && <i className="fas fa-user-plus"></i>}
+                        </div>
+                        <div className="option-label">{option}</div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+              
+              <div className="form-row">
+                <div className="form-group">
+                  <label>
+                    <i className="fas fa-clipboard-check"></i>
+                    Exam By Clinician This Visit
+                  </label>
+                  <div className="toggle-switch">
+                    <input
+                      type="checkbox"
+                      id="examByClinician"
+                      checked={formData.examByClinician === 'Yes'}
+                      onChange={() => handleTextChange('examByClinician', formData.examByClinician === 'Yes' ? 'No' : 'Yes')}
+                    />
+                    <label htmlFor="examByClinician">
+                      <span className="toggle-label">{formData.examByClinician}</span>
                     </label>
                   </div>
                 </div>
-                <div className="assessment-item">
-                  <label>ABSENT:</label>
-                  <div className="checkbox-group">
-                    <label className="checkbox-option">
-                      <input
-                        type="checkbox"
-                        checked={formData.pedalPulsesAbsent.right}
-                        onChange={() => handleCheckboxChange('pedalPulsesAbsent', 'right')}
-                      />
-                      <span>Right</span>
-                    </label>
-                    <label className="checkbox-option">
-                      <input
-                        type="checkbox"
-                        checked={formData.pedalPulsesAbsent.left}
-                        onChange={() => handleCheckboxChange('pedalPulsesAbsent', 'left')}
-                      />
-                      <span>Left</span>
-                    </label>
+              </div>
+            </div>
+          </div>
+          
+          <div className="exam-section">
+            <div className="section-header">
+              <h3>
+                <i className="fas fa-clipboard-list"></i>
+                Integument Findings
+              </h3>
+            </div>
+            
+            <div className="section-content">
+              <div className="form-row">
+                <div className="form-group">
+                  <textarea
+                    value={formData.integumentFindings}
+                    onChange={(e) => handleTextChange('integumentFindings', e.target.value)}
+                    rows={4}
+                    placeholder="Document any integument findings here (color, temperature, texture, moisture, etc.)"
+                    className="form-control"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div className="exam-section">
+            <div className="section-header">
+              <h3>
+                <i className="fas fa-heartbeat"></i>
+                Pedal Pulses
+              </h3>
+            </div>
+            
+            <div className="section-content">
+              <div className="foot-selection">
+                <div className="foot-option">
+                  <div className="foot-header">Present</div>
+                  <div className="foot-toggles">
+                    <div 
+                      className={`foot-toggle ${formData.pedalPulsesPresent.right ? 'active' : ''}`}
+                      onClick={() => handleCheckboxChange('pedalPulsesPresent', 'right')}
+                    >
+                      <div className="foot-icon">
+                        <i className="fas fa-shoe-prints fa-flip-horizontal"></i>
+                      </div>
+                      <div className="foot-label">Right</div>
+                    </div>
+                    <div 
+                      className={`foot-toggle ${formData.pedalPulsesPresent.left ? 'active' : ''}`}
+                      onClick={() => handleCheckboxChange('pedalPulsesPresent', 'left')}
+                    >
+                      <div className="foot-icon">
+                        <i className="fas fa-shoe-prints"></i>
+                      </div>
+                      <div className="foot-label">Left</div>
+                    </div>
                   </div>
                 </div>
+                
+                <div className="foot-option">
+                  <div className="foot-header">Absent</div>
+                  <div className="foot-toggles">
+                    <div 
+                      className={`foot-toggle ${formData.pedalPulsesAbsent.right ? 'active' : ''}`}
+                      onClick={() => handleCheckboxChange('pedalPulsesAbsent', 'right')}
+                    >
+                      <div className="foot-icon">
+                        <i className="fas fa-shoe-prints fa-flip-horizontal"></i>
+                      </div>
+                      <div className="foot-label">Right</div>
+                    </div>
+                    <div 
+                      className={`foot-toggle ${formData.pedalPulsesAbsent.left ? 'active' : ''}`}
+                      onClick={() => handleCheckboxChange('pedalPulsesAbsent', 'left')}
+                    >
+                      <div className="foot-icon">
+                        <i className="fas fa-shoe-prints"></i>
+                      </div>
+                      <div className="foot-label">Left</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="notes-field">
+                <label>
+                  <i className="fas fa-pencil-alt"></i>
+                  Additional Notes
+                </label>
                 <textarea
                   value={formData.pedalPulsesNotes}
                   onChange={(e) => handleTextChange('pedalPulsesNotes', e.target.value)}
+                  placeholder="Add notes about pedal pulses findings"
                   rows={3}
-                  placeholder="Additional notes about pedal pulses"
+                  className="form-control"
                 />
               </div>
             </div>
+          </div>
+          
+          <div className="exam-section">
+            <div className="section-header">
+              <h3>
+                <i className="fas fa-temperature-low"></i>
+                Loss of Sense
+              </h3>
+            </div>
             
-            <div className="assessment-row">
-              <div className="assessment-header">
-                <h3>LOSS OF SENSE</h3>
+            <div className="section-content">
+              <div className="foot-selection">
+                <div className="foot-option">
+                  <div className="foot-header">Warm</div>
+                  <div className="foot-toggles">
+                    <div 
+                      className={`foot-toggle ${formData.lossOfSenseWarm.right ? 'active' : ''}`}
+                      onClick={() => handleCheckboxChange('lossOfSenseWarm', 'right')}
+                    >
+                      <div className="foot-icon">
+                        <i className="fas fa-shoe-prints fa-flip-horizontal"></i>
+                      </div>
+                      <div className="foot-label">Right</div>
+                    </div>
+                    <div 
+                      className={`foot-toggle ${formData.lossOfSenseWarm.left ? 'active' : ''}`}
+                      onClick={() => handleCheckboxChange('lossOfSenseWarm', 'left')}
+                    >
+                      <div className="foot-icon">
+                        <i className="fas fa-shoe-prints"></i>
+                      </div>
+                      <div className="foot-label">Left</div>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="foot-option">
+                  <div className="foot-header">Cold</div>
+                  <div className="foot-toggles">
+                    <div 
+                      className={`foot-toggle ${formData.lossOfSenseCold.right ? 'active' : ''}`}
+                      onClick={() => handleCheckboxChange('lossOfSenseCold', 'right')}
+                    >
+                      <div className="foot-icon">
+                        <i className="fas fa-shoe-prints fa-flip-horizontal"></i>
+                      </div>
+                      <div className="foot-label">Right</div>
+                    </div>
+                    <div 
+                      className={`foot-toggle ${formData.lossOfSenseCold.left ? 'active' : ''}`}
+                      onClick={() => handleCheckboxChange('lossOfSenseCold', 'left')}
+                    >
+                      <div className="foot-icon">
+                        <i className="fas fa-shoe-prints"></i>
+                      </div>
+                      <div className="foot-label">Left</div>
+                    </div>
+                  </div>
+                </div>
               </div>
-              <div className="assessment-content">
-                <div className="assessment-item">
-                  <label>WARM:</label>
-                  <div className="checkbox-group">
-                    <label className="checkbox-option">
-                      <input
-                        type="checkbox"
-                        checked={formData.lossOfSenseWarm.right}
-                        onChange={() => handleCheckboxChange('lossOfSenseWarm', 'right')}
-                      />
-                      <span>Right</span>
-                    </label>
-                    <label className="checkbox-option">
-                      <input
-                        type="checkbox"
-                        checked={formData.lossOfSenseWarm.left}
-                        onChange={() => handleCheckboxChange('lossOfSenseWarm', 'left')}
-                      />
-                      <span>Left</span>
-                    </label>
-                  </div>
-                </div>
-                <div className="assessment-item">
-                  <label>COLD:</label>
-                  <div className="checkbox-group">
-                    <label className="checkbox-option">
-                      <input
-                        type="checkbox"
-                        checked={formData.lossOfSenseCold.right}
-                        onChange={() => handleCheckboxChange('lossOfSenseCold', 'right')}
-                      />
-                      <span>Right</span>
-                    </label>
-                    <label className="checkbox-option">
-                      <input
-                        type="checkbox"
-                        checked={formData.lossOfSenseCold.left}
-                        onChange={() => handleCheckboxChange('lossOfSenseCold', 'left')}
-                      />
-                      <span>Left</span>
-                    </label>
-                  </div>
-                </div>
+              
+              <div className="notes-field">
+                <label>
+                  <i className="fas fa-pencil-alt"></i>
+                  Additional Notes
+                </label>
                 <textarea
                   value={formData.lossOfSenseNotes}
                   onChange={(e) => handleTextChange('lossOfSenseNotes', e.target.value)}
+                  placeholder="Add notes about loss of sense findings"
                   rows={3}
-                  placeholder="Additional notes about loss of sense"
+                  className="form-control"
                 />
               </div>
             </div>
-            
-            <div className="assessment-row">
-              <div className="assessment-header">
-                <h3>NEUROPATHY:</h3>
+          </div>
+          
+          <div className="exam-grid">
+            <div className="exam-section mini">
+              <div className="section-header">
+                <h3>
+                  <i className="fas fa-network-wired"></i>
+                  Neuropathy
+                </h3>
               </div>
-              <div className="assessment-content">
-                <div className="checkbox-group wide">
-                  <label className="checkbox-option">
-                    <input
-                      type="checkbox"
-                      checked={formData.neuropathy.right}
-                      onChange={() => handleCheckboxChange('neuropathy', 'right')}
-                    />
-                    <span>Right</span>
-                  </label>
-                  <label className="checkbox-option">
-                    <input
-                      type="checkbox"
-                      checked={formData.neuropathy.left}
-                      onChange={() => handleCheckboxChange('neuropathy', 'left')}
-                    />
-                    <span>Left</span>
-                  </label>
+              
+              <div className="section-content">
+                <div className="foot-toggles">
+                  <div 
+                    className={`foot-toggle ${formData.neuropathy.right ? 'active' : ''}`}
+                    onClick={() => handleCheckboxChange('neuropathy', 'right')}
+                  >
+                    <div className="foot-icon">
+                      <i className="fas fa-shoe-prints fa-flip-horizontal"></i>
+                    </div>
+                    <div className="foot-label">Right</div>
+                  </div>
+                  <div 
+                    className={`foot-toggle ${formData.neuropathy.left ? 'active' : ''}`}
+                    onClick={() => handleCheckboxChange('neuropathy', 'left')}
+                  >
+                    <div className="foot-icon">
+                      <i className="fas fa-shoe-prints"></i>
+                    </div>
+                    <div className="foot-label">Left</div>
+                  </div>
                 </div>
               </div>
             </div>
             
-            <div className="assessment-row">
-              <div className="assessment-header">
-                <h3>ASCENDING CALF</h3>
+            <div className="exam-section mini">
+              <div className="section-header">
+                <h3>
+                  <i className="fas fa-bolt"></i>
+                  Tingling
+                </h3>
               </div>
-              <div className="assessment-content">
+              
+              <div className="section-content">
+                <div className="foot-toggles">
+                  <div 
+                    className={`foot-toggle ${formData.tingling.right ? 'active' : ''}`}
+                    onClick={() => handleCheckboxChange('tingling', 'right')}
+                  >
+                    <div className="foot-icon">
+                      <i className="fas fa-shoe-prints fa-flip-horizontal"></i>
+                    </div>
+                    <div className="foot-label">Right</div>
+                  </div>
+                  <div 
+                    className={`foot-toggle ${formData.tingling.left ? 'active' : ''}`}
+                    onClick={() => handleCheckboxChange('tingling', 'left')}
+                  >
+                    <div className="foot-icon">
+                      <i className="fas fa-shoe-prints"></i>
+                    </div>
+                    <div className="foot-label">Left</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div className="exam-section">
+            <div className="section-header">
+              <h3>
+                <i className="fas fa-ruler"></i>
+                Ascending Calf Measurements
+              </h3>
+            </div>
+            
+            <div className="section-content">
+              <div className="measurement-row">
                 <div className="measurement-group">
-                  <div className="measurement-item">
-                    <label>RIGHT FOOT:</label>
-                    <div className="measurement-input">
-                      <input
-                        type="text"
-                        value={formData.ascendingCalf.right}
-                        onChange={(e) => handleCalfMeasureChange('right', e.target.value)}
-                        placeholder="0"
-                      />
-                      <span className="unit">cm</span>
-                    </div>
+                  <label>
+                    <i className="fas fa-shoe-prints fa-flip-horizontal"></i>
+                    Right Foot
+                  </label>
+                  <div className="measurement-input">
+                    <input
+                      type="text"
+                      value={formData.ascendingCalf.right}
+                      onChange={(e) => handleCalfMeasureChange('right', e.target.value)}
+                      placeholder="0"
+                      className="form-control"
+                    />
+                    <span className="unit">cm</span>
                   </div>
-                  <div className="measurement-item">
-                    <label>LEFT FOOT:</label>
-                    <div className="measurement-input">
-                      <input
-                        type="text"
-                        value={formData.ascendingCalf.left}
-                        onChange={(e) => handleCalfMeasureChange('left', e.target.value)}
-                        placeholder="0"
-                      />
-                      <span className="unit">cm</span>
-                    </div>
+                </div>
+                
+                <div className="measurement-group">
+                  <label>
+                    <i className="fas fa-shoe-prints"></i>
+                    Left Foot
+                  </label>
+                  <div className="measurement-input">
+                    <input
+                      type="text"
+                      value={formData.ascendingCalf.left}
+                      onChange={(e) => handleCalfMeasureChange('left', e.target.value)}
+                      placeholder="0"
+                      className="form-control"
+                    />
+                    <span className="unit">cm</span>
                   </div>
                 </div>
               </div>
             </div>
-            
-            <div className="assessment-row">
-              <div className="assessment-header">
-                <h3>TINGLING:</h3>
-              </div>
-              <div className="assessment-content">
-                <div className="checkbox-group wide">
-                  <label className="checkbox-option">
-                    <input
-                      type="checkbox"
-                      checked={formData.tingling.right}
-                      onChange={() => handleCheckboxChange('tingling', 'right')}
-                    />
-                    <span>Right</span>
-                  </label>
-                  <label className="checkbox-option">
-                    <input
-                      type="checkbox"
-                      checked={formData.tingling.left}
-                      onChange={() => handleCheckboxChange('tingling', 'left')}
-                    />
-                    <span>Left</span>
-                  </label>
-                </div>
-              </div>
+          </div>
+          
+          <div className="exam-section">
+            <div className="section-header">
+              <h3>
+                <i className="fas fa-user"></i>
+                Leg Hair
+              </h3>
             </div>
             
-            <div className="assessment-row">
-              <div className="assessment-header">
-                <h3>LEG HAIR</h3>
-              </div>
-              <div className="assessment-content">
-                <div className="assessment-item">
-                  <label>PRESENT:</label>
-                  <div className="checkbox-group">
-                    <label className="checkbox-option">
-                      <input
-                        type="checkbox"
-                        checked={formData.legHairPresent.right}
-                        onChange={() => handleCheckboxChange('legHairPresent', 'right')}
-                      />
-                      <span>Right</span>
-                    </label>
-                    <label className="checkbox-option">
-                      <input
-                        type="checkbox"
-                        checked={formData.legHairPresent.left}
-                        onChange={() => handleCheckboxChange('legHairPresent', 'left')}
-                      />
-                      <span>Left</span>
-                    </label>
+            <div className="section-content">
+              <div className="foot-selection">
+                <div className="foot-option">
+                  <div className="foot-header">Present</div>
+                  <div className="foot-toggles">
+                    <div 
+                      className={`foot-toggle ${formData.legHairPresent.right ? 'active' : ''}`}
+                      onClick={() => handleCheckboxChange('legHairPresent', 'right')}
+                    >
+                      <div className="foot-icon">
+                        <i className="fas fa-shoe-prints fa-flip-horizontal"></i>
+                      </div>
+                      <div className="foot-label">Right</div>
+                    </div>
+                    <div 
+                      className={`foot-toggle ${formData.legHairPresent.left ? 'active' : ''}`}
+                      onClick={() => handleCheckboxChange('legHairPresent', 'left')}
+                    >
+                      <div className="foot-icon">
+                        <i className="fas fa-shoe-prints"></i>
+                      </div>
+                      <div className="foot-label">Left</div>
+                    </div>
                   </div>
                 </div>
-                <div className="assessment-item">
-                  <label>ABSENT:</label>
-                  <div className="checkbox-group">
-                    <label className="checkbox-option">
-                      <input
-                        type="checkbox"
-                        checked={formData.legHairAbsent.right}
-                        onChange={() => handleCheckboxChange('legHairAbsent', 'right')}
-                      />
-                      <span>Right</span>
-                    </label>
-                    <label className="checkbox-option">
-                      <input
-                        type="checkbox"
-                        checked={formData.legHairAbsent.left}
-                        onChange={() => handleCheckboxChange('legHairAbsent', 'left')}
-                      />
-                      <span>Left</span>
-                    </label>
+                
+                <div className="foot-option">
+                  <div className="foot-header">Absent</div>
+                  <div className="foot-toggles">
+                    <div 
+                      className={`foot-toggle ${formData.legHairAbsent.right ? 'active' : ''}`}
+                      onClick={() => handleCheckboxChange('legHairAbsent', 'right')}
+                    >
+                      <div className="foot-icon">
+                        <i className="fas fa-shoe-prints fa-flip-horizontal"></i>
+                      </div>
+                      <div className="foot-label">Right</div>
+                    </div>
+                    <div 
+                      className={`foot-toggle ${formData.legHairAbsent.left ? 'active' : ''}`}
+                      onClick={() => handleCheckboxChange('legHairAbsent', 'left')}
+                    >
+                      <div className="foot-icon">
+                        <i className="fas fa-shoe-prints"></i>
+                      </div>
+                      <div className="foot-label">Left</div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -434,10 +647,12 @@ const DiabeticFootModal = ({ isOpen, onClose, initialData = null }) => {
         
         <div className="modal-footer">
           <button className="cancel-btn" onClick={() => onClose()}>
-            CANCEL
+            <i className="fas fa-times"></i>
+            <span>Cancel</span>
           </button>
           <button className="submit-btn" onClick={handleSubmit}>
-            SUBMIT
+            <i className="fas fa-check"></i>
+            <span>Submit</span>
           </button>
         </div>
       </div>

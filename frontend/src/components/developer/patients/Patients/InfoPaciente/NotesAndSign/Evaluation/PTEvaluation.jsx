@@ -867,9 +867,9 @@ const PTEvaluation = ({ data, onChange, onOpenTest, onOpenDiagnosisModal, autoSa
           
           <StandardizedTest 
             title="Katz Index" 
-            isComplete={isTestComplete('Katz Index')}
-            score={getTestScore('Katz Index')}
-            onOpen={() => onOpenTest('Katz Index')}
+            isComplete={isTestComplete('Katz')}
+            score={getTestScore('Katz')}
+            onOpen={() => onOpenTest('Katz')}
           />
           
           <StandardizedTest 

@@ -1,4 +1,4 @@
-// components/standardizedTests/BergModal.jsx
+// Enhanced BergModal.jsx
 import React, { useState, useEffect } from 'react';
 import '../../../../../../../../styles/developer/Patients/InfoPaciente/NotesAndSign/standardizedTests/BergModal.scss';
 
@@ -26,6 +26,9 @@ const BergModal = ({ isOpen, onClose, initialData = null }) => {
 
   // Estado para validación
   const [validationErrors, setValidationErrors] = useState({});
+  
+  // Estado para la pestaña activa
+  const [activeTab, setActiveTab] = useState('sitting-position');
 
   // Opciones para los campos de selección
   const bergOptions = {
@@ -146,6 +149,28 @@ const BergModal = ({ isOpen, onClose, initialData = null }) => {
     stoolStepping: 'Place each foot alternately on the step/stool. Continue until each foot has touched the step/stool four times.',
     reachingForward: 'Lift arm to 90 degrees. Stretch out your fingers and reach forward as far as you can. (Examiner places a ruler at the end of the fingertips when arm is at 90 degrees. Fingers should not touch the ruler while reaching forward. The recorded measure is the distance forward that the fingers reach while the subject is in most forward lean position. When possible, ask subject to use both arms when reaching to avoid rotation of the trunk.)'
   };
+
+  // Organización de pestañas para el formulario
+  const tabs = [
+    { 
+      id: 'sitting-position', 
+      label: 'Sitting & Position Changes', 
+      icon: 'fa-chair',
+      items: ['sittingUnsupported', 'changePositionSitToStand', 'changePositionStandToSit', 'transfers'] 
+    },
+    { 
+      id: 'standing-balance', 
+      label: 'Standing & Balance', 
+      icon: 'fa-person-walking',
+      items: ['standingUnsupported', 'standingWithEyesClosed', 'standingWithFeetTogether', 'tandemStanding', 'standingOnOneLeg'] 
+    },
+    { 
+      id: 'dynamic-movement', 
+      label: 'Dynamic Movement', 
+      icon: 'fa-arrows-rotate',
+      items: ['turningTrunk', 'turning360Degrees', 'retrievingObjectsFromFloor', 'stoolStepping', 'reachingForward'] 
+    }
+  ];
 
   // Calcular la puntuación total cuando cambian los datos del formulario
   useEffect(() => {
@@ -277,6 +302,17 @@ const BergModal = ({ isOpen, onClose, initialData = null }) => {
     return 'high-risk';
   };
 
+  // Obtener porcentaje de progreso por pestaña
+  const getTabProgress = (tabId) => {
+    const tab = tabs.find(t => t.id === tabId);
+    if (!tab) return 0;
+    
+    const tabFields = tab.items;
+    const completedFields = tabFields.filter(field => formData[field]);
+    
+    return completedFields.length === 0 ? 0 : Math.round((completedFields.length / tabFields.length) * 100);
+  };
+
   // Si el modal no está abierto, no renderizar nada
   if (!isOpen) return null;
 
@@ -284,392 +320,208 @@ const BergModal = ({ isOpen, onClose, initialData = null }) => {
     <div className="berg-modal-overlay">
       <div className="berg-modal">
         <div className="modal-header">
-          <h2>
-            <i className="fas fa-balance-scale"></i>
-            Berg Balance Scale
-          </h2>
-          <button className="close-button" onClick={() => onClose()}>
+          <div className="header-content">
+            <h2>
+              <i className="fas fa-balance-scale"></i>
+              <span>Berg Balance Scale</span>
+            </h2>
+            <p className="header-subtitle">Assessment for balance and fall risk</p>
+          </div>
+          <button className="close-button" onClick={() => onClose()} aria-label="Close">
             <i className="fas fa-times"></i>
           </button>
         </div>
         
         <div className="modal-content">
-          <div className="info-note">
-            <p>Prior scores are for reference only. To print previous scores please type in additional boxes below.</p>
-          </div>
-          
-          <div className="wheelchair-toggle">
-            <label className="toggle-label">
-              <input
-                type="checkbox"
-                checked={formData.isWheelchairBound}
-                onChange={(e) => handleWheelchairChange(e.target.checked)}
-              />
-              <span>Patient is wheelchair bound</span>
-            </label>
-            {formData.isWheelchairBound && (
-              <div className="wheelchair-note">
+          <div className="dashboard-panel">
+            <div className="info-note">
+              <div className="note-icon">
                 <i className="fas fa-info-circle"></i>
-                <span>Scoring is not applicable for wheelchair bound patients. The assessment can be submitted with 0 points.</span>
               </div>
-            )}
+              <div className="note-content">
+                <p>Prior scores are for reference only. To print previous scores please type in additional boxes below.</p>
+              </div>
+            </div>
+            
+            <div className="wheelchair-toggle">
+              <label className="toggle-container">
+                <input
+                  type="checkbox"
+                  checked={formData.isWheelchairBound}
+                  onChange={(e) => handleWheelchairChange(e.target.checked)}
+                />
+                <span className="toggle-switch"></span>
+                <div className="toggle-label">
+                  <i className="fas fa-wheelchair"></i>
+                  <span>Patient is wheelchair bound</span>
+                </div>
+              </label>
+              
+              {formData.isWheelchairBound && (
+                <div className="wheelchair-note">
+                  <i className="fas fa-info-circle"></i>
+                  <span>Scoring is not applicable for wheelchair bound patients. The assessment can be submitted with 0 points.</span>
+                </div>
+              )}
+            </div>
+            
+            <div className={`score-summary ${getRiskClass()}`}>
+              <div className="score-header">
+                <div className="score-icon">
+                  <i className="fas fa-chart-column"></i>
+                </div>
+                <div className="score-title">Risk Assessment</div>
+              </div>
+              <div className="score-value">
+                <span className="current-score">{formData.totalScore}</span>
+                <span className="total-score">/ 56</span>
+              </div>
+              <div className="risk-level">{getRiskLevel()}</div>
+              <div className="risk-scale">
+                <div className="risk-zones">
+                  <span className="high-risk-zone">High</span>
+                  <span className="medium-risk-zone">Medium</span>
+                  <span className="low-risk-zone">Low</span>
+                </div>
+                <div className="scale-bar">
+                  <div className="scale-indicator" style={{ left: `${Math.min(100, (formData.totalScore / 56) * 100)}%` }}></div>
+                </div>
+                <div className="scale-marks">
+                  <span>0</span>
+                  <span>20</span>
+                  <span>40</span>
+                  <span>56</span>
+                </div>
+              </div>
+            </div>
           </div>
           
           {!formData.isWheelchairBound && (
-            <div className="berg-items">
-              <div className={`berg-item ${validationErrors.sittingUnsupported ? 'has-error' : ''}`}>
-                <div className="item-label">SITTING UNSUPPORTED:</div>
-                <div className="item-field">
-                  <select 
-                    value={formData.sittingUnsupported}
-                    onChange={(e) => handleChange('sittingUnsupported', e.target.value)}
+            <div className="assessment-form">
+              <div className="tabs-navigation">
+                {tabs.map(tab => (
+                  <button
+                    key={tab.id}
+                    className={`tab-button ${activeTab === tab.id ? 'active' : ''}`}
+                    onClick={() => setActiveTab(tab.id)}
                   >
-                    <option value="">Select an option</option>
-                    {bergOptions.sittingUnsupported.map(option => (
-                      <option key={option.value} value={option.value}>
-                        {option.label}
-                      </option>
-                    ))}
-                  </select>
-                  <div className="item-instructions">
-                    <strong>Instructions:</strong> {instructions.sittingUnsupported}
-                  </div>
-                  {validationErrors.sittingUnsupported && (
-                    <div className="error-message">This field is required</div>
-                  )}
-                </div>
+                    <div className="tab-icon">
+                      <i className={`fas ${tab.icon}`}></i>
+                    </div>
+                    <div className="tab-info">
+                      <span className="tab-label">{tab.label}</span>
+                      <div className="progress-bar">
+                        <div 
+                          className="progress-fill"
+                          style={{ width: `${getTabProgress(tab.id)}%` }}
+                        ></div>
+                      </div>
+                    </div>
+                  </button>
+                ))}
               </div>
               
-              <div className={`berg-item ${validationErrors.changePositionSitToStand ? 'has-error' : ''}`}>
-                <div className="item-label">CHANGE OF POSITION (SITTING ↔ STANDING):</div>
-                <div className="item-field">
-                  <select 
-                    value={formData.changePositionSitToStand}
-                    onChange={(e) => handleChange('changePositionSitToStand', e.target.value)}
+              <div className="tab-content">
+                {tabs.map(tab => (
+                  <div 
+                    key={tab.id} 
+                    className={`tab-pane ${activeTab === tab.id ? 'active' : ''}`}
                   >
-                    <option value="">Select an option</option>
-                    {bergOptions.changePositionSitToStand.map(option => (
-                      <option key={option.value} value={option.value}>
-                        {option.label}
-                      </option>
-                    ))}
-                  </select>
-                  <div className="item-instructions">
-                    <strong>Instructions:</strong> {instructions.changePositionSitToStand}
+                    <div className="assessment-items">
+                      {tab.items.map(item => (
+                        <div 
+                          key={item} 
+                          className={`assessment-card ${validationErrors[item] ? 'has-error' : ''}`}
+                        >
+                          <div className="card-header">
+                            <div className="item-label">
+                              {item === 'sittingUnsupported' && 'Sitting Unsupported'}
+                              {item === 'changePositionSitToStand' && 'Change Position: Sit to Stand'}
+                              {item === 'changePositionStandToSit' && 'Change Position: Stand to Sit'}
+                              {item === 'transfers' && 'Transfers'}
+                              {item === 'standingUnsupported' && 'Standing Unsupported'}
+                              {item === 'standingWithEyesClosed' && 'Standing with Eyes Closed'}
+                              {item === 'standingWithFeetTogether' && 'Standing with Feet Together'}
+                              {item === 'tandemStanding' && 'Tandem Standing'}
+                              {item === 'standingOnOneLeg' && 'Standing on One Leg'}
+                              {item === 'turningTrunk' && 'Turning Trunk (Feet Fixed)'}
+                              {item === 'turning360Degrees' && 'Turning 360 Degrees'}
+                              {item === 'retrievingObjectsFromFloor' && 'Retrieving Objects from Floor'}
+                              {item === 'stoolStepping' && 'Stool Stepping'}
+                              {item === 'reachingForward' && 'Reaching Forward While Standing'}
+                            </div>
+                            {validationErrors[item] && (
+                              <div className="validation-error">
+                                <i className="fas fa-exclamation-circle"></i>
+                                Required
+                              </div>
+                            )}
+                          </div>
+                          
+                          <div className="card-body">
+                            <div className="item-instructions">
+                              <div className="instruction-icon">
+                                <i className="fas fa-file-prescription"></i>
+                              </div>
+                              <div className="instruction-text">
+                                {instructions[item]}
+                              </div>
+                            </div>
+                            
+                            <div className="score-selector">
+                              {bergOptions[item].map(option => (
+                                <div 
+                                  key={option.value}
+                                  className={`score-option ${formData[item] === option.value ? 'selected' : ''}`}
+                                  onClick={() => handleChange(item, option.value)}
+                                >
+                                  <div className="option-score">{option.value}</div>
+                                  <div className="option-label">{option.label.substring(option.label.indexOf('-') + 1).trim()}</div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                  {validationErrors.changePositionSitToStand && (
-                    <div className="error-message">This field is required</div>
-                  )}
-                </div>
-              </div>
-              
-              <div className={`berg-item ${validationErrors.changePositionStandToSit ? 'has-error' : ''}`}>
-                <div className="item-label">CHANGE OF POSITION (STANDING ↔ SITTING):</div>
-                <div className="item-field">
-                  <select 
-                    value={formData.changePositionStandToSit}
-                    onChange={(e) => handleChange('changePositionStandToSit', e.target.value)}
-                  >
-                    <option value="">Select an option</option>
-                    {bergOptions.changePositionStandToSit.map(option => (
-                      <option key={option.value} value={option.value}>
-                        {option.label}
-                      </option>
-                    ))}
-                  </select>
-                  <div className="item-instructions">
-                    <strong>Instructions:</strong> {instructions.changePositionStandToSit}
-                  </div>
-                  {validationErrors.changePositionStandToSit && (
-                    <div className="error-message">This field is required</div>
-                  )}
-                </div>
-              </div>
-              
-              <div className={`berg-item ${validationErrors.transfers ? 'has-error' : ''}`}>
-                <div className="item-label">TRANSFERS:</div>
-                <div className="item-field">
-                  <select 
-                    value={formData.transfers}
-                    onChange={(e) => handleChange('transfers', e.target.value)}
-                  >
-                    <option value="">Select an option</option>
-                    {bergOptions.transfers.map(option => (
-                      <option key={option.value} value={option.value}>
-                        {option.label}
-                      </option>
-                    ))}
-                  </select>
-                  <div className="item-instructions">
-                    <strong>Instructions:</strong> {instructions.transfers}
-                  </div>
-                  {validationErrors.transfers && (
-                    <div className="error-message">This field is required</div>
-                  )}
-                </div>
-              </div>
-              
-              <div className={`berg-item ${validationErrors.standingUnsupported ? 'has-error' : ''}`}>
-                <div className="item-label">STANDING UNSUPPORTED:</div>
-                <div className="item-field">
-                  <select 
-                    value={formData.standingUnsupported}
-                    onChange={(e) => handleChange('standingUnsupported', e.target.value)}
-                  >
-                    <option value="">Select an option</option>
-                    {bergOptions.standingUnsupported.map(option => (
-                      <option key={option.value} value={option.value}>
-                        {option.label}
-                      </option>
-                    ))}
-                  </select>
-                  <div className="item-instructions">
-                    <strong>Instructions:</strong> {instructions.standingUnsupported}
-                  </div>
-                  {validationErrors.standingUnsupported && (
-                    <div className="error-message">This field is required</div>
-                  )}
-                </div>
-              </div>
-              
-              <div className={`berg-item ${validationErrors.standingWithEyesClosed ? 'has-error' : ''}`}>
-                <div className="item-label">STANDING WITH EYES CLOSED:</div>
-                <div className="item-field">
-                  <select 
-                    value={formData.standingWithEyesClosed}
-                    onChange={(e) => handleChange('standingWithEyesClosed', e.target.value)}
-                  >
-                    <option value="">Select an option</option>
-                    {bergOptions.standingWithEyesClosed.map(option => (
-                      <option key={option.value} value={option.value}>
-                        {option.label}
-                      </option>
-                    ))}
-                  </select>
-                  <div className="item-instructions">
-                    <strong>Instructions:</strong> {instructions.standingWithEyesClosed}
-                  </div>
-                  {validationErrors.standingWithEyesClosed && (
-                    <div className="error-message">This field is required</div>
-                  )}
-                </div>
-              </div>
-              
-              <div className={`berg-item ${validationErrors.standingWithFeetTogether ? 'has-error' : ''}`}>
-                <div className="item-label">STANDING WITH FEET TOGETHER:</div>
-                <div className="item-field">
-                  <select 
-                    value={formData.standingWithFeetTogether}
-                    onChange={(e) => handleChange('standingWithFeetTogether', e.target.value)}
-                  >
-                    <option value="">Select an option</option>
-                    {bergOptions.standingWithFeetTogether.map(option => (
-                      <option key={option.value} value={option.value}>
-                        {option.label}
-                      </option>
-                    ))}
-                  </select>
-                  <div className="item-instructions">
-                    <strong>Instructions:</strong> {instructions.standingWithFeetTogether}
-                  </div>
-                  {validationErrors.standingWithFeetTogether && (
-                    <div className="error-message">This field is required</div>
-                  )}
-                </div>
-              </div>
-              
-              <div className={`berg-item ${validationErrors.tandemStanding ? 'has-error' : ''}`}>
-                <div className="item-label">TANDEM STANDING:</div>
-                <div className="item-field">
-                  <select 
-                    value={formData.tandemStanding}
-                    onChange={(e) => handleChange('tandemStanding', e.target.value)}
-                  >
-                    <option value="">Select an option</option>
-                    {bergOptions.tandemStanding.map(option => (
-                      <option key={option.value} value={option.value}>
-                        {option.label}
-                      </option>
-                    ))}
-                  </select>
-                  <div className="item-instructions">
-                    <strong>Instructions:</strong> {instructions.tandemStanding}
-                  </div>
-                  {validationErrors.tandemStanding && (
-                    <div className="error-message">This field is required</div>
-                  )}
-                </div>
-              </div>
-              
-              <div className={`berg-item ${validationErrors.standingOnOneLeg ? 'has-error' : ''}`}>
-                <div className="item-label">STANDING ON ONE LEG:</div>
-                <div className="item-field">
-                  <select 
-                    value={formData.standingOnOneLeg}
-                    onChange={(e) => handleChange('standingOnOneLeg', e.target.value)}
-                  >
-                    <option value="">Select an option</option>
-                    {bergOptions.standingOnOneLeg.map(option => (
-                      <option key={option.value} value={option.value}>
-                        {option.label}
-                      </option>
-                    ))}
-                  </select>
-                  <div className="item-instructions">
-                    <strong>Instructions:</strong> {instructions.standingOnOneLeg}
-                  </div>
-                  {validationErrors.standingOnOneLeg && (
-                    <div className="error-message">This field is required</div>
-                  )}
-                </div>
-              </div>
-              
-              <div className={`berg-item ${validationErrors.turningTrunk ? 'has-error' : ''}`}>
-                <div className="item-label">TURNING TRUNK (FEET FIXED):</div>
-                <div className="item-field">
-                  <select 
-                    value={formData.turningTrunk}
-                    onChange={(e) => handleChange('turningTrunk', e.target.value)}
-                  >
-                    <option value="">Select an option</option>
-                    {bergOptions.turningTrunk.map(option => (
-                      <option key={option.value} value={option.value}>
-                        {option.label}
-                      </option>
-                    ))}
-                  </select>
-                  <div className="item-instructions">
-                    <strong>Instructions:</strong> {instructions.turningTrunk}
-                  </div>
-                  {validationErrors.turningTrunk && (
-                    <div className="error-message">This field is required</div>
-                  )}
-                </div>
-              </div>
-              
-              <div className={`berg-item ${validationErrors.turning360Degrees ? 'has-error' : ''}`}>
-                <div className="item-label">TURNING 360 DEGREES:</div>
-                <div className="item-field">
-                  <select 
-                    value={formData.turning360Degrees}
-                    onChange={(e) => handleChange('turning360Degrees', e.target.value)}
-                  >
-                    <option value="">Select an option</option>
-                    {bergOptions.turning360Degrees.map(option => (
-                      <option key={option.value} value={option.value}>
-                        {option.label}
-                      </option>
-                    ))}
-                  </select>
-                  <div className="item-instructions">
-                    <strong>Instructions:</strong> {instructions.turning360Degrees}
-                  </div>
-                  {validationErrors.turning360Degrees && (
-                    <div className="error-message">This field is required</div>
-                  )}
-                </div>
-              </div>
-              
-              <div className={`berg-item ${validationErrors.retrievingObjectsFromFloor ? 'has-error' : ''}`}>
-                <div className="item-label">RETRIEVING OBJECTS FROM FLOOR:</div>
-                <div className="item-field">
-                  <select 
-                    value={formData.retrievingObjectsFromFloor}
-                    onChange={(e) => handleChange('retrievingObjectsFromFloor', e.target.value)}
-                  >
-                    <option value="">Select an option</option>
-                    {bergOptions.retrievingObjectsFromFloor.map(option => (
-                      <option key={option.value} value={option.value}>
-                        {option.label}
-                      </option>
-                    ))}
-                  </select>
-                  <div className="item-instructions">
-                    <strong>Instructions:</strong> {instructions.retrievingObjectsFromFloor}
-                  </div>
-                  {validationErrors.retrievingObjectsFromFloor && (
-                    <div className="error-message">This field is required</div>
-                  )}
-                </div>
-              </div>
-              
-              <div className={`berg-item ${validationErrors.stoolStepping ? 'has-error' : ''}`}>
-                <div className="item-label">STOOL STEPPING:</div>
-                <div className="item-field">
-                <select 
-                    value={formData.stoolStepping}
-                    onChange={(e) => handleChange('stoolStepping', e.target.value)}
-                  >
-                    <option value="">Select an option</option>
-                    {bergOptions.stoolStepping.map(option => (
-                      <option key={option.value} value={option.value}>
-                        {option.label}
-                      </option>
-                    ))}
-                  </select>
-                  <div className="item-instructions">
-                    <strong>Instructions:</strong> {instructions.stoolStepping}
-                  </div>
-                  {validationErrors.stoolStepping && (
-                    <div className="error-message">This field is required</div>
-                  )}
-                </div>
-              </div>
-              
-              <div className={`berg-item ${validationErrors.reachingForward ? 'has-error' : ''}`}>
-                <div className="item-label">REACHING FORWARD WHILE STANDING:</div>
-                <div className="item-field">
-                  <select 
-                    value={formData.reachingForward}
-                    onChange={(e) => handleChange('reachingForward', e.target.value)}
-                  >
-                    <option value="">Select an option</option>
-                    {bergOptions.reachingForward.map(option => (
-                      <option key={option.value} value={option.value}>
-                        {option.label}
-                      </option>
-                    ))}
-                  </select>
-                  <div className="item-instructions">
-                    <strong>Instructions:</strong> {instructions.reachingForward}
-                  </div>
-                  {validationErrors.reachingForward && (
-                    <div className="error-message">This field is required</div>
-                  )}
-                </div>
+                ))}
               </div>
             </div>
           )}
           
-          <div className="total-score-section">
-            <div className={`score-card ${getRiskClass()}`}>
-              <div className="score-header">
-                <h3>TOTAL: {formData.totalScore} out of 56 {formData.isWheelchairBound ? '(wheelchair bound)' : ''}</h3>
+          <div className="risk-interpretation">
+            <div className="interpretation-header">
+              <i className="fas fa-info-circle"></i>
+              <h3>Interpretation Guide</h3>
+            </div>
+            <div className="interpretation-content">
+              <div className="interpretation-item">
+                <div className="risk-badge high-risk">High Risk</div>
+                <div className="risk-details">
+                  <div className="risk-range">Score 0-40</div>
+                  <div className="risk-description">May require wheelchair for mobility</div>
+                </div>
               </div>
-              <div className="score-content">
-                <div className="risk-level">
-                  <span className="label">Fall Risk Level:</span>
-                  <span className="value">{getRiskLevel()}</span>
+              
+              <div className="interpretation-item">
+                <div className="risk-badge medium-risk">Medium Risk</div>
+                <div className="risk-details">
+                  <div className="risk-range">Score 41-44</div>
+                  <div className="risk-description">May need assistive device</div>
                 </div>
-                <div className="risk-scale">
-                  <div className="scale-labels">
-                    <span>High Risk (0-40)</span>
-                    <span>Medium Risk (41-44)</span>
-                    <span>Low Risk (45-56)</span>
-                  </div>
-                  <div className="scale-bar">
-                    <div className="risk-indicator" style={{ left: `${Math.min(100, (formData.totalScore / 56) * 100)}%` }}></div>
-                  </div>
+              </div>
+              
+              <div className="interpretation-item">
+                <div className="risk-badge low-risk">Low Risk</div>
+                <div className="risk-details">
+                  <div className="risk-range">Score 45-56</div>
+                  <div className="risk-description">Independent mobility</div>
                 </div>
-                <div className="risk-interpretation">
-                  <h4>Interpretation:</h4>
-                  <ul>
-                    <li><strong>41-56 = Low Fall Risk</strong> - Walking independently</li>
-                    <li><strong>21-40 = Medium Fall Risk</strong> - May need assistive device</li>
-                    <li><strong>0-20 = High Fall Risk</strong> - Wheelchair bound</li>
-                  </ul>
-                  <p>A change of 8 points is required to reveal genuine change in function between assessments.</p>
-                </div>
+              </div>
+              
+              <div className="interpretation-note">
+                A change of 8 points is required to reveal genuine change in function between assessments.
               </div>
             </div>
           </div>
@@ -677,10 +529,12 @@ const BergModal = ({ isOpen, onClose, initialData = null }) => {
         
         <div className="modal-footer">
           <button className="cancel-btn" onClick={() => onClose()}>
-            CANCEL
+            <i className="fas fa-times"></i>
+            <span>Cancel</span>
           </button>
           <button className="submit-btn" onClick={handleSubmit}>
-            SUBMIT
+            <i className="fas fa-check"></i>
+            <span>Submit Assessment</span>
           </button>
         </div>
       </div>

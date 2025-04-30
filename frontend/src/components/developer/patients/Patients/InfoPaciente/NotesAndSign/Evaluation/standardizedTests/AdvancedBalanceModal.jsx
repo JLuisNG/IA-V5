@@ -1,4 +1,4 @@
-// components/standardizedTests/AdvancedBalanceModal.jsx
+// Enhanced AdvancedBalanceModal.jsx
 import React, { useState } from 'react';
 import '../../../../../../../../styles/developer/Patients/InfoPaciente/NotesAndSign/standardizedTests/AdvancedBalanceModal.scss';
 
@@ -85,372 +85,444 @@ const AdvancedBalanceModal = ({ isOpen, onClose, initialData = null }) => {
     <div className="advanced-balance-modal-overlay">
       <div className="advanced-balance-modal">
         <div className="modal-header">
-          <h2>
-            <i className="fas fa-balance-scale-right"></i>
-            Advanced Balance
-          </h2>
-          <button className="close-button" onClick={() => onClose()}>
+          <div className="header-content">
+            <h2>
+              <i className="fas fa-balance-scale-right"></i>
+              <span>Advanced Balance Assessment</span>
+            </h2>
+            <p className="header-subtitle">Comprehensive vestibular and balance evaluation</p>
+          </div>
+          <button className="close-button" onClick={() => onClose()} aria-label="Close">
             <i className="fas fa-times"></i>
           </button>
         </div>
         
         <div className="modal-content">
           <div className="info-note">
-            <p>Prior scores are for reference only. To print previous scores please type in additional boxes below.</p>
+            <div className="note-icon">
+              <i className="fas fa-info-circle"></i>
+            </div>
+            <div className="note-content">
+              <p>Prior scores are for reference only. To print previous scores please type in additional boxes below.</p>
+            </div>
           </div>
           
           <div className="assessment-section">
-            <div className="section-row">
-              <div className="label-column">
-                <label>SHARP-PURSAR TEST (CERVICAL INSTABILITY):</label>
+            <div className="section-card">
+              <div className="card-header">
+                <div className="header-icon">
+                  <i className="fas fa-exclamation-triangle"></i>
+                </div>
+                <h3>Cervical Instability Assessment</h3>
               </div>
-              <div className="field-column">
-                <div className="radio-group">
-                  {posNegOptions.map(option => (
-                    <div className="radio-option" key={option.value}>
+              <div className="card-content">
+                <div className="test-item">
+                  <div className="test-label">
+                    <label>SHARP-PURSAR TEST:</label>
+                    <span className="label-hint">Tests for cervical instability</span>
+                  </div>
+                  <div className="test-options">
+                    <div className="toggle-option-group">
+                      {posNegOptions.map(option => (
+                        <div 
+                          key={option.value}
+                          className={`toggle-option ${formData.sharpPursarTest === option.value ? 'active' : ''} ${option.value === 'Pos' ? 'positive' : 'negative'}`}
+                          onClick={() => handleChange('sharpPursarTest', option.value)}
+                        >
+                          {option.label}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div className="dual-section">
+              <div className="section-card">
+                <div className="card-header">
+                  <div className="header-icon">
+                    <i className="fas fa-eye"></i>
+                  </div>
+                  <h3>Oculomotor Assessment</h3>
+                </div>
+                <div className="card-content">
+                  <div className="test-item">
+                    <div className="test-label">
+                      <label>SMOOTH PURSUIT:</label>
+                      <span className="label-hint">Eye tracking of moving targets</span>
+                    </div>
+                    <div className="test-options">
+                      <div className="toggle-option-group">
+                        {posNegOptions.map(option => (
+                          <div 
+                            key={option.value}
+                            className={`toggle-option ${formData.smoothPursuit === option.value ? 'active' : ''} ${option.value === 'Pos' ? 'positive' : 'negative'}`}
+                            onClick={() => handleChange('smoothPursuit', option.value)}
+                          >
+                            {option.label}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="test-item">
+                    <div className="test-label">
+                      <label>SACCADES:</label>
+                      <span className="label-hint">Rapid eye movements between fixed points</span>
+                    </div>
+                    <div className="test-options">
+                      <div className="toggle-option-group">
+                        {posNegOptions.map(option => (
+                          <div 
+                            key={option.value}
+                            className={`toggle-option ${formData.saccades === option.value ? 'active' : ''} ${option.value === 'Pos' ? 'positive' : 'negative'}`}
+                            onClick={() => handleChange('saccades', option.value)}
+                          >
+                            {option.label}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="test-item">
+                    <div className="test-label">
+                      <label>NYSTAGMUS PRESENT:</label>
+                      <span className="label-hint">Involuntary eye movements</span>
+                    </div>
+                    <div className="test-options">
+                      <div className="toggle-option-group">
+                        {posNegOptions.map(option => (
+                          <div 
+                            key={option.value}
+                            className={`toggle-option ${formData.nystagmusPresent === option.value ? 'active' : ''} ${option.value === 'Pos' ? 'positive' : 'negative'}`}
+                            onClick={() => handleChange('nystagmusPresent', option.value)}
+                          >
+                            {option.label}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="section-card">
+                <div className="card-header">
+                  <div className="header-icon">
+                    <i className="fas fa-deaf"></i>
+                  </div>
+                  <h3>Vestibular Assessment</h3>
+                </div>
+                <div className="card-content">
+                  <div className="test-item">
+                    <div className="test-label">
+                      <label>HEAD SHAKE NYSTAGMUS:</label>
+                    </div>
+                    <div className="test-options">
+                      <div className="toggle-option-group">
+                        {posNegOptions.map(option => (
+                          <div 
+                            key={option.value}
+                            className={`toggle-option ${formData.headShakeNystagmus === option.value ? 'active' : ''} ${option.value === 'Pos' ? 'positive' : 'negative'}`}
+                            onClick={() => handleChange('headShakeNystagmus', option.value)}
+                          >
+                            {option.label}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="test-item">
+                    <div className="test-label">
+                      <label>HEAD THRUST (R):</label>
+                      <span className="label-hint">Right side</span>
+                    </div>
+                    <div className="test-options">
+                      <div className="toggle-option-group">
+                        {posNegOptions.map(option => (
+                          <div 
+                            key={option.value}
+                            className={`toggle-option ${formData.headThrustRight === option.value ? 'active' : ''} ${option.value === 'Pos' ? 'positive' : 'negative'}`}
+                            onClick={() => handleChange('headThrustRight', option.value)}
+                          >
+                            {option.label}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="test-item">
+                    <div className="test-label">
+                      <label>HEAD THRUST (L):</label>
+                      <span className="label-hint">Left side</span>
+                    </div>
+                    <div className="test-options">
+                      <div className="toggle-option-group">
+                        {posNegOptions.map(option => (
+                          <div 
+                            key={option.value}
+                            className={`toggle-option ${formData.headThrustLeft === option.value ? 'active' : ''} ${option.value === 'Pos' ? 'positive' : 'negative'}`}
+                            onClick={() => handleChange('headThrustLeft', option.value)}
+                          >
+                            {option.label}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div className="section-card">
+              <div className="card-header">
+                <div className="header-icon">
+                  <i className="fas fa-low-vision"></i>
+                </div>
+                <h3>Dynamic Visual Acuity</h3>
+              </div>
+              <div className="card-content">
+                <div className="test-item">
+                  <div className="test-label">
+                    <label>DYNAMIC VISUAL ACUITY (DVA):</label>
+                  </div>
+                  <div className="test-options">
+                    <div className="toggle-option-group">
+                      {posNegOptions.map(option => (
+                        <div 
+                          key={option.value}
+                          className={`toggle-option ${formData.dynamicVisualAcuity === option.value ? 'active' : ''} ${option.value === 'Pos' ? 'positive' : 'negative'}`}
+                          onClick={() => handleChange('dynamicVisualAcuity', option.value)}
+                        >
+                          {option.label}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="test-item">
+                  <div className="test-label">
+                    <label>LINES OF DEFICIT:</label>
+                    <span className="label-hint">0-2 lines indicates vestibular hypofunction</span>
+                  </div>
+                  <div className="test-options">
+                    <div className="input-field">
                       <input
-                        type="radio"
-                        id={`sharpPursar${option.value}`}
-                        name="sharpPursarTest"
-                        checked={formData.sharpPursarTest === option.value}
-                        onChange={() => handleChange('sharpPursarTest', option.value)}
+                        type="text"
+                        value={formData.linesOfDeficit}
+                        onChange={(e) => handleChange('linesOfDeficit', e.target.value)}
+                        placeholder="Enter number of lines"
                       />
-                      <label htmlFor={`sharpPursar${option.value}`}>{option.label}</label>
                     </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-            
-            <div className="divider"></div>
-            
-            <div className="dual-column-section">
-              <div className="column">
-                <h3>OCULOMOTOR</h3>
-                
-                <div className="test-row">
-                  <label>SMOOTH PURSUIT:</label>
-                  <div className="radio-group">
-                    {posNegOptions.map(option => (
-                      <div className="radio-option" key={option.value}>
-                        <input
-                          type="radio"
-                          id={`smoothPursuit${option.value}`}
-                          name="smoothPursuit"
-                          checked={formData.smoothPursuit === option.value}
-                          onChange={() => handleChange('smoothPursuit', option.value)}
-                        />
-                        <label htmlFor={`smoothPursuit${option.value}`}>{option.label}</label>
-                      </div>
-                    ))}
                   </div>
                 </div>
                 
-                <div className="test-row">
-                  <label>SACCADES:</label>
-                  <div className="radio-group">
-                    {posNegOptions.map(option => (
-                      <div className="radio-option" key={option.value}>
-                        <input
-                          type="radio"
-                          id={`saccades${option.value}`}
-                          name="saccades"
-                          checked={formData.saccades === option.value}
-                          onChange={() => handleChange('saccades', option.value)}
-                        />
-                        <label htmlFor={`saccades${option.value}`}>{option.label}</label>
-                      </div>
-                    ))}
+                <div className="test-item">
+                  <div className="test-label">
+                    <label>GAZE STABILIZATION DEFICITS:</label>
+                    <span className="label-hint">Based on oculomotor and vestibular testing</span>
                   </div>
-                </div>
-                
-                <div className="test-row">
-                  <label>NYSTAGMUS PRESENT:</label>
-                  <div className="radio-group">
-                    {posNegOptions.map(option => (
-                      <div className="radio-option" key={option.value}>
-                        <input
-                          type="radio"
-                          id={`nystagmusPresent${option.value}`}
-                          name="nystagmusPresent"
-                          checked={formData.nystagmusPresent === option.value}
-                          onChange={() => handleChange('nystagmusPresent', option.value)}
-                        />
-                        <label htmlFor={`nystagmusPresent${option.value}`}>{option.label}</label>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-              
-              <div className="column">
-                <h3>VESTIBULAR</h3>
-                
-                <div className="test-row">
-                  <label>HEAD SHAKE NYSTAGMUS:</label>
-                  <div className="radio-group">
-                    {posNegOptions.map(option => (
-                      <div className="radio-option" key={option.value}>
-                        <input
-                          type="radio"
-                          id={`headShakeNystagmus${option.value}`}
-                          name="headShakeNystagmus"
-                          checked={formData.headShakeNystagmus === option.value}
-                          onChange={() => handleChange('headShakeNystagmus', option.value)}
-                        />
-                        <label htmlFor={`headShakeNystagmus${option.value}`}>{option.label}</label>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-                
-                <div className="test-row">
-                  <label>HEAD THRUST (R):</label>
-                  <div className="radio-group">
-                    {posNegOptions.map(option => (
-                      <div className="radio-option" key={option.value}>
-                        <input
-                          type="radio"
-                          id={`headThrustRight${option.value}`}
-                          name="headThrustRight"
-                          checked={formData.headThrustRight === option.value}
-                          onChange={() => handleChange('headThrustRight', option.value)}
-                        />
-                        <label htmlFor={`headThrustRight${option.value}`}>{option.label}</label>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-                
-                <div className="test-row">
-                  <label>HEAD THRUST (L):</label>
-                  <div className="radio-group">
-                    {posNegOptions.map(option => (
-                      <div className="radio-option" key={option.value}>
-                        <input
-                          type="radio"
-                          id={`headThrustLeft${option.value}`}
-                          name="headThrustLeft"
-                          checked={formData.headThrustLeft === option.value}
-                          onChange={() => handleChange('headThrustLeft', option.value)}
-                        />
-                        <label htmlFor={`headThrustLeft${option.value}`}>{option.label}</label>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </div>
-            
-            <div className="divider"></div>
-            
-            <div className="section-row">
-              <div className="label-column">
-                <label>DYNAMIC VISUAL ACUITY (DVA):</label>
-              </div>
-              <div className="field-column">
-                <div className="radio-group">
-                  {posNegOptions.map(option => (
-                    <div className="radio-option" key={option.value}>
-                      <input type="radio"
-                        id={`dynamicVisualAcuity${option.value}`}
-                        name="dynamicVisualAcuity"
-                        checked={formData.dynamicVisualAcuity === option.value}
-                        onChange={() => handleChange('dynamicVisualAcuity', option.value)}
-                      />
-                      <label htmlFor={`dynamicVisualAcuity${option.value}`}>{option.label}</label>
+                  <div className="test-options">
+                    <div className="toggle-option-group">
+                      {yesNoOptions.map(option => (
+                        <div 
+                          key={option.value}
+                          className={`toggle-option ${formData.gazeStabilizationDeficits === option.value ? 'active' : ''} ${option.value === 'Yes' ? 'positive' : 'negative'}`}
+                          onClick={() => handleChange('gazeStabilizationDeficits', option.value)}
+                        >
+                          {option.label}
+                        </div>
+                      ))}
                     </div>
-                  ))}
+                  </div>
                 </div>
-              </div>
-              <div className="field-column">
-                <label>LINES OF DEFICIT:</label>
-                <input
-                  type="text"
-                  value={formData.linesOfDeficit}
-                  onChange={(e) => handleChange('linesOfDeficit', e.target.value)}
-                  placeholder="0-2 lines indicates vestibular Hypo function"
-                />
-              </div>
-            </div>
-            
-            <div className="section-row">
-              <div className="label-column">
-                <label>DOES OCULOMOTOR AND VESTIBULAR TESTING INDICATE GAZE STABILIZATION DEFICITS?</label>
-              </div>
-              <div className="field-column">
-                <div className="radio-group">
-                  {yesNoOptions.map(option => (
-                    <div className="radio-option" key={option.value}>
-                      <input
-                        type="radio"
-                        id={`gazeStabilizationDeficits${option.value}`}
-                        name="gazeStabilizationDeficits"
-                        checked={formData.gazeStabilizationDeficits === option.value}
-                        onChange={() => handleChange('gazeStabilizationDeficits', option.value)}
-                      />
-                      <label htmlFor={`gazeStabilizationDeficits${option.value}`}>{option.label}</label>
+                
+                <div className="test-item full-width">
+                  <div className="test-label">
+                    <label>OTHER TESTING:</label>
+                  </div>
+                  <div className="test-options">
+                    <div className="input-field">
+                      <textarea
+                        value={formData.otherTesting}
+                        onChange={(e) => handleChange('otherTesting', e.target.value)}
+                        rows={3}
+                        placeholder="Describe any other tests performed"
+                      ></textarea>
                     </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-            
-            <div className="section-row">
-              <div className="label-column">
-                <label>OTHER TESTING:</label>
-              </div>
-              <div className="field-column">
-                <textarea
-                  value={formData.otherTesting}
-                  onChange={(e) => handleChange('otherTesting', e.target.value)}
-                  rows={4}
-                  placeholder="Describe any other tests performed"
-                ></textarea>
-              </div>
-            </div>
-            
-            <div className="divider"></div>
-            
-            <h3 className="section-title">MODIFIED CLINICAL TEST OF SENSORY INTEGRATION FOR BALANCE (MCTSIB)</h3>
-            
-            <div className="mctsib-grid">
-              <div className="mctsib-row">
-                <div className="test-label">
-                  <label>EYES OPEN-FIRM SURFACE (EO/FS):</label>
-                </div>
-                <div className="test-input">
-                  <div className="input-with-unit">
-                    <input
-                      type="text"
-                      value={formData.eyesOpenFirmSurface}
-                      onChange={(e) => handleChange('eyesOpenFirmSurface', e.target.value)}
-                      placeholder=""
-                    />
-                    <span className="unit">/ 30 sec</span>
-                  </div>
-                </div>
-                <div className="test-label">
-                  <label>TINETTI (POMA):</label>
-                </div>
-                <div className="test-input">
-                  <div className="input-with-unit">
-                    <input
-                      type="text"
-                      value={formData.tinettiPOMA}
-                      onChange={(e) => handleChange('tinettiPOMA', e.target.value)}
-                      placeholder=""
-                    />
-                    <span className="unit">/ 28</span>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="mctsib-row">
-                <div className="test-label">
-                  <label>EYES CLOSED-FIRM SURFACE (EC/FS):</label>
-                </div>
-                <div className="test-input">
-                  <div className="input-with-unit">
-                    <input
-                      type="text"
-                      value={formData.eyesClosedFirmSurface}
-                      onChange={(e) => handleChange('eyesClosedFirmSurface', e.target.value)}
-                      placeholder=""
-                    />
-                    <span className="unit">/ 30 sec</span>
-                  </div>
-                </div>
-                <div className="test-label">
-                  <label>DYNAMIC GAIT (DGI) 4 STEP:</label>
-                </div>
-                <div className="test-input">
-                  <div className="input-with-unit">
-                    <input
-                      type="text"
-                      value={formData.dynamicGait4Step}
-                      onChange={(e) => handleChange('dynamicGait4Step', e.target.value)}
-                      placeholder=""
-                    />
-                    <span className="unit">/ 12</span>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="mctsib-row">
-                <div className="test-label">
-                  <label>EYES OPEN-COMPLIANT SURFACE (EO/CS):</label>
-                </div>
-                <div className="test-input">
-                  <div className="input-with-unit">
-                    <input
-                      type="text"
-                      value={formData.eyesOpenCompliantSurface}
-                      onChange={(e) => handleChange('eyesOpenCompliantSurface', e.target.value)}
-                      placeholder=""
-                    />
-                    <span className="unit">/ 30 sec</span>
-                  </div>
-                </div>
-                <div className="test-label">
-                  <label>DYNAMIC GAIT (DGI) 8 STEP:</label>
-                </div>
-                <div className="test-input">
-                  <div className="input-with-unit">
-                    <input
-                      type="text"
-                      value={formData.dynamicGait8Step}
-                      onChange={(e) => handleChange('dynamicGait8Step', e.target.value)}
-                      placeholder=""
-                    />
-                    <span className="unit">/ 24</span>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="mctsib-row single-row">
-                <div className="test-label">
-                  <label>EYES CLOSED-COMPLIANT SURFACE (EC/CS):</label>
-                </div>
-                <div className="test-input">
-                  <div className="input-with-unit">
-                    <input
-                      type="text"
-                      value={formData.eyesClosedCompliantSurface}
-                      onChange={(e) => handleChange('eyesClosedCompliantSurface', e.target.value)}
-                      placeholder=""
-                    />
-                    <span className="unit">/ 30 sec</span>
                   </div>
                 </div>
               </div>
             </div>
             
-            <div className="section-row">
-              <div className="label-column">
-                <label>OTHER BALANCE TESTS:</label>
+            <div className="section-card">
+              <div className="card-header">
+                <div className="header-icon">
+                  <i className="fas fa-standing-balance"></i>
+                </div>
+                <h3>Modified Clinical Test of Sensory Integration for Balance (MCTSIB)</h3>
               </div>
-              <div className="field-column">
-                <textarea
-                  value={formData.otherBalanceTests}
-                  onChange={(e) => handleChange('otherBalanceTests', e.target.value)}
-                  rows={4}
-                  placeholder="Describe any other balance tests performed"
-                ></textarea>
+              <div className="card-content mctsib-content">
+                <div className="mctsib-grid">
+                  <div className="grid-section balance-tests">
+                    <div className="section-title">Balance Testing</div>
+                    <div className="test-grid-item">
+                      <div className="test-grid-label">EYES OPEN - FIRM SURFACE:</div>
+                      <div className="test-grid-input">
+                        <div className="input-with-unit">
+                          <input
+                            type="text"
+                            value={formData.eyesOpenFirmSurface}
+                            onChange={(e) => handleChange('eyesOpenFirmSurface', e.target.value)}
+                            placeholder=""
+                          />
+                          <span className="unit">/ 30 sec</span>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="test-grid-item">
+                      <div className="test-grid-label">EYES CLOSED - FIRM SURFACE:</div>
+                      <div className="test-grid-input">
+                        <div className="input-with-unit">
+                          <input
+                            type="text"
+                            value={formData.eyesClosedFirmSurface}
+                            onChange={(e) => handleChange('eyesClosedFirmSurface', e.target.value)}
+                            placeholder=""
+                          />
+                          <span className="unit">/ 30 sec</span>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="test-grid-item">
+                      <div className="test-grid-label">EYES OPEN - COMPLIANT SURFACE:</div>
+                      <div className="test-grid-input">
+                        <div className="input-with-unit">
+                          <input
+                            type="text"
+                            value={formData.eyesOpenCompliantSurface}
+                            onChange={(e) => handleChange('eyesOpenCompliantSurface', e.target.value)}
+                            placeholder=""
+                          />
+                          <span className="unit">/ 30 sec</span>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="test-grid-item">
+                      <div className="test-grid-label">EYES CLOSED - COMPLIANT SURFACE:</div>
+                      <div className="test-grid-input">
+                        <div className="input-with-unit">
+                          <input
+                            type="text"
+                            value={formData.eyesClosedCompliantSurface}
+                            onChange={(e) => handleChange('eyesClosedCompliantSurface', e.target.value)}
+                            placeholder=""
+                          />
+                          <span className="unit">/ 30 sec</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="grid-section functional-tests">
+                    <div className="section-title">Functional Assessments</div>
+                    <div className="test-grid-item">
+                      <div className="test-grid-label">TINETTI (POMA):</div>
+                      <div className="test-grid-input">
+                        <div className="input-with-unit">
+                          <input
+                            type="text"
+                            value={formData.tinettiPOMA}
+                            onChange={(e) => handleChange('tinettiPOMA', e.target.value)}
+                            placeholder=""
+                          />
+                          <span className="unit">/ 28</span>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="test-grid-item">
+                      <div className="test-grid-label">DYNAMIC GAIT (DGI) 4 STEP:</div>
+                      <div className="test-grid-input">
+                        <div className="input-with-unit">
+                          <input
+                            type="text"
+                            value={formData.dynamicGait4Step}
+                            onChange={(e) => handleChange('dynamicGait4Step', e.target.value)}
+                            placeholder=""
+                          />
+                          <span className="unit">/ 12</span>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="test-grid-item">
+                      <div className="test-grid-label">DYNAMIC GAIT (DGI) 8 STEP:</div>
+                      <div className="test-grid-input">
+                        <div className="input-with-unit">
+                          <input
+                            type="text"
+                            value={formData.dynamicGait8Step}
+                            onChange={(e) => handleChange('dynamicGait8Step', e.target.value)}
+                            placeholder=""
+                          />
+                          <span className="unit">/ 24</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="test-item full-width">
+                  <div className="test-label">
+                    <label>OTHER BALANCE TESTS:</label>
+                  </div>
+                  <div className="test-options">
+                    <div className="input-field">
+                      <textarea
+                        value={formData.otherBalanceTests}
+                        onChange={(e) => handleChange('otherBalanceTests', e.target.value)}
+                        rows={3}
+                        placeholder="Describe any other balance tests performed"
+                      ></textarea>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
             
-            <div className="section-row">
-              <div className="label-column">
-                <label>INTERPRETATION OF STANDARDIZED TESTING AND IMPACT OF FUNCTION:</label>
+            <div className="section-card">
+              <div className="card-header">
+                <div className="header-icon">
+                  <i className="fas fa-clipboard-list"></i>
+                </div>
+                <h3>Interpretation</h3>
               </div>
-              <div className="field-column">
-                <textarea
-                  value={formData.interpretation}
-                  onChange={(e) => handleChange('interpretation', e.target.value)}
-                  rows={4}
-                  placeholder="Provide interpretation of test results and impact on function"
-                ></textarea>
+              <div className="card-content">
+                <div className="test-item full-width">
+                  <div className="test-label">
+                    <label>INTERPRETATION OF STANDARDIZED TESTING AND IMPACT ON FUNCTION:</label>
+                  </div>
+                  <div className="test-options">
+                    <div className="input-field">
+                      <textarea
+                        value={formData.interpretation}
+                        onChange={(e) => handleChange('interpretation', e.target.value)}
+                        rows={4}
+                        placeholder="Provide interpretation of test results and impact on function"
+                      ></textarea>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -458,10 +530,12 @@ const AdvancedBalanceModal = ({ isOpen, onClose, initialData = null }) => {
         
         <div className="modal-footer">
           <button className="cancel-btn" onClick={() => onClose()}>
-            CANCEL
+            <i className="fas fa-times"></i>
+            <span>Cancel</span>
           </button>
           <button className="submit-btn" onClick={handleSubmit}>
-            SUBMIT
+            <i className="fas fa-check"></i>
+            <span>Submit Assessment</span>
           </button>
         </div>
       </div>

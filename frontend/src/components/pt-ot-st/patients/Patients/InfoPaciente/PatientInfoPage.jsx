@@ -915,27 +915,7 @@ const PatientInfoPage = () => {
         </div>
       </main>
       
-      {/* Floating Action Button */}
-      <div className="floating-action-button">
-        <button className="fab-button">
-          <i className="fas fa-plus"></i>
-          <span className="fab-tooltip">Quick Actions</span>
-        </button>
-        <div className="fab-menu">
-          <button className="fab-item">
-            <i className="fas fa-calendar-plus"></i>
-            <span>Add Visit</span>
-          </button>
-          <button className="fab-item">
-            <i className="fas fa-file-upload"></i>
-            <span>Upload Document</span>
-          </button>
-          <button className="fab-item">
-            <i className="fas fa-sticky-note"></i>
-            <span>Add Note</span>
-          </button>
-        </div>
-      </div>
+
     </div>
   );
 };

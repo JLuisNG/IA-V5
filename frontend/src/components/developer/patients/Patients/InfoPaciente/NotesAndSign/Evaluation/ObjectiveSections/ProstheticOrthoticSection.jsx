@@ -1,4 +1,4 @@
-// components/ObjectiveSections/ProstheticOrthoticSection.jsx
+// Enhanced ProstheticOrthoticSection.jsx
 import React, { useState } from 'react';
 import '../../../../../../../../styles/developer/Patients/InfoPaciente/NotesAndSign/ObjectiveSections/ProstheticOrthoticSection.scss';
 
@@ -123,71 +123,102 @@ const ProstheticOrthoticSection = ({ data, onChange }) => {
 
   return (
     <div className="prosthetic-orthotic-section">
-      <h2 className="section-title">Prosthetic And Orthotic (Optional)</h2>
+      <div className="section-header">
+        <h2 className="section-title">
+          <i className="fas fa-crutch"></i>
+          Prosthetic And Orthotic
+        </h2>
+        <span className="optional-badge">Optional</span>
+      </div>
       
       <div className="content-grid">
         <div className="prosthetic-column">
-          <h3 className="column-title">PROSTHETIC</h3>
+          <div className="column-header">
+            <div className="title-icon">
+              <i className="fas fa-biking"></i>
+            </div>
+            <h3 className="column-title">PROSTHETIC</h3>
+          </div>
           
           <div className="prosthetic-list">
-            {prostheticsList.map((item, index) => (
-              <div className="item-row" key={item.id || index}>
-                <div className="item-details">
-                  <span className="item-type">{item.type}</span>
-                  <span className="item-usage">{item.usage}</span>
-                </div>
-                <button 
-                  className="remove-btn"
-                  onClick={() => handleRemoveProsthetic(item.id)}
-                  title="Remove"
-                >
-                  <i className="fas fa-times"></i>
-                </button>
+            {prostheticsList.length === 0 ? (
+              <div className="empty-state">
+                <i className="fas fa-info-circle"></i>
+                <p>No prosthetics added yet</p>
               </div>
-            ))}
+            ) : (
+              prostheticsList.map((item, index) => (
+                <div className="item-row" key={item.id || index}>
+                  <div className="item-content">
+                    <div className="item-icon">
+                      <i className="fas fa-walking"></i>
+                    </div>
+                    <div className="item-details">
+                      <span className="item-type">{item.type}</span>
+                      <span className="item-usage">
+                        <i className="fas fa-tag"></i> {item.usage}
+                      </span>
+                    </div>
+                  </div>
+                  <button 
+                    className="remove-btn"
+                    onClick={() => handleRemoveProsthetic(item.id)}
+                    title="Remove"
+                  >
+                    <i className="fas fa-trash-alt"></i>
+                  </button>
+                </div>
+              ))
+            )}
           </div>
           
           <div className="add-item-section">
             <div className="dropdown-row">
-              <select 
-                value={newProsthetic.type}
-                onChange={(e) => handleProstheticChange('type', e.target.value)}
-                className="type-dropdown"
-              >
-                {prostheticTypes.map(option => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
+              <div className="select-container">
+                <i className="fas fa-list prefix-icon"></i>
+                <select 
+                  value={newProsthetic.type}
+                  onChange={(e) => handleProstheticChange('type', e.target.value)}
+                  className="type-dropdown"
+                >
+                  {prostheticTypes.map(option => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
               
-              <select 
-                value={newProsthetic.usage}
-                onChange={(e) => handleProstheticChange('usage', e.target.value)}
-                className="usage-dropdown"
-              >
-                {usageTypes.map(option => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
+              <div className="select-container">
+                <i className="fas fa-check-circle prefix-icon"></i>
+                <select 
+                  value={newProsthetic.usage}
+                  onChange={(e) => handleProstheticChange('usage', e.target.value)}
+                  className="usage-dropdown"
+                >
+                  {usageTypes.map(option => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
               
               <button 
-                className="remove-field-btn"
-                title="Clear Field"
+                className="clear-field-btn"
+                title="Clear Fields"
                 onClick={() => setNewProsthetic({
                   type: 'AKA (Above Knee)',
                   usage: 'Both',
                   notes: ''
                 })}
               >
-                <i className="fas fa-times"></i>
+                <i className="fas fa-sync-alt"></i>
               </button>
             </div>
             
             <button 
-              className="add-btn"
+              className="add-btn prosthetic-add"
               onClick={handleAddProsthetic}
             >
               <i className="fas fa-plus"></i>
@@ -197,67 +228,92 @@ const ProstheticOrthoticSection = ({ data, onChange }) => {
         </div>
 
         <div className="orthotic-column">
-          <h3 className="column-title">ORTHOTIC</h3>
+          <div className="column-header">
+            <div className="title-icon">
+              <i className="fas fa-hand-paper"></i>
+            </div>
+            <h3 className="column-title">ORTHOTIC</h3>
+          </div>
           
           <div className="orthotic-list">
-            {orthoticsList.map((item, index) => (
-              <div className="item-row" key={item.id || index}>
-                <div className="item-details">
-                  <span className="item-type">{item.type}</span>
-                  <span className="item-usage">{item.usage}</span>
-                </div>
-                <button 
-                  className="remove-btn"
-                  onClick={() => handleRemoveOrthotic(item.id)}
-                  title="Remove"
-                >
-                  <i className="fas fa-times"></i>
-                </button>
+            {orthoticsList.length === 0 ? (
+              <div className="empty-state">
+                <i className="fas fa-info-circle"></i>
+                <p>No orthotics added yet</p>
               </div>
-            ))}
+            ) : (
+              orthoticsList.map((item, index) => (
+                <div className="item-row" key={item.id || index}>
+                  <div className="item-content">
+                    <div className="item-icon">
+                      <i className="fas fa-network-wired"></i>
+                    </div>
+                    <div className="item-details">
+                      <span className="item-type">{item.type}</span>
+                      <span className="item-usage">
+                        <i className="fas fa-tag"></i> {item.usage}
+                      </span>
+                    </div>
+                  </div>
+                  <button 
+                    className="remove-btn"
+                    onClick={() => handleRemoveOrthotic(item.id)}
+                    title="Remove"
+                  >
+                    <i className="fas fa-trash-alt"></i>
+                  </button>
+                </div>
+              ))
+            )}
           </div>
           
           <div className="add-item-section">
             <div className="dropdown-row">
-              <select 
-                value={newOrthotic.type}
-                onChange={(e) => handleOrthoticChange('type', e.target.value)}
-                className="type-dropdown"
-              >
-                {orthoticTypes.map(option => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
+              <div className="select-container">
+                <i className="fas fa-list prefix-icon"></i>
+                <select 
+                  value={newOrthotic.type}
+                  onChange={(e) => handleOrthoticChange('type', e.target.value)}
+                  className="type-dropdown"
+                >
+                  {orthoticTypes.map(option => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
               
-              <select 
-                value={newOrthotic.usage}
-                onChange={(e) => handleOrthoticChange('usage', e.target.value)}
-                className="usage-dropdown"
-              >
-                {usageTypes.map(option => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
+              <div className="select-container">
+                <i className="fas fa-check-circle prefix-icon"></i>
+                <select 
+                  value={newOrthotic.usage}
+                  onChange={(e) => handleOrthoticChange('usage', e.target.value)}
+                  className="usage-dropdown"
+                >
+                  {usageTypes.map(option => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
               
               <button 
-                className="remove-field-btn"
-                title="Clear Field"
+                className="clear-field-btn"
+                title="Clear Fields"
                 onClick={() => setNewOrthotic({
                   type: 'AFO (Ankle/Foot Orthosis)',
                   usage: 'Donning/Doffing',
                   notes: ''
                 })}
               >
-                <i className="fas fa-times"></i>
+                <i className="fas fa-sync-alt"></i>
               </button>
             </div>
             
             <button 
-              className="add-btn"
+              className="add-btn orthotic-add"
               onClick={handleAddOrthotic}
             >
               <i className="fas fa-plus"></i>
@@ -267,14 +323,19 @@ const ProstheticOrthoticSection = ({ data, onChange }) => {
         </div>
       </div>
       
-      <div className="additional-info-row">
-        <span className="label">ADDITIONAL INFORMATION:</span>
-        <textarea 
-          value={data.additionalInformation || ''}
-          onChange={(e) => handleTextChange('additionalInformation', e.target.value)}
-          rows={3}
-          placeholder="Add any additional information about prosthetics or orthotics"
-        />
+      <div className="additional-info-container">
+        <div className="info-header">
+          <i className="fas fa-info-circle"></i>
+          <span className="label">ADDITIONAL INFORMATION:</span>
+        </div>
+        <div className="textarea-container">
+          <textarea 
+            value={data.additionalInformation || ''}
+            onChange={(e) => handleTextChange('additionalInformation', e.target.value)}
+            rows={3}
+            placeholder="Add any additional information about prosthetics or orthotics"
+          />
+        </div>
       </div>
     </div>
   );

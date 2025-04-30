@@ -1,4 +1,4 @@
-// components/standardizedTests/BradenScaleModal.jsx
+// Enhanced BradenScaleModal.jsx
 import React, { useState, useEffect } from 'react';
 import '../../../../../../../../styles/developer/Patients/InfoPaciente/NotesAndSign/standardizedTests/BradenScaleModal.scss';
 
@@ -150,6 +150,15 @@ const BradenScaleModal = ({ isOpen, onClose, initialData = null }) => {
     }
   };
 
+  // Obtener el color del nivel de riesgo
+  const getRiskLevelColor = (score) => {
+    if (score <= 9) return '#ef4444'; // Very High Risk - Red
+    if (score <= 12) return '#f97316'; // High Risk - Orange
+    if (score <= 14) return '#f59e0b'; // Moderate Risk - Amber
+    if (score <= 18) return '#10b981'; // Mild Risk - Green
+    return '#3b82f6'; // No Risk - Blue
+  };
+
   // Si el modal no está abierto, no renderizar nada
   if (!isOpen) return null;
 
@@ -159,7 +168,7 @@ const BradenScaleModal = ({ isOpen, onClose, initialData = null }) => {
         <div className="modal-header">
           <h2>
             <i className="fas fa-clipboard-check"></i>
-            Braden Scale
+            Braden Scale for Predicting Pressure Sore Risk
           </h2>
           <button className="close-button" onClick={() => onClose()}>
             <i className="fas fa-times"></i>
@@ -167,255 +176,329 @@ const BradenScaleModal = ({ isOpen, onClose, initialData = null }) => {
         </div>
         
         <div className="modal-content">
-          <div className="info-note">
-            <p>Prior scores are for reference only. To print previous scores please type in additional boxes below.</p>
+          <div className="info-banner">
+            <div className="info-icon">
+              <i className="fas fa-info-circle"></i>
+            </div>
+            <div className="info-text">
+              <h3>Assessment Information</h3>
+              <p>Prior scores are for reference only. Complete all sections below to obtain a valid risk assessment.</p>
+            </div>
+          </div>
+          
+          <div className="progress-indicator">
+            <div className="progress-bar" style={{ width: `${(Object.keys(formData).filter(key => formData[key] && !['totalScore', 'riskLevel', 'isComplete'].includes(key)).length / 6) * 100}%` }}></div>
+            <div className="progress-text">
+              Completion: {Object.keys(formData).filter(key => formData[key] && !['totalScore', 'riskLevel', 'isComplete'].includes(key)).length} of 6 sections
+            </div>
           </div>
           
           <div className="braden-table">
             <div className="table-header">
               <div className="risk-factor-col">RISK FACTOR</div>
-              <div className="score-description-col">SCORE/DESCRIPTION</div>
+              <div className="score-description-col">SCORE / DESCRIPTION</div>
             </div>
             
-            <div className="table-row">
+            <div className={`table-row ${validationErrors.sensoryPerception ? 'has-error' : ''}`}>
               <div className="risk-factor-col">
-                <h3>Sensory Perception</h3>
+                <h3>
+                  <i className="fas fa-brain"></i>
+                  Sensory Perception
+                </h3>
                 <p>Ability to respond meaningfully to pressure-related discomfort</p>
-              </div>
-              <div className="score-description-col">
-                <div className={`score-options ${validationErrors.sensoryPerception ? 'has-error' : ''}`}>
-                  {bradenOptions.sensoryPerception.map(option => (
-                    <div className="score-option" key={option.value}>
-                      <label className="radio-container">
-                        <input
-                          type="radio"
-                          name="sensoryPerception"
-                          value={option.value}
-                          checked={formData.sensoryPerception === option.value}
-                          onChange={() => handleChange('sensoryPerception', option.value)}
-                        />
-                        <span className="checkmark"></span>
-                        <div className="option-content">
-                          <div className="option-title">{option.label}</div>
-                          <div className="option-description">{option.description}</div>
-                        </div>
-                      </label>
-                    </div>
-                  ))}
-                </div>
                 {validationErrors.sensoryPerception && (
-                  <div className="error-message">This field is required</div>
+                  <div className="error-badge">Required</div>
                 )}
+              </div>
+              <div className="score-description-col">
+                <div className="score-options">
+                  {bradenOptions.sensoryPerception.map(option => (
+                    <div 
+                      className={`score-option ${formData.sensoryPerception === option.value ? 'selected' : ''}`} 
+                      key={option.value}
+                      onClick={() => handleChange('sensoryPerception', option.value)}
+                    >
+                      <div className="option-header">
+                        <div className="radio-indicator">
+                          {formData.sensoryPerception === option.value && <div className="indicator-inner"></div>}
+                        </div>
+                        <div className="option-title">{option.label}</div>
+                      </div>
+                      <div className="option-description">{option.description}</div>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
             
-            <div className="table-row">
+            <div className={`table-row ${validationErrors.moisture ? 'has-error' : ''}`}>
               <div className="risk-factor-col">
-                <h3>Moisture</h3>
+                <h3>
+                  <i className="fas fa-tint"></i>
+                  Moisture
+                </h3>
                 <p>Degree to which skin is exposed to moisture</p>
-              </div>
-              <div className="score-description-col">
-                <div className={`score-options ${validationErrors.moisture ? 'has-error' : ''}`}>
-                  {bradenOptions.moisture.map(option => (
-                    <div className="score-option" key={option.value}>
-                      <label className="radio-container">
-                        <input
-                          type="radio"
-                          name="moisture"
-                          value={option.value}
-                          checked={formData.moisture === option.value}
-                          onChange={() => handleChange('moisture', option.value)}
-                        />
-                        <span className="checkmark"></span>
-                        <div className="option-content">
-                          <div className="option-title">{option.label}</div>
-                          <div className="option-description">{option.description}</div>
-                        </div>
-                      </label>
-                    </div>
-                  ))}
-                </div>
                 {validationErrors.moisture && (
-                  <div className="error-message">This field is required</div>
+                  <div className="error-badge">Required</div>
                 )}
+              </div>
+              <div className="score-description-col">
+                <div className="score-options">
+                  {bradenOptions.moisture.map(option => (
+                    <div 
+                      className={`score-option ${formData.moisture === option.value ? 'selected' : ''}`} 
+                      key={option.value}
+                      onClick={() => handleChange('moisture', option.value)}
+                    >
+                      <div className="option-header">
+                        <div className="radio-indicator">
+                          {formData.moisture === option.value && <div className="indicator-inner"></div>}
+                        </div>
+                        <div className="option-title">{option.label}</div>
+                      </div>
+                      <div className="option-description">{option.description}</div>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
             
-            <div className="table-row">
+            <div className={`table-row ${validationErrors.activity ? 'has-error' : ''}`}>
               <div className="risk-factor-col">
-                <h3>Activity</h3>
+                <h3>
+                  <i className="fas fa-walking"></i>
+                  Activity
+                </h3>
                 <p>Degree of physical activity</p>
-              </div>
-              <div className="score-description-col">
-                <div className={`score-options ${validationErrors.activity ? 'has-error' : ''}`}>
-                  {bradenOptions.activity.map(option => (
-                    <div className="score-option" key={option.value}>
-                      <label className="radio-container">
-                        <input
-                          type="radio"
-                          name="activity"
-                          value={option.value}
-                          checked={formData.activity === option.value}
-                          onChange={() => handleChange('activity', option.value)}
-                        />
-                        <span className="checkmark"></span>
-                        <div className="option-content">
-                          <div className="option-title">{option.label}</div>
-                          <div className="option-description">{option.description}</div>
-                        </div>
-                      </label>
-                    </div>
-                  ))}
-                </div>
                 {validationErrors.activity && (
-                  <div className="error-message">This field is required</div>
+                  <div className="error-badge">Required</div>
                 )}
+              </div>
+              <div className="score-description-col">
+                <div className="score-options">
+                  {bradenOptions.activity.map(option => (
+                    <div 
+                      className={`score-option ${formData.activity === option.value ? 'selected' : ''}`} 
+                      key={option.value}
+                      onClick={() => handleChange('activity', option.value)}
+                    >
+                      <div className="option-header">
+                        <div className="radio-indicator">
+                          {formData.activity === option.value && <div className="indicator-inner"></div>}
+                        </div>
+                        <div className="option-title">{option.label}</div>
+                      </div>
+                      <div className="option-description">{option.description}</div>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
             
-            <div className="table-row">
+            <div className={`table-row ${validationErrors.mobility ? 'has-error' : ''}`}>
               <div className="risk-factor-col">
-                <h3>Mobility</h3>
+                <h3>
+                  <i className="fas fa-arrows-alt"></i>
+                  Mobility
+                </h3>
                 <p>Ability to change and control body position</p>
-              </div>
-              <div className="score-description-col">
-                <div className={`score-options ${validationErrors.mobility ? 'has-error' : ''}`}>
-                  {bradenOptions.mobility.map(option => (
-                    <div className="score-option" key={option.value}>
-                      <label className="radio-container">
-                        <input
-                          type="radio"
-                          name="mobility"
-                          value={option.value}
-                          checked={formData.mobility === option.value}
-                          onChange={() => handleChange('mobility', option.value)}
-                        />
-                        <span className="checkmark"></span>
-                        <div className="option-content">
-                          <div className="option-title">{option.label}</div>
-                          <div className="option-description">{option.description}</div>
-                        </div>
-                      </label>
-                    </div>
-                  ))}
-                </div>
                 {validationErrors.mobility && (
-                  <div className="error-message">This field is required</div>
+                  <div className="error-badge">Required</div>
                 )}
+              </div>
+              <div className="score-description-col">
+                <div className="score-options">
+                  {bradenOptions.mobility.map(option => (
+                    <div 
+                      className={`score-option ${formData.mobility === option.value ? 'selected' : ''}`} 
+                      key={option.value}
+                      onClick={() => handleChange('mobility', option.value)}
+                    >
+                      <div className="option-header">
+                        <div className="radio-indicator">
+                          {formData.mobility === option.value && <div className="indicator-inner"></div>}
+                        </div>
+                        <div className="option-title">{option.label}</div>
+                      </div>
+                      <div className="option-description">{option.description}</div>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
             
-            <div className="table-row">
+            <div className={`table-row ${validationErrors.nutrition ? 'has-error' : ''}`}>
               <div className="risk-factor-col">
-                <h3>Nutrition</h3>
+                <h3>
+                  <i className="fas fa-utensils"></i>
+                  Nutrition
+                </h3>
                 <p>Usual food intake pattern (NPO: Nothing by mouth)</p>
+                {validationErrors.nutrition && (
+                  <div className="error-badge">Required</div>
+                )}
               </div>
               <div className="score-description-col">
-                <div className={`score-options ${validationErrors.nutrition ? 'has-error' : ''}`}>
+                <div className="score-options">
                   {bradenOptions.nutrition.map(option => (
-                    <div className="score-option" key={option.value}>
-                      <label className="radio-container">
-                        <input
-                          type="radio"
-                          name="nutrition"
-                          value={option.value}
-                          checked={formData.nutrition === option.value}
-                          onChange={() => handleChange('nutrition', option.value)}
-                        />
-                        <span className="checkmark"></span>
-                        <div className="option-content">
-                          <div className="option-title">{option.label}</div>
-                          <div className="option-description">{option.description}</div>
+                    <div 
+                      className={`score-option ${formData.nutrition === option.value ? 'selected' : ''}`} 
+                      key={option.value}
+                      onClick={() => handleChange('nutrition', option.value)}
+                    >
+                      <div className="option-header">
+                        <div className="radio-indicator">
+                          {formData.nutrition === option.value && <div className="indicator-inner"></div>}
                         </div>
-                      </label>
+                        <div className="option-title">{option.label}</div>
+                      </div>
+                      <div className="option-description">{option.description}</div>
                     </div>
                   ))}
                 </div>
-                {validationErrors.nutrition && (
-                  <div className="error-message">This field is required</div>
-                )}
               </div>
             </div>
             
-            <div className="table-row">
+            <div className={`table-row ${validationErrors.frictionAndShear ? 'has-error' : ''}`}>
               <div className="risk-factor-col">
-                <h3>Friction and Shear</h3>
+                <h3>
+                  <i className="fas fa-exchange-alt"></i>
+                  Friction & Shear
+                </h3>
+                {validationErrors.frictionAndShear && (
+                  <div className="error-badge">Required</div>
+                )}
               </div>
               <div className="score-description-col">
-                <div className={`score-options ${validationErrors.frictionAndShear ? 'has-error' : ''}`}>
+                <div className="score-options">
                   {bradenOptions.frictionAndShear.map(option => (
-                    <div className="score-option" key={option.value}>
-                      <label className="radio-container">
-                        <input
-                          type="radio"
-                          name="frictionAndShear"
-                          value={option.value}
-                          checked={formData.frictionAndShear === option.value}
-                          onChange={() => handleChange('frictionAndShear', option.value)}
-                        />
-                        <span className="checkmark"></span>
-                        <div className="option-content">
-                          <div className="option-title">{option.label}</div>
-                          <div className="option-description">{option.description}</div>
+                    <div 
+                      className={`score-option ${formData.frictionAndShear === option.value ? 'selected' : ''}`} 
+                      key={option.value}
+                      onClick={() => handleChange('frictionAndShear', option.value)}
+                    >
+                      <div className="option-header">
+                        <div className="radio-indicator">
+                          {formData.frictionAndShear === option.value && <div className="indicator-inner"></div>}
                         </div>
-                      </label>
+                        <div className="option-title">{option.label}</div>
+                      </div>
+                      <div className="option-description">{option.description}</div>
                     </div>
                   ))}
                 </div>
-                {validationErrors.frictionAndShear && (
-                  <div className="error-message">This field is required</div>
-                )}
               </div>
             </div>
             
             <div className="table-footer">
-              <div className="total-score">
-                <span className="total-label">TOTAL:</span>
-                <span className="total-value">{formData.totalScore} out of 23 ({formData.riskLevel})</span>
+              <div className="total-container">
+                <div className="total-label">TOTAL SCORE:</div>
+                <div className="total-value" style={{ backgroundColor: getRiskLevelColor(formData.totalScore) + '20', color: getRiskLevelColor(formData.totalScore) }}>
+                  <span className="score-number">{formData.totalScore}</span>
+                  <span className="score-max">/ 23</span>
+                </div>
+              </div>
+              <div className="risk-level" style={{ backgroundColor: getRiskLevelColor(formData.totalScore) + '20', color: getRiskLevelColor(formData.totalScore) }}>
+                <i className="fas fa-exclamation-triangle"></i>
+                <span>{formData.riskLevel}</span>
               </div>
             </div>
           </div>
           
-          <div className="risk-interpretation">
-            <div className={`risk-card ${formData.totalScore <= 9 ? 'active' : ''}`}>
-              <div className="risk-level very-high">Very High Risk</div>
-              <div className="risk-range">Total Score ≤ 9</div>
-              <div className="risk-action">Implement comprehensive prevention protocol and consider specialty surface</div>
-            </div>
-            
-            <div className={`risk-card ${formData.totalScore > 9 && formData.totalScore <= 12 ? 'active' : ''}`}>
-              <div className="risk-level high">High Risk</div>
-              <div className="risk-range">Total Score 10-12</div>
-              <div className="risk-action">Implement prevention protocol and frequent repositioning</div>
-            </div>
-            
-            <div className={`risk-card ${formData.totalScore > 12 && formData.totalScore <= 14 ? 'active' : ''}`}>
-              <div className="risk-level moderate">Moderate Risk</div>
-              <div className="risk-range">Total Score 13-14</div>
-              <div className="risk-action">Implement basic prevention measures and reassess regularly</div>
-            </div>
-            
-            <div className={`risk-card ${formData.totalScore > 14 && formData.totalScore <= 18 ? 'active' : ''}`}>
-              <div className="risk-level mild">Mild Risk</div>
-              <div className="risk-range">Total Score 15-18</div>
-              <div className="risk-action">Monitor and implement basic prevention as needed</div>
-            </div>
-            
-            <div className={`risk-card ${formData.totalScore > 18 ? 'active' : ''}`}>
-              <div className="risk-level no-risk">No Risk</div>
-              <div className="risk-range">Total Score 19-23</div>
-              <div className="risk-action">Monitor and reassess as condition changes</div>
+          <div className="risk-legend">
+            <h3>Risk Level Interpretation</h3>
+            <div className="risk-cards">
+              <div className={`risk-card ${formData.totalScore <= 9 ? 'active' : ''}`}>
+                <div className="risk-header" style={{ backgroundColor: '#ef4444' }}>
+                  <i className="fas fa-exclamation-circle"></i>
+                  <span>Very High Risk</span>
+                </div>
+                <div className="risk-details">
+                  <div className="risk-score">≤ 9</div>
+                  <div className="risk-actions">
+                    <i className="fas fa-clipboard-list"></i>
+                    <span>Implement comprehensive prevention protocol and consider specialty surface</span>
+                  </div>
+                </div>
+              </div>
+              
+              <div className={`risk-card ${formData.totalScore > 9 && formData.totalScore <= 12 ? 'active' : ''}`}>
+                <div className="risk-header" style={{ backgroundColor: '#f97316' }}>
+                  <i className="fas fa-exclamation-triangle"></i>
+                  <span>High Risk</span>
+                </div>
+                <div className="risk-details">
+                  <div className="risk-score">10-12</div>
+                  <div className="risk-actions">
+                    <i className="fas fa-exchange-alt"></i>
+                    <span>Implement prevention protocol and frequent repositioning</span>
+                  </div>
+                </div>
+              </div>
+              
+              <div className={`risk-card ${formData.totalScore > 12 && formData.totalScore <= 14 ? 'active' : ''}`}>
+                <div className="risk-header" style={{ backgroundColor: '#f59e0b' }}>
+                  <i className="fas fa-exclamation"></i>
+                  <span>Moderate Risk</span>
+                </div>
+                <div className="risk-details">
+                  <div className="risk-score">13-14</div>
+                  <div className="risk-actions">
+                    <i className="fas fa-sync-alt"></i>
+                    <span>Implement basic prevention measures and reassess regularly</span>
+                  </div>
+                </div>
+              </div>
+              
+              <div className={`risk-card ${formData.totalScore > 14 && formData.totalScore <= 18 ? 'active' : ''}`}>
+                <div className="risk-header" style={{ backgroundColor: '#10b981' }}>
+                  <i className="fas fa-check-circle"></i>
+                  <span>Mild Risk</span>
+                </div>
+                <div className="risk-details">
+                  <div className="risk-score">15-18</div>
+                  <div className="risk-actions">
+                    <i className="fas fa-eye"></i>
+                    <span>Monitor and implement basic prevention as needed</span>
+                  </div>
+                </div>
+              </div>
+              
+              <div className={`risk-card ${formData.totalScore > 18 ? 'active' : ''}`}>
+                <div className="risk-header" style={{ backgroundColor: '#3b82f6' }}>
+                  <i className="fas fa-shield-alt"></i>
+                  <span>No Risk</span>
+                </div>
+                <div className="risk-details">
+                  <div className="risk-score">19-23</div>
+                  <div className="risk-actions">
+                    <i className="fas fa-chart-line"></i>
+                    <span>Monitor and reassess as condition changes</span>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
         
         <div className="modal-footer">
-          <button className="cancel-btn" onClick={() => onClose()}>
-            CANCEL
-          </button>
-          <button className="submit-btn" onClick={handleSubmit}>
-            SUBMIT
-          </button>
+          <div className="modal-actions">
+            <button className="action-btn cancel-btn" onClick={() => onClose()}>
+              <i className="fas fa-times"></i>
+              <span>Cancel</span>
+            </button>
+            <button className="action-btn submit-btn" onClick={handleSubmit}>
+              <i className="fas fa-check"></i>
+              <span>Submit</span>
+            </button>
+          </div>
+          
+          {Object.keys(validationErrors).length > 0 && (
+            <div className="validation-summary">
+              <i className="fas fa-exclamation-circle"></i>
+              <span>Please complete all required fields before submitting.</span>
+            </div>
+          )}
         </div>
       </div>
     </div>

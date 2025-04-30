@@ -38,7 +38,6 @@ const NotesComponent = ({ patient, onUpdateNotes }) => {
     { value: 'face-to-face', label: 'Face to Face' },
     { value: 'case-conference', label: 'Case Conference' },
     { value: 'oasis-care-summary', label: 'OASIS Care Summary' },
-    { value: 'telehealth-note', label: 'Telehealth Note' },
     { value: 'nomnc', label: 'NOMNC' },
     { value: 'kaiser-form', label: 'Kaiser Form' },
     { value: 'maintenance-assessment-form', label: 'Maintenance Assessment Form' },

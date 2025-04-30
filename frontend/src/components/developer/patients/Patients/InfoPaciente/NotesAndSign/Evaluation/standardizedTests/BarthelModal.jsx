@@ -1,4 +1,4 @@
-// components/standardizedTests/BarthelModal.jsx
+// Enhanced BarthelModal.jsx
 import React, { useState, useEffect } from 'react';
 import '../../../../../../../../styles/developer/Patients/InfoPaciente/NotesAndSign/standardizedTests/BarthelModal.scss';
 
@@ -190,273 +190,400 @@ const BarthelModal = ({ isOpen, onClose, initialData = null }) => {
     <div className="barthel-modal-overlay">
       <div className="barthel-modal">
         <div className="modal-header">
-          <h2>
-            <i className="fas fa-tasks"></i>
-            Barthel Index
-          </h2>
-          <button className="close-button" onClick={() => onClose()}>
+          <div className="header-content">
+            <h2>
+              <i className="fas fa-tasks"></i>
+              <span>Barthel Index</span>
+            </h2>
+            <p className="header-subtitle">Activities of Daily Living Assessment</p>
+          </div>
+          <button className="close-button" onClick={() => onClose()} aria-label="Close">
             <i className="fas fa-times"></i>
           </button>
         </div>
         
         <div className="modal-content">
           <div className="info-note">
-            <p>Prior scores are for reference only. To print previous scores please type in additional boxes below.</p>
+            <div className="note-icon">
+              <i className="fas fa-info-circle"></i>
+            </div>
+            <div className="note-content">
+              <p>Prior scores are for reference only. To print previous scores please type in additional boxes below.</p>
+            </div>
           </div>
           
-          <div className="barthel-form">
-            <div className="form-section">
-              <div className={`form-item ${validationErrors.feeding ? 'has-error' : ''}`}>
-                <label>Feeding:</label>
-                <div className="options-container">
-                  {barthelOptions.feeding.map(option => (
-                    <label key={option.value} className="radio-container">
-                      <input
-                        type="radio"
-                        name="feeding"
-                        value={option.value}
-                        checked={formData.feeding === option.value}
-                        onChange={() => handleChange('feeding', option.value)}
-                      />
-                      <span className="checkmark"></span>
-                      <span className="option-label">{option.label}</span>
-                    </label>
-                  ))}
-                </div>
-                {validationErrors.feeding && <div className="error-message">Required</div>}
-              </div>
-              
-              <div className={`form-item ${validationErrors.bathing ? 'has-error' : ''}`}>
-                <label>Bathing:</label>
-                <div className="options-container">
-                  {barthelOptions.bathing.map(option => (
-                    <label key={option.value} className="radio-container">
-                      <input
-                        type="radio"
-                        name="bathing"
-                        value={option.value}
-                        checked={formData.bathing === option.value}
-                        onChange={() => handleChange('bathing', option.value)}
-                      />
-                      <span className="checkmark"></span>
-                      <span className="option-label">{option.label}</span>
-                    </label>
-                  ))}
-                </div>
-                {validationErrors.bathing && <div className="error-message">Required</div>}
-              </div>
-              
-              <div className={`form-item ${validationErrors.grooming ? 'has-error' : ''}`}>
-                <label>Grooming:</label>
-                <div className="options-container">
-                  {barthelOptions.grooming.map(option => (
-                    <label key={option.value} className="radio-container">
-                      <input
-                        type="radio"
-                        name="grooming"
-                        value={option.value}
-                        checked={formData.grooming === option.value}
-                        onChange={() => handleChange('grooming', option.value)}
-                      />
-                      <span className="checkmark"></span>
-                      <span className="option-label">{option.label}</span>
-                    </label>
-                  ))}
-                </div>
-                {validationErrors.grooming && <div className="error-message">Required</div>}
-              </div>
-              
-              <div className={`form-item ${validationErrors.dressing ? 'has-error' : ''}`}>
-                <label>Dressing:</label>
-                <div className="options-container">
-                  {barthelOptions.dressing.map(option => (
-                    <label key={option.value} className="radio-container">
-                      <input
-                        type="radio"
-                        name="dressing"
-                        value={option.value}
-                        checked={formData.dressing === option.value}
-                        onChange={() => handleChange('dressing', option.value)}
-                      />
-                      <span className="checkmark"></span>
-                      <span className="option-label">{option.label}</span>
-                    </label>
-                  ))}
-                </div>
-                {validationErrors.dressing && <div className="error-message">Required</div>}
-              </div>
-              
-              <div className={`form-item ${validationErrors.bowels ? 'has-error' : ''}`}>
-                <label>Bowels:</label>
-                <div className="options-container">
-                  {barthelOptions.bowels.map(option => (
-                    <label key={option.value} className="radio-container">
-                      <input
-                        type="radio"
-                        name="bowels"
-                        value={option.value}
-                        checked={formData.bowels === option.value}
-                        onChange={() => handleChange('bowels', option.value)}
-                      />
-                      <span className="checkmark"></span>
-                      <span className="option-label">{option.label}</span>
-                    </label>
-                  ))}
-                </div>
-                {validationErrors.bowels && <div className="error-message">Required</div>}
-              </div>
-              
-              <div className={`form-item ${validationErrors.bladder ? 'has-error' : ''}`}>
-                <label>Bladder:</label>
-                <div className="options-container">
-                  {barthelOptions.bladder.map(option => (
-                    <label key={option.value} className="radio-container">
-                      <input
-                        type="radio"
-                        name="bladder"
-                        value={option.value}
-                        checked={formData.bladder === option.value}
-                        onChange={() => handleChange('bladder', option.value)}
-                      />
-                      <span className="checkmark"></span>
-                      <span className="option-label">{option.label}</span>
-                    </label>
-                  ))}
-                </div>
-                {validationErrors.bladder && <div className="error-message">Required</div>}
-              </div>
-              
-              <div className={`form-item ${validationErrors.toiletUse ? 'has-error' : ''}`}>
-                <label>Toilet Use:</label>
-                <div className="options-container">
-                  {barthelOptions.toiletUse.map(option => (
-                    <label key={option.value} className="radio-container">
-                      <input
-                        type="radio"
-                        name="toiletUse"
-                        value={option.value}
-                        checked={formData.toiletUse === option.value}
-                        onChange={() => handleChange('toiletUse', option.value)}
-                      />
-                      <span className="checkmark"></span>
-                      <span className="option-label">{option.label}</span>
-                    </label>
-                  ))}
-                </div>
-                {validationErrors.toiletUse && <div className="error-message">Required</div>}
-              </div>
-              
-              <div className={`form-item ${validationErrors.transfers ? 'has-error' : ''}`}>
-                <label>Transfers (Bed to Chair and Back):</label>
-                <div className="options-container">
-                  {barthelOptions.transfers.map(option => (
-                    <label key={option.value} className="radio-container">
-                      <input
-                        type="radio"
-                        name="transfers"
-                        value={option.value}
-                        checked={formData.transfers === option.value}
-                        onChange={() => handleChange('transfers', option.value)}
-                      />
-                      <span className="checkmark"></span>
-                      <span className="option-label">{option.label}</span>
-                    </label>
-                  ))}
-                </div>
-                {validationErrors.transfers && <div className="error-message">Required</div>}
-              </div>
-              
-              <div className={`form-item ${validationErrors.mobility ? 'has-error' : ''}`}>
-                <label>Mobility (On Level Surfaces):</label>
-                <div className="options-container">
-                  {barthelOptions.mobility.map(option => (
-                    <label key={option.value} className="radio-container">
-                      <input
-                        type="radio"
-                        name="mobility"
-                        value={option.value}
-                        checked={formData.mobility === option.value}
-                        onChange={() => handleChange('mobility', option.value)}
-                      />
-                      <span className="checkmark"></span>
-                      <span className="option-label">{option.label}</span>
-                    </label>
-                  ))}
-                </div>
-                {validationErrors.mobility && <div className="error-message">Required</div>}
-              </div>
-              
-              <div className={`form-item ${validationErrors.stairs ? 'has-error' : ''}`}>
-                <label>Stairs:</label>
-                <div className="options-container">
-                  {barthelOptions.stairs.map(option => (
-                    <label key={option.value} className="radio-container">
-                      <input
-                        type="radio"
-                        name="stairs"
-                        value={option.value}
-                        checked={formData.stairs === option.value}
-                        onChange={() => handleChange('stairs', option.value)}
-                      />
-                      <span className="checkmark"></span>
-                      <span className="option-label">{option.label}</span>
-                    </label>
-                  ))}
-                </div>
-                {validationErrors.stairs && <div className="error-message">Required</div>}
-              </div>
-            </div>
-            
-            <div className="summary-section">
-              <div className="score-card">
-                <div className="score-header">
-                  <h3>Total Score</h3>
-                  <div className="score-badge">{formData.totalScore}/100</div>
-                </div>
-                <div className="dependency-level">
-                  <span className="level-label">Dependency Level:</span>
-                  <span className={`level-value ${formData.dependencyLevel.toLowerCase().replace(' ', '-')}`}>
-                    {formData.dependencyLevel}
-                  </span>
-                </div>
-                <div className="score-interpretation">
-                  <div className="interpretation-row">
-                    <span className="range">0-20:</span>
-                    <span className="description">Total Dependency</span>
+          <div className="barthel-layout">
+            <div className="assessment-section">
+              <div className="category-section">
+                <div className="category-card">
+                  <div className="card-header">
+                    <div className="header-icon">
+                      <i className="fas fa-utensils"></i>
+                    </div>
+                    <h3>Self-Care Activities</h3>
                   </div>
-                  <div className="interpretation-row">
-                    <span className="range">21-35:</span>
-                    <span className="description">Severe Dependency</span>
+                  <div className="card-content">
+                    <div className={`assessment-item ${validationErrors.feeding ? 'has-error' : ''}`}>
+                      <div className="item-header">
+                        <h4>Feeding</h4>
+                        {validationErrors.feeding && <div className="validation-error"><i className="fas fa-exclamation-circle"></i> Required</div>}
+                      </div>
+                      <div className="option-list">
+                        {barthelOptions.feeding.map(option => (
+                          <div 
+                            key={option.value}
+                            className={`option-item ${formData.feeding === option.value ? 'active' : ''}`}
+                            onClick={() => handleChange('feeding', option.value)}
+                          >
+                            <div className="option-radio">
+                              <div className="radio-outer">
+                                <div className="radio-inner"></div>
+                              </div>
+                            </div>
+                            <div className="option-content">
+                              <div className="option-score">{option.value}</div>
+                              <div className="option-label">{option.label.substring(option.label.indexOf('-') + 1).trim()}</div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                    
+                    <div className={`assessment-item ${validationErrors.bathing ? 'has-error' : ''}`}>
+                      <div className="item-header">
+                        <h4>Bathing</h4>
+                        {validationErrors.bathing && <div className="validation-error"><i className="fas fa-exclamation-circle"></i> Required</div>}
+                      </div>
+                      <div className="option-list">
+                        {barthelOptions.bathing.map(option => (
+                          <div 
+                            key={option.value}
+                            className={`option-item ${formData.bathing === option.value ? 'active' : ''}`}
+                            onClick={() => handleChange('bathing', option.value)}
+                          >
+                            <div className="option-radio">
+                              <div className="radio-outer">
+                                <div className="radio-inner"></div>
+                              </div>
+                            </div>
+                            <div className="option-content">
+                              <div className="option-score">{option.value}</div>
+                              <div className="option-label">{option.label.substring(option.label.indexOf('-') + 1).trim()}</div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                    
+                    <div className={`assessment-item ${validationErrors.grooming ? 'has-error' : ''}`}>
+                      <div className="item-header">
+                        <h4>Grooming</h4>
+                        {validationErrors.grooming && <div className="validation-error"><i className="fas fa-exclamation-circle"></i> Required</div>}
+                      </div>
+                      <div className="option-list">
+                        {barthelOptions.grooming.map(option => (
+                          <div 
+                            key={option.value}
+                            className={`option-item ${formData.grooming === option.value ? 'active' : ''}`}
+                            onClick={() => handleChange('grooming', option.value)}
+                          >
+                            <div className="option-radio">
+                              <div className="radio-outer">
+                                <div className="radio-inner"></div>
+                              </div>
+                            </div>
+                            <div className="option-content">
+                              <div className="option-score">{option.value}</div>
+                              <div className="option-label">{option.label.substring(option.label.indexOf('-') + 1).trim()}</div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                    
+                    <div className={`assessment-item ${validationErrors.dressing ? 'has-error' : ''}`}>
+                      <div className="item-header">
+                        <h4>Dressing</h4>
+                        {validationErrors.dressing && <div className="validation-error"><i className="fas fa-exclamation-circle"></i> Required</div>}
+                      </div>
+                      <div className="option-list">
+                        {barthelOptions.dressing.map(option => (
+                          <div 
+                            key={option.value}
+                            className={`option-item ${formData.dressing === option.value ? 'active' : ''}`}
+                            onClick={() => handleChange('dressing', option.value)}
+                          >
+                            <div className="option-radio">
+                              <div className="radio-outer">
+                                <div className="radio-inner"></div>
+                              </div>
+                            </div>
+                            <div className="option-content">
+                              <div className="option-score">{option.value}</div>
+                              <div className="option-label">{option.label.substring(option.label.indexOf('-') + 1).trim()}</div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
                   </div>
-                  <div className="interpretation-row">
-                    <span className="range">36-55:</span>
-                    <span className="description">Moderate Dependency</span>
+                </div>
+                
+                <div className="category-card">
+                  <div className="card-header">
+                    <div className="header-icon">
+                      <i className="fas fa-toilet"></i>
+                    </div>
+                    <h3>Continence & Toileting</h3>
                   </div>
-                  <div className="interpretation-row">
-                    <span className="range">56-90:</span>
-                    <span className="description">Slight Dependency</span>
+                  <div className="card-content">
+                    <div className={`assessment-item ${validationErrors.bowels ? 'has-error' : ''}`}>
+                      <div className="item-header">
+                        <h4>Bowels</h4>
+                        {validationErrors.bowels && <div className="validation-error"><i className="fas fa-exclamation-circle"></i> Required</div>}
+                      </div>
+                      <div className="option-list">
+                        {barthelOptions.bowels.map(option => (
+                          <div 
+                          key={option.value}
+                          className={`option-item ${formData.bowels === option.value ? 'active' : ''}`}
+                          onClick={() => handleChange('bowels', option.value)}
+                        >
+                          <div className="option-radio">
+                            <div className="radio-outer">
+                              <div className="radio-inner"></div>
+                            </div>
+                          </div>
+                          <div className="option-content">
+                            <div className="option-score">{option.value}</div>
+                            <div className="option-label">{option.label.substring(option.label.indexOf('-') + 1).trim()}</div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                  <div className="interpretation-row">
-                    <span className="range">91-100:</span>
-                    <span className="description">Independence</span>
+                  
+                  <div className={`assessment-item ${validationErrors.bladder ? 'has-error' : ''}`}>
+                    <div className="item-header">
+                      <h4>Bladder</h4>
+                      {validationErrors.bladder && <div className="validation-error"><i className="fas fa-exclamation-circle"></i> Required</div>}
+                    </div>
+                    <div className="option-list">
+                      {barthelOptions.bladder.map(option => (
+                        <div 
+                          key={option.value}
+                          className={`option-item ${formData.bladder === option.value ? 'active' : ''}`}
+                          onClick={() => handleChange('bladder', option.value)}
+                        >
+                          <div className="option-radio">
+                            <div className="radio-outer">
+                              <div className="radio-inner"></div>
+                            </div>
+                          </div>
+                          <div className="option-content">
+                            <div className="option-score">{option.value}</div>
+                            <div className="option-label">{option.label.substring(option.label.indexOf('-') + 1).trim()}</div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  
+                  <div className={`assessment-item ${validationErrors.toiletUse ? 'has-error' : ''}`}>
+                    <div className="item-header">
+                      <h4>Toilet Use</h4>
+                      {validationErrors.toiletUse && <div className="validation-error"><i className="fas fa-exclamation-circle"></i> Required</div>}
+                    </div>
+                    <div className="option-list">
+                      {barthelOptions.toiletUse.map(option => (
+                        <div 
+                          key={option.value}
+                          className={`option-item ${formData.toiletUse === option.value ? 'active' : ''}`}
+                          onClick={() => handleChange('toiletUse', option.value)}
+                        >
+                          <div className="option-radio">
+                            <div className="radio-outer">
+                              <div className="radio-inner"></div>
+                            </div>
+                          </div>
+                          <div className="option-content">
+                            <div className="option-score">{option.value}</div>
+                            <div className="option-label">{option.label.substring(option.label.indexOf('-') + 1).trim()}</div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="category-card">
+                <div className="card-header">
+                  <div className="header-icon">
+                    <i className="fas fa-walking"></i>
+                  </div>
+                  <h3>Mobility & Transfers</h3>
+                </div>
+                <div className="card-content">
+                  <div className={`assessment-item ${validationErrors.transfers ? 'has-error' : ''}`}>
+                    <div className="item-header">
+                      <h4>Transfers (Bed to Chair and Back)</h4>
+                      {validationErrors.transfers && <div className="validation-error"><i className="fas fa-exclamation-circle"></i> Required</div>}
+                    </div>
+                    <div className="option-list">
+                      {barthelOptions.transfers.map(option => (
+                        <div 
+                          key={option.value}
+                          className={`option-item ${formData.transfers === option.value ? 'active' : ''}`}
+                          onClick={() => handleChange('transfers', option.value)}
+                        >
+                          <div className="option-radio">
+                            <div className="radio-outer">
+                              <div className="radio-inner"></div>
+                            </div>
+                          </div>
+                          <div className="option-content">
+                            <div className="option-score">{option.value}</div>
+                            <div className="option-label">{option.label.substring(option.label.indexOf('-') + 1).trim()}</div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  
+                  <div className={`assessment-item ${validationErrors.mobility ? 'has-error' : ''}`}>
+                    <div className="item-header">
+                      <h4>Mobility (On Level Surfaces)</h4>
+                      {validationErrors.mobility && <div className="validation-error"><i className="fas fa-exclamation-circle"></i> Required</div>}
+                    </div>
+                    <div className="option-list">
+                      {barthelOptions.mobility.map(option => (
+                        <div 
+                          key={option.value}
+                          className={`option-item ${formData.mobility === option.value ? 'active' : ''}`}
+                          onClick={() => handleChange('mobility', option.value)}
+                        >
+                          <div className="option-radio">
+                            <div className="radio-outer">
+                              <div className="radio-inner"></div>
+                            </div>
+                          </div>
+                          <div className="option-content">
+                            <div className="option-score">{option.value}</div>
+                            <div className="option-label">{option.label.substring(option.label.indexOf('-') + 1).trim()}</div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  
+                  <div className={`assessment-item ${validationErrors.stairs ? 'has-error' : ''}`}>
+                    <div className="item-header">
+                      <h4>Stairs</h4>
+                      {validationErrors.stairs && <div className="validation-error"><i className="fas fa-exclamation-circle"></i> Required</div>}
+                    </div>
+                    <div className="option-list">
+                      {barthelOptions.stairs.map(option => (
+                        <div 
+                          key={option.value}
+                          className={`option-item ${formData.stairs === option.value ? 'active' : ''}`}
+                          onClick={() => handleChange('stairs', option.value)}
+                        >
+                          <div className="option-radio">
+                            <div className="radio-outer">
+                              <div className="radio-inner"></div>
+                            </div>
+                          </div>
+                          <div className="option-content">
+                            <div className="option-score">{option.value}</div>
+                            <div className="option-label">{option.label.substring(option.label.indexOf('-') + 1).trim()}</div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
-        
-        <div className="modal-footer">
-          <button className="cancel-btn" onClick={() => onClose()}>
-            CANCEL
-          </button>
-          <button className="submit-btn" onClick={handleSubmit}>
-            SUBMIT
-          </button>
+          
+          <div className="results-section">
+            <div className="results-card">
+              <div className="card-header">
+                <div className="header-icon">
+                  <i className="fas fa-chart-pie"></i>
+                </div>
+                <h3>Assessment Results</h3>
+              </div>
+              <div className="card-content">
+                <div className="score-display">
+                  <div className="total-score">
+                    <div className="score-value">{formData.totalScore}</div>
+                    <div className="score-label">Total Score</div>
+                    <div className="score-max">Out of 100 points</div>
+                  </div>
+                  
+                  <div className="dependency-display">
+                    <div className="dependency-label">Dependency Level:</div>
+                    <div className={`dependency-value ${formData.dependencyLevel.toLowerCase().replace(' ', '-')}`}>
+                      {formData.dependencyLevel}
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="score-interpretation">
+                  <h4>Interpretation Guide</h4>
+                  <div className="interpretation-scale">
+                    <div className="scale-item total-dependency">
+                      <div className="scale-range">0-20</div>
+                      <div className="scale-label">Total Dependency</div>
+                    </div>
+                    <div className="scale-item severe-dependency">
+                      <div className="scale-range">21-35</div>
+                      <div className="scale-label">Severe Dependency</div>
+                    </div>
+                    <div className="scale-item moderate-dependency">
+                      <div className="scale-range">36-55</div>
+                      <div className="scale-label">Moderate Dependency</div>
+                    </div>
+                    <div className="scale-item slight-dependency">
+                      <div className="scale-range">56-90</div>
+                      <div className="scale-label">Slight Dependency</div>
+                    </div>
+                    <div className="scale-item independence">
+                      <div className="scale-range">91-100</div>
+                      <div className="scale-label">Independence</div>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="validation-summary">
+                  {Object.keys(validationErrors).length > 0 && (
+                    <div className="validation-message">
+                      <i className="fas fa-exclamation-triangle"></i>
+                      <span>Please complete all required items to submit the assessment.</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
+      
+      <div className="modal-footer">
+        <button className="cancel-btn" onClick={() => onClose()}>
+          <i className="fas fa-times"></i>
+          <span>Cancel</span>
+        </button>
+        <button className="submit-btn" onClick={handleSubmit}>
+          <i className="fas fa-check"></i>
+          <span>Submit Assessment</span>
+        </button>
+      </div>
     </div>
-  );
+  </div>
+);
 };
 
 export default BarthelModal;

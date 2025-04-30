@@ -1,4 +1,4 @@
-// components/standardizedTests/MedicationListModal.jsx
+// Enhanced MedicationListModal.jsx
 import React, { useState, useEffect } from 'react';
 import '../../../../../../../../styles/developer/Patients/InfoPaciente/NotesAndSign/standardizedTests/MedicationListModal.scss';
 
@@ -35,9 +35,15 @@ const MedicationListModal = ({ isOpen, onClose, initialData = null }) => {
   // Estado para edición de medicamento
   const [editingIndex, setEditingIndex] = useState(null);
 
+  // Estado para navegación entre tabs
+  const [activeTab, setActiveTab] = useState('medications');
+
   // Estado para validación
   const [validationErrors, setValidationErrors] = useState({});
   const [medicationErrors, setMedicationErrors] = useState({});
+
+  // Estado para mostrar/ocultar formulario de medicamento
+  const [showMedicationForm, setShowMedicationForm] = useState(false);
 
   // Opciones para selección
   const yesNoOptions = [
@@ -168,13 +174,34 @@ const MedicationListModal = ({ isOpen, onClose, initialData = null }) => {
         startDate: '',
         endDate: ''
       });
+      
+      // Ocultar formulario
+      setShowMedicationForm(false);
     }
+  };
+
+  // Cancelar adición/edición de medicamento
+  const handleCancelMedication = () => {
+    setNewMedication({
+      name: '',
+      dosage: '',
+      frequency: '',
+      route: '',
+      prescriber: '',
+      purpose: '',
+      startDate: '',
+      endDate: ''
+    });
+    setEditingIndex(null);
+    setMedicationErrors({});
+    setShowMedicationForm(false);
   };
 
   // Editar medicamento existente
   const handleEditMedication = (index) => {
     setNewMedication(formData.medications[index]);
     setEditingIndex(index);
+    setShowMedicationForm(true);
   };
 
   // Eliminar medicamento
@@ -199,6 +226,7 @@ const MedicationListModal = ({ isOpen, onClose, initialData = null }) => {
         startDate: '',
         endDate: ''
       });
+      setShowMedicationForm(false);
     }
   };
 
@@ -232,6 +260,11 @@ const MedicationListModal = ({ isOpen, onClose, initialData = null }) => {
     }
   };
 
+  // Obtener resumen de medicamentos
+  const getMedicationSummary = () => {
+    return `${formData.medications.length} medication${formData.medications.length !== 1 ? 's' : ''} added`;
+  };
+
   // Si el modal no está abierto, no renderizar nada
   if (!isOpen) return null;
 
@@ -248,362 +281,549 @@ const MedicationListModal = ({ isOpen, onClose, initialData = null }) => {
           </button>
         </div>
         
+        <div className="modal-tabs">
+          <button 
+            className={`tab-button ${activeTab === 'medications' ? 'active' : ''}`} 
+            onClick={() => setActiveTab('medications')}
+          >
+            <i className="fas fa-pills"></i>
+            <span>Medications</span>
+            <div className="tab-badge">{formData.medications.length}</div>
+          </button>
+          <button 
+            className={`tab-button ${activeTab === 'assessment' ? 'active' : ''}`} 
+            onClick={() => setActiveTab('assessment')}
+          >
+            <i className="fas fa-clipboard-check"></i>
+            <span>Assessment</span>
+            {(formData.sideEffects === 'Yes' || 
+              formData.knowledgeDeficit === 'Yes' || 
+              formData.nonCompliance === 'Yes' || 
+              formData.medicationQuestions === 'Yes' || 
+              formData.adverseEffects === 'Yes') && (
+              <div className="tab-badge alert">!</div>
+            )}
+          </button>
+          <button 
+            className={`tab-button ${activeTab === 'details' ? 'active' : ''}`} 
+            onClick={() => setActiveTab('details')}
+          >
+            <i className="fas fa-info-circle"></i>
+            <span>Details</span>
+          </button>
+        </div>
+        
         <div className="modal-content">
-          <div className="info-note">
-            <p>Prior scores are for reference only. To print previous scores please type in additional boxes below.</p>
-          </div>
-          
-          <div className="section medications-section">
-            <h3>Current Medications</h3>
-            
-            <div className="medication-form">
-              <div className="form-row">
-                <div className="form-group">
-                  <label>Medication Name*</label>
-                  <input
-                    type="text"
-                    placeholder="Enter medication name"
-                    value={newMedication.name}
-                    onChange={(e) => handleMedicationChange('name', e.target.value)}
-                    className={medicationErrors.name ? 'error' : ''}
-                  />
-                  {medicationErrors.name && <div className="error-message">Required</div>}
-                </div>
-                
-                <div className="form-group">
-                  <label>Dosage*</label>
-                  <input
-                    type="text"
-                    placeholder="Enter dosage"
-                    value={newMedication.dosage}
-                    onChange={(e) => handleMedicationChange('dosage', e.target.value)}
-                    className={medicationErrors.dosage ? 'error' : ''}
-                  />
-                  {medicationErrors.dosage && <div className="error-message">Required</div>}
-                </div>
-              </div>
-              
-              <div className="form-row">
-                <div className="form-group">
-                  <label>Frequency*</label>
-                  <select
-                    value={newMedication.frequency}
-                    onChange={(e) => handleMedicationChange('frequency', e.target.value)}
-                    className={medicationErrors.frequency ? 'error' : ''}
-                  >
-                    <option value="">Select frequency</option>
-                    {frequencyOptions.map(option => (
-                      <option key={option.value} value={option.value}>
-                        {option.label}
-                      </option>
-                    ))}
-                  </select>
-                  {medicationErrors.frequency && <div className="error-message">Required</div>}
-                </div>
-                
-                <div className="form-group">
-                  <label>Route*</label>
-                  <select
-                    value={newMedication.route}
-                    onChange={(e) => handleMedicationChange('route', e.target.value)}
-                    className={medicationErrors.route ? 'error' : ''}
-                  >
-                    <option value="">Select route</option>
-                    {routeOptions.map(option => (
-                      <option key={option.value} value={option.value}>
-                        {option.label}
-                      </option>
-                    ))}
-                  </select>
-                  {medicationErrors.route && <div className="error-message">Required</div>}
-                </div>
-              </div>
-              
-              <div className="form-row">
-                <div className="form-group">
-                  <label>Prescriber</label>
-                  <input
-                    type="text"
-                    placeholder="Prescribing doctor"
-                    value={newMedication.prescriber}
-                    onChange={(e) => handleMedicationChange('prescriber', e.target.value)}
-                  />
-                </div>
-                
-                <div className="form-group">
-                  <label>Purpose</label>
-                  <input
-                    type="text"
-                    placeholder="Purpose of medication"
-                    value={newMedication.purpose}
-                    onChange={(e) => handleMedicationChange('purpose', e.target.value)}
-                  />
-                </div>
-              </div>
-              
-              <div className="form-row">
-                <div className="form-group">
-                  <label>Start Date</label>
-                  <input
-                    type="date"
-                    value={newMedication.startDate}
-                    onChange={(e) => handleMedicationChange('startDate', e.target.value)}
-                  />
-                </div>
-                
-                <div className="form-group">
-                  <label>End Date</label>
-                  <input
-                    type="date"
-                    value={newMedication.endDate}
-                    onChange={(e) => handleMedicationChange('endDate', e.target.value)}
-                  />
-                </div>
-              </div>
-              
-              <div className="form-actions">
-                <button 
-                  className="add-medication-btn"
-                  onClick={handleAddMedication}
-                >
-                  {editingIndex !== null ? 'Update Medication' : 'Add Medication'}
-                </button>
-                {editingIndex !== null && (
-                  <button 
-                    className="cancel-edit-btn"
-                    onClick={() => {
-                      setEditingIndex(null);
-                      setNewMedication({
-                        name: '',
-                        dosage: '',
-                        frequency: '',
-                        route: '',
-                        prescriber: '',
-                        purpose: '',
-                        startDate: '',
-                        endDate: ''
-                      });
-                      setMedicationErrors({});
-                    }}
-                  >
-                    Cancel Edit
-                  </button>
+          {activeTab === 'medications' && (
+            <div className="medications-tab">
+              <div className="section-header">
+                <h3>
+                  <i className="fas fa-pills"></i>
+                  Current Medications
+                </h3>
+                {formData.medications.length > 0 && (
+                  <div className="medication-count">
+                    {getMedicationSummary()}
+                  </div>
                 )}
               </div>
-            </div>
-            
-            <div className="medications-list">
-              {formData.medications.length > 0 ? (
-                <div className="medications-table">
-                  <div className="table-header">
-                    <div className="column">Medication</div>
-                    <div className="column">Dosage</div>
-                    <div className="column">Frequency</div>
-                    <div className="column">Route</div>
-                    <div className="column">Actions</div>
+              
+              {!showMedicationForm ? (
+                <div className="add-medication-container">
+                  <button 
+                    className="add-medication-btn" 
+                    onClick={() => setShowMedicationForm(true)}
+                  >
+                    <i className="fas fa-plus"></i>
+                    Add Medication
+                  </button>
+                </div>
+              ) : (
+                <div className="medication-form-container">
+                  <div className="form-header">
+                    <h4>{editingIndex !== null ? 'Edit Medication' : 'Add New Medication'}</h4>
+                    <button className="collapse-form-btn" onClick={handleCancelMedication}>
+                      <i className="fas fa-chevron-up"></i>
+                    </button>
                   </div>
                   
-                  {formData.medications.map((medication, index) => (
-                    <div className="table-row" key={index}>
-                      <div className="column">
-                        <span className="med-name">{medication.name}</span>
-                        {medication.purpose && <span className="med-purpose">({medication.purpose})</span>}
-                      </div>
-                      <div className="column">{medication.dosage}</div>
-                      <div className="column">{medication.frequency}</div>
-                      <div className="column">{medication.route}</div>
-                      <div className="column actions">
-                        <button 
-                          className="edit-btn"
-                          onClick={() => handleEditMedication(index)}
-                          title="Edit"
-                        >
-                          <i className="fas fa-edit"></i>
-                        </button>
-                        <button 
-                          className="delete-btn"
-                          onClick={() => handleDeleteMedication(index)}
-                          title="Delete"
-                        >
-                          <i className="fas fa-trash-alt"></i>
-                        </button>
-                      </div>
+                  <div className="form-grid">
+                    <div className="form-group">
+                      <label>
+                        <i className="fas fa-prescription-bottle-alt"></i>
+                        Medication Name*
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="Enter medication name"
+                        value={newMedication.name}
+                        onChange={(e) => handleMedicationChange('name', e.target.value)}
+                        className={medicationErrors.name ? 'error' : ''}
+                      />
+                      {medicationErrors.name && <div className="error-message">Required</div>}
                     </div>
-                  ))}
+                    
+                    <div className="form-group">
+                      <label>
+                        <i className="fas fa-weight"></i>
+                        Dosage*
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="Enter dosage"
+                        value={newMedication.dosage}
+                        onChange={(e) => handleMedicationChange('dosage', e.target.value)}
+                        className={medicationErrors.dosage ? 'error' : ''}
+                      />
+                      {medicationErrors.dosage && <div className="error-message">Required</div>}
+                    </div>
+                    
+                    <div className="form-group">
+                      <label>
+                        <i className="fas fa-clock"></i>
+                        Frequency*
+                      </label>
+                      <select
+                        value={newMedication.frequency}
+                        onChange={(e) => handleMedicationChange('frequency', e.target.value)}
+                        className={medicationErrors.frequency ? 'error' : ''}
+                      >
+                        <option value="">Select frequency</option>
+                        {frequencyOptions.map(option => (
+                          <option key={option.value} value={option.value}>
+                            {option.label}
+                          </option>
+                        ))}
+                      </select>
+                      {medicationErrors.frequency && <div className="error-message">Required</div>}
+                    </div>
+                    
+                    <div className="form-group">
+                      <label>
+                        <i className="fas fa-route"></i>
+                        Route*
+                      </label>
+                      <select
+                        value={newMedication.route}
+                        onChange={(e) => handleMedicationChange('route', e.target.value)}
+                        className={medicationErrors.route ? 'error' : ''}
+                      >
+                        <option value="">Select route</option>
+                        {routeOptions.map(option => (
+                          <option key={option.value} value={option.value}>
+                            {option.label}
+                          </option>
+                        ))}
+                      </select>
+                      {medicationErrors.route && <div className="error-message">Required</div>}
+                    </div>
+                    
+                    <div className="form-group">
+                      <label>
+                        <i className="fas fa-user-md"></i>
+                        Prescriber
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="Prescribing doctor"
+                        value={newMedication.prescriber}
+                        onChange={(e) => handleMedicationChange('prescriber', e.target.value)}
+                      />
+                    </div>
+                    
+                    <div className="form-group">
+                      <label>
+                        <i className="fas fa-info-circle"></i>
+                        Purpose
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="Purpose of medication"
+                        value={newMedication.purpose}
+                        onChange={(e) => handleMedicationChange('purpose', e.target.value)}
+                      />
+                    </div>
+                    
+                    <div className="form-group">
+                      <label>
+                        <i className="fas fa-calendar-plus"></i>
+                        Start Date
+                      </label>
+                      <input
+                        type="date"
+                        value={newMedication.startDate}
+                        onChange={(e) => handleMedicationChange('startDate', e.target.value)}
+                      />
+                    </div>
+                    
+                    <div className="form-group">
+                      <label>
+                        <i className="fas fa-calendar-minus"></i>
+                        End Date
+                      </label>
+                      <input
+                        type="date"
+                        value={newMedication.endDate}
+                        onChange={(e) => handleMedicationChange('endDate', e.target.value)}
+                      />
+                    </div>
+                  </div>
+                  
+                  <div className="form-actions">
+                    <button 
+                      className="cancel-action-btn"
+                      onClick={handleCancelMedication}
+                    >
+                      <i className="fas fa-times"></i>
+                      Cancel
+                    </button>
+                    <button 
+                      className="save-action-btn"
+                      onClick={handleAddMedication}
+                    >
+                      <i className="fas fa-check"></i>
+                      {editingIndex !== null ? 'Update Medication' : 'Add Medication'}
+                    </button>
+                  </div>
+                </div>
+              )}
+              
+              {formData.medications.length > 0 ? (
+                <div className="medications-table-container">
+                  <div className="medications-table">
+                    <div className="table-header">
+                      <div className="column-name">Medication</div>
+                      <div className="column-dosage">Dosage</div>
+                      <div className="column-frequency">Frequency</div>
+                      <div className="column-route">Route</div>
+                      <div className="column-actions">Actions</div>
+                    </div>
+                    <div className="table-body">
+                      {formData.medications.map((medication, index) => (
+                        <div className="table-row" key={index}>
+                          <div className="column-name">
+                            <div className="med-name">{medication.name}</div>
+                            {medication.purpose && (
+                              <div className="med-purpose">{medication.purpose}</div>
+                            )}
+                          </div>
+                          <div className="column-dosage">{medication.dosage}</div>
+                          <div className="column-frequency">{medication.frequency}</div>
+                          <div className="column-route">{medication.route}</div>
+                          <div className="column-actions">
+                            <button 
+                              className="edit-btn"
+                              onClick={() => handleEditMedication(index)}
+                              title="Edit"
+                            >
+                              <i className="fas fa-edit"></i>
+                            </button>
+                            <button 
+                              className="delete-btn"
+                              onClick={() => handleDeleteMedication(index)}
+                              title="Delete"
+                            >
+                              <i className="fas fa-trash-alt"></i>
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
                 </div>
               ) : (
                 <div className="no-medications">
-                  <p>No medications added yet</p>
+                  <div className="empty-state">
+                    <div className="empty-icon">
+                      <i className="fas fa-prescription-bottle"></i>
+                    </div>
+                    <h4>No Medications Added</h4>
+                    <p>Click "Add Medication" to begin creating the medication list.</p>
+                  </div>
                 </div>
               )}
             </div>
-          </div>
+          )}
           
-          <div className="section questions-section">
-            <h3>Medication Assessment</h3>
-            
-            <div className="assessment-questions">
-              <div className="question-item">
-                <label className="question-label">A. DOES THE PATIENT REPORT EXPERIENCING 1 OR MORE SIGNIFICANT SIDE EFFECTS TO CURRENT DRUG REGIMEN?</label>
-                <select
-                  value={formData.sideEffects}
-                  onChange={(e) => handleChange('sideEffects', e.target.value)}
-                >
-                  {yesNoOptions.map(option => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
+          {activeTab === 'assessment' && (
+            <div className="assessment-tab">
+              <div className="section-header">
+                <h3>
+                  <i className="fas fa-clipboard-check"></i>
+                  Medication Assessment
+                </h3>
               </div>
               
-              <div className="question-item">
-                <label className="question-label">B. DOES THE PATIENT AND/OR CAREGIVER DEMONSTRATE A KNOWLEDGE DEFICIT RELATED TO CURRENT MEDICATION USE?</label>
-                <select
-                  value={formData.knowledgeDeficit}
-                  onChange={(e) => handleChange('knowledgeDeficit', e.target.value)}
-                >
-                  {yesNoOptions.map(option => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              
-              <div className="question-item">
-                <label className="question-label">C. DOES THE PATIENT DEMONSTRATE NONCOMPLIANCE WITH MEDICATION USE, AS PRESCRIBED BY PHYSICIAN?</label>
-                <select
-                  value={formData.nonCompliance}
-                  onChange={(e) => handleChange('nonCompliance', e.target.value)}
-                >
-                  {yesNoOptions.map(option => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              
-              <div className="question-item">
-                <label className="question-label">D. DOES THE PATIENT AND/OR CAREGIVER HAVE ANY QUESTIONS RELATED TO CURRENT MEDICATIONS INCLUDING PURPOSE, DOSAGE, OR ADMINISTRATION?</label>
-                <select
-                  value={formData.medicationQuestions}
-                  onChange={(e) => handleChange('medicationQuestions', e.target.value)}
-                >
-                  {yesNoOptions.map(option => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              
-              <div className="question-item">
-                <label className="question-label">E. HAVE POTENTIAL ADVERSE EFFECTS, SIGNIFICANT DRUG INTERACTIONS, DUPLICATE INEFFECTIVE DRUG THERAPY AND POTENTIAL CONTRAINDICATIONS BEEN IDENTIFIED?</label>
-                <select
-                  value={formData.adverseEffects}
-                  onChange={(e) => handleChange('adverseEffects', e.target.value)}
-                >
-                  {yesNoOptions.map(option => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              
-              <div className="question-item problems-explanation">
-                <label className="question-label">F. DESCRIBE PROBLEMS AND ACTION FOR "YES" RESPONSES:</label>
-                <textarea
-                  value={formData.problemsExplanation}
-                  onChange={(e) => handleChange('problemsExplanation', e.target.value)}
-                  placeholder="Describe any identified problems and actions taken"
-                  rows={4}
-                  className={validationErrors.problemsExplanation ? 'error' : ''}
-                />
-                {validationErrors.problemsExplanation && (
-                  <div className="error-message">Required for "Yes" responses</div>
-                )}
-              </div>
-              
-              <div className="question-item">
-                <label className="question-label">G. MEDICATIONS RECONCILED (PER AGENCY POLICY):</label>
-                <select
-                  value={formData.medicationsReconciled}
-                  onChange={(e) => handleChange('medicationsReconciled', e.target.value)}
-                >
-                  {yesNoOptions.map(option => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-          </div>
-          
-          <div className="section additional-info-section">
-            <div className="form-row">
-              <div className="form-group allergies-group">
-                <label>ALLERGIES:</label>
-                <div className="allergies-input">
-                  <input
-                    type="text"
-                    placeholder="List medication allergies"
-                    value={formData.allergies}
-                    onChange={(e) => handleChange('allergies', e.target.value)}
-                    disabled={formData.noKnownAllergies}
-                  />
-                  <div className="checkbox-item">
-                    <input
-                      type="checkbox"
-                      id="noKnownAllergies"
-                      checked={formData.noKnownAllergies}
-                      onChange={(e) => handleChange('noKnownAllergies', e.target.checked)}
+              <div className="assessment-questions">
+                <div className="question-card">
+                  <div className="question-header">
+                    <span className="question-letter">A</span>
+                    <h4>Side Effects</h4>
+                  </div>
+                  <div className="question-content">
+                    <p>Does the patient report experiencing 1 or more significant side effects to current drug regimen?</p>
+                    <div className="option-buttons">
+                      {yesNoOptions.map(option => (
+                        <button
+                          key={option.value}
+                          className={`option-btn ${option.value.toLowerCase()} ${formData.sideEffects === option.value ? 'selected' : ''}`}
+                          onClick={() => handleChange('sideEffects', option.value)}
+                        >
+                          {option.value === 'Yes' ? (
+                            <i className="fas fa-check-circle"></i>
+                          ) : (
+                            <i className="fas fa-times-circle"></i>
+                          )}
+                          {option.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="question-card">
+                  <div className="question-header">
+                    <span className="question-letter">B</span>
+                    <h4>Knowledge Deficit</h4>
+                  </div>
+                  <div className="question-content">
+                    <p>Does the patient and/or caregiver demonstrate a knowledge deficit related to current medication use?</p>
+                    <div className="option-buttons">
+                      {yesNoOptions.map(option => (
+                        <button
+                          key={option.value}
+                          className={`option-btn ${option.value.toLowerCase()} ${formData.knowledgeDeficit === option.value ? 'selected' : ''}`}
+                          onClick={() => handleChange('knowledgeDeficit', option.value)}
+                        >
+                          {option.value === 'Yes' ? (
+                            <i className="fas fa-check-circle"></i>
+                          ) : (
+                            <i className="fas fa-times-circle"></i>
+                          )}
+                          {option.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="question-card">
+                  <div className="question-header">
+                    <span className="question-letter">C</span>
+                    <h4>Noncompliance</h4>
+                  </div>
+                  <div className="question-content">
+                    <p>Does the patient demonstrate noncompliance with medication use, as prescribed by physician?</p>
+                    <div className="option-buttons">
+                      {yesNoOptions.map(option => (
+                        <button
+                          key={option.value}
+                          className={`option-btn ${option.value.toLowerCase()} ${formData.nonCompliance === option.value ? 'selected' : ''}`}
+                          onClick={() => handleChange('nonCompliance', option.value)}
+                        >
+                          {option.value === 'Yes' ? (
+                            <i className="fas fa-check-circle"></i>
+                          ) : (
+                            <i className="fas fa-times-circle"></i>
+                          )}
+                          {option.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="question-card">
+                  <div className="question-header">
+                    <span className="question-letter">D</span>
+                    <h4>Medication Questions</h4>
+                  </div>
+                  <div className="question-content">
+                    <p>Does the patient and/or caregiver have any questions related to current medications including purpose, dosage, or administration?</p>
+                    <div className="option-buttons">
+                      {yesNoOptions.map(option => (
+                        <button
+                          key={option.value}
+                          className={`option-btn ${option.value.toLowerCase()} ${formData.medicationQuestions === option.value ? 'selected' : ''}`}
+                          onClick={() => handleChange('medicationQuestions', option.value)}
+                        >
+                          {option.value === 'Yes' ? (
+                            <i className="fas fa-check-circle"></i>
+                          ) : (
+                            <i className="fas fa-times-circle"></i>
+                          )}
+                          {option.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="question-card">
+                  <div className="question-header">
+                    <span className="question-letter">E</span>
+                    <h4>Potential Adverse Effects</h4>
+                  </div>
+                  <div className="question-content">
+                    <p>Have potential adverse effects, significant drug interactions, duplicate ineffective drug therapy and potential contraindications been identified?</p>
+                    <div className="option-buttons">
+                      {yesNoOptions.map(option => (
+                        <button
+                          key={option.value}
+                          className={`option-btn ${option.value.toLowerCase()} ${formData.adverseEffects === option.value ? 'selected' : ''}`}
+                          onClick={() => handleChange('adverseEffects', option.value)}
+                        >
+                          {option.value === 'Yes' ? (
+                            <i className="fas fa-check-circle"></i>
+                          ) : (
+                            <i className="fas fa-times-circle"></i>
+                          )}
+                          {option.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="question-card problems-explanation">
+                  <div className="question-header">
+                    <span className="question-letter">F</span>
+                    <h4>Problems & Actions</h4>
+                  </div>
+                  <div className="question-content">
+                    <p>Describe problems and action for "Yes" responses:</p>
+                    <textarea
+                      value={formData.problemsExplanation}
+                      onChange={(e) => handleChange('problemsExplanation', e.target.value)}
+                      placeholder="Describe any identified problems and actions taken"
+                      rows={4}
+                      className={validationErrors.problemsExplanation ? 'error' : ''}
                     />
-                    <label htmlFor="noKnownAllergies">No Known Drug Allergies</label>
+                    {validationErrors.problemsExplanation && (
+                      <div className="error-message">Required for "Yes" responses</div>
+                    )}
+                  </div>
+                </div>
+                
+                <div className="question-card">
+                  <div className="question-header">
+                    <span className="question-letter">G</span>
+                    <h4>Medications Reconciled</h4>
+                  </div>
+                  <div className="question-content">
+                    <p>Medications reconciled (per agency policy):</p>
+                    <div className="option-buttons">
+                      {yesNoOptions.map(option => (
+                        <button
+                          key={option.value}
+                          className={`option-btn ${option.value.toLowerCase()} ${formData.medicationsReconciled === option.value ? 'selected' : ''}`}
+                          onClick={() => handleChange('medicationsReconciled', option.value)}
+                        >
+                          {option.value === 'Yes' ? (
+                            <i className="fas fa-check-circle"></i>
+                          ) : (
+                            <i className="fas fa-times-circle"></i>
+                          )}
+                          {option.label}
+                        </button>
+                      ))}
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
-            
-            <div className="form-row">
-              <div className="form-group">
-                <label>PHARMACY:</label>
-                <input
-                  type="text"
-                  placeholder="Pharmacy name and contact information"
-                  value={formData.pharmacy}
-                  onChange={(e) => handleChange('pharmacy', e.target.value)}
-                />
+          )}
+          
+          {activeTab === 'details' && (
+            <div className="details-tab">
+              <div className="section-header">
+                <h3>
+                  <i className="fas fa-info-circle"></i>
+                  Additional Information
+                </h3>
+              </div>
+              
+              <div className="details-content">
+                <div className="detail-card allergies">
+                  <div className="card-header">
+                    <div className="header-icon">
+                      <i className="fas fa-allergies"></i>
+                    </div>
+                    <h4>Allergies</h4>
+                  </div>
+                  <div className="card-content">
+                    <div className="allergies-field">
+                      <input
+                        type="text"
+                        placeholder="List medication allergies"
+                        value={formData.allergies}
+                        onChange={(e) => handleChange('allergies', e.target.value)}
+                        disabled={formData.noKnownAllergies}
+                      />
+                      <div className="checkbox-item">
+                        <input
+                          type="checkbox"
+                          id="noKnownAllergies"
+                          checked={formData.noKnownAllergies}
+                          onChange={(e) => handleChange('noKnownAllergies', e.target.checked)}
+                        />
+                        <label htmlFor="noKnownAllergies">No Known Drug Allergies</label>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="detail-card pharmacy">
+                  <div className="card-header">
+                    <div className="header-icon">
+                      <i className="fas fa-mortar-pestle"></i>
+                    </div>
+                    <h4>Pharmacy</h4>
+                  </div>
+                  <div className="card-content">
+                    <input
+                      type="text"
+                      placeholder="Pharmacy name and contact information"
+                      value={formData.pharmacy}
+                      onChange={(e) => handleChange('pharmacy', e.target.value)}
+                    />
+                  </div>
+                </div>
+                
+                <div className="detail-card administration">
+                  <div className="card-header">
+                    <div className="header-icon">
+                      <i className="fas fa-user-nurse"></i>
+                    </div>
+                    <h4>Administration</h4>
+                  </div>
+                  <div className="card-content">
+                    <label>Medications administered by:</label>
+                    <select
+                      value={formData.administeredBy}
+                      onChange={(e) => handleChange('administeredBy', e.target.value)}
+                    >
+                      {administeredByOptions.map(option => (
+                        <option key={option.value} value={option.value}>
+                          {option.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
               </div>
             </div>
-            
-            <div className="form-row">
-              <div className="form-group">
-                <label>MEDICATIONS ADMINISTERED BY:</label>
-                <select
-                  value={formData.administeredBy}
-                  onChange={(e) => handleChange('administeredBy', e.target.value)}
-                >
-                  {administeredByOptions.map(option => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-          </div>
+          )}
         </div>
         
         <div className="modal-footer">
           <button className="cancel-btn" onClick={() => onClose()}>
-            CANCEL
+            <i className="fas fa-times"></i>
+            Cancel
           </button>
           <button className="submit-btn" onClick={handleSubmit}>
-            SUBMIT
+            <i className="fas fa-check"></i>
+            Submit
           </button>
         </div>
       </div>

@@ -1,4 +1,4 @@
-// components/standardizedTests/MAHC10Modal.jsx
+// Enhanced MAHC10Modal.jsx
 import React, { useState, useEffect } from 'react';
 import '../../../../../../../../styles/developer/Patients/InfoPaciente/NotesAndSign/standardizedTests/MAHC10Modal.scss';
 
@@ -19,10 +19,77 @@ const MAHC10Modal = ({ isOpen, onClose, initialData = null }) => {
     isComplete: initialData?.isComplete || false
   });
 
+  // Estado para animación cuando cambia el puntaje
+  const [animateScore, setAnimateScore] = useState(false);
+
   // Opciones para los campos de selección
   const yesNoOptions = [
-    { value: 'No', label: 'No' },
-    { value: 'Yes', label: 'Yes' }
+    { value: 'No', label: 'No', icon: 'fa-times-circle' },
+    { value: 'Yes', label: 'Yes', icon: 'fa-check-circle' }
+  ];
+
+  // Configuración de los elementos de evaluación
+  const assessmentItems = [
+    {
+      id: 'age65Plus',
+      label: 'AGE 65+',
+      icon: 'fa-user-clock',
+      description: 'Patient is 65 years or older'
+    },
+    {
+      id: 'impairedFunctionalMobility',
+      label: 'IMPAIRED FUNCTIONAL MOBILITY',
+      icon: 'fa-walking',
+      description: 'Requires assistance when moving, transferring, or walking'
+    },
+    {
+      id: 'threeOrMoreDiagnoses',
+      label: 'DIAGNOSIS (3 OR MORE CO-EXISTING)',
+      icon: 'fa-file-medical',
+      description: 'Patient has three or more medical conditions'
+    },
+    {
+      id: 'environmentalHazards',
+      label: 'ENVIRONMENTAL HAZARDS',
+      icon: 'fa-home',
+      description: 'Cluttered pathways, poor lighting, slippery floors, etc.'
+    },
+    {
+      id: 'fallHistory',
+      label: 'PRIOR HISTORY OF FALLS WITHIN 3 MONTHS',
+      icon: 'fa-exclamation-triangle',
+      description: 'Has fallen one or more times in the past 3 months'
+    },
+    {
+      id: 'polyPharmacy',
+      label: 'POLY PHARMACY (4 OR MORE PRESCRIPTIONS - ANY TYPE)',
+      icon: 'fa-pills',
+      description: 'Takes four or more prescribed or OTC medications'
+    },
+    {
+      id: 'incontinence',
+      label: 'INCONTINENCE',
+      icon: 'fa-tint',
+      description: 'Inability to make it to the bathroom in time'
+    },
+    {
+      id: 'painAffectingFunction',
+      label: 'PAIN AFFECTING LEVEL OF FUNCTION',
+      icon: 'fa-heartbeat',
+      description: 'Pain that limits mobility or daily activities'
+    },
+    {
+      id: 'visualImpairment',
+      label: 'VISUAL IMPAIRMENT',
+      icon: 'fa-eye',
+      description: 'Decreased visual acuity, declining peripheral vision, etc.'
+    },
+    {
+      id: 'cognitiveImpairment',
+      label: 'COGNITIVE IMPAIRMENT',
+      icon: 'fa-brain',
+      description: 'Altered awareness of surroundings, impaired judgment, impaired memory'
+    }
   ];
 
   // Calcular la puntuación total cuando cambian los datos del formulario
@@ -35,6 +102,12 @@ const MAHC10Modal = ({ isOpen, onClose, initialData = null }) => {
         total += 1;
       }
     });
+    
+    // Si el score ha cambiado y no es la carga inicial, triggerea animación
+    if (formData.totalScore !== total && Object.values(formData).some(val => val !== initialData?.val)) {
+      setAnimateScore(true);
+      setTimeout(() => setAnimateScore(false), 800);
+    }
     
     setFormData(prevData => ({
       ...prevData,
@@ -89,6 +162,11 @@ const MAHC10Modal = ({ isOpen, onClose, initialData = null }) => {
     return 'low-risk';
   };
 
+  // Obtener porcentaje para la visualización del medidor
+  const getRiskPercentage = () => {
+    return (formData.totalScore / 10) * 100;
+  };
+
   // Si el modal no está abierto, no renderizar nada
   if (!isOpen) return null;
 
@@ -106,216 +184,97 @@ const MAHC10Modal = ({ isOpen, onClose, initialData = null }) => {
         </div>
         
         <div className="modal-content">
-          <div className="info-note">
-            <p>Prior scores are for reference only. To print previous scores please type in additional boxes below.</p>
+          <div className="info-banner">
+            <div className="banner-content">
+              <div className="banner-icon">
+                <i className="fas fa-info-circle"></i>
+              </div>
+              <div className="banner-text">
+                <p>The MAHC-10 is a comprehensive fall risk assessment tool to identify patients at risk for falls in the home setting. A score of 4 or higher indicates a high fall risk.</p>
+              </div>
+            </div>
           </div>
           
-          <div className="instructions-panel">
-            <p>Information may be gathered from medical record, assessment and if applicable, the patient/caregiver.</p>
-            <p>Beyond protocols listed below, scoring should be based on your clinical judgment.</p>
+          <div className="risk-score-container">
+            <div className={`risk-gauge ${getRiskClass()} ${animateScore ? 'animate' : ''}`}>
+              <div className="gauge-background">
+                <div className="gauge-fill" style={{ width: `${getRiskPercentage()}%` }}></div>
+              </div>
+              <div className="gauge-markers">
+                <div className="marker low" data-value="Low (0-3)"></div>
+                <div className="marker high" data-value="High (4-10)"></div>
+                <div className="divider"></div>
+              </div>
+              <div className="gauge-pointer" style={{ left: `${getRiskPercentage()}%` }}>
+                <div className="pointer"></div>
+                <div className="pointer-label">{formData.totalScore}</div>
+              </div>
+            </div>
+            
+            <div className="risk-summary">
+              <div className={`risk-level ${getRiskClass()}`}>
+                <div className="level-icon">
+                  <i className={`fas ${formData.totalScore >= 4 ? 'fa-exclamation-triangle' : 'fa-shield-alt'}`}></i>
+                </div>
+                <div className="level-details">
+                  <h3>{getRiskLevel()}</h3>
+                  <p>{formData.totalScore >= 4 ? 
+                    'Implement fall prevention interventions' : 
+                    'Continue to monitor and reassess as needed'}
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
           
           <div className="assessment-grid">
-            <div className="assessment-item">
-              <div className="item-label">AGE 65+:</div>
-              <div className="item-field">
-                <select 
-                  value={formData.age65Plus}
-                  onChange={(e) => handleChange('age65Plus', e.target.value)}
-                >
-                  {yesNoOptions.map(option => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
+            {assessmentItems.map(item => (
+              <div key={item.id} className={`assessment-card ${formData[item.id] === 'Yes' ? 'active' : ''}`}>
+                <div className="card-header">
+                  <div className="header-icon">
+                    <i className={`fas ${item.icon}`}></i>
+                  </div>
+                  <h3>{item.label}</h3>
+                </div>
+                
+                <div className="card-content">
+                  <p className="item-description">{item.description}</p>
+                  
+                  <div className="selection-buttons">
+                    {yesNoOptions.map(option => (
+                      <button
+                        key={option.value}
+                        type="button"
+                        className={`selection-btn ${option.value.toLowerCase()} ${formData[item.id] === option.value ? 'selected' : ''}`}
+                        onClick={() => handleChange(item.id, option.value)}
+                      >
+                        <i className={`fas ${option.icon}`}></i>
+                        <span>{option.label}</span>
+                        {option.value === 'Yes' && <span className="points-value">+1</span>}
+                      </button>
+                    ))}
+                  </div>
+                </div>
               </div>
-            </div>
-            
-            <div className="assessment-item">
-              <div className="item-label">IMPAIRED FUNCTIONAL MOBILITY:</div>
-              <div className="item-field">
-                <select 
-                  value={formData.impairedFunctionalMobility}
-                  onChange={(e) => handleChange('impairedFunctionalMobility', e.target.value)}
-                >
-                  {yesNoOptions.map(option => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-            
-            <div className="assessment-item">
-              <div className="item-label">DIAGNOSIS (3 OR MORE CO-EXISTING):</div>
-              <div className="item-field">
-                <select 
-                  value={formData.threeOrMoreDiagnoses}
-                  onChange={(e) => handleChange('threeOrMoreDiagnoses', e.target.value)}
-                >
-                  {yesNoOptions.map(option => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-            
-            <div className="assessment-item">
-              <div className="item-label">ENVIRONMENTAL HAZARDS:</div>
-              <div className="item-field">
-                <select 
-                  value={formData.environmentalHazards}
-                  onChange={(e) => handleChange('environmentalHazards', e.target.value)}
-                >
-                  {yesNoOptions.map(option => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-            
-            <div className="assessment-item">
-              <div className="item-label">PRIOR HISTORY OF FALLS WITHIN 3 MONTHS:</div>
-              <div className="item-field">
-                <select 
-                  value={formData.fallHistory}
-                  onChange={(e) => handleChange('fallHistory', e.target.value)}
-                >
-                  {yesNoOptions.map(option => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-            
-            <div className="assessment-item">
-              <div className="item-label">POLY PHARMACY (4 OR MORE PRESCRIPTIONS - ANY TYPE):</div>
-              <div className="item-field">
-                <select 
-                  value={formData.polyPharmacy}
-                  onChange={(e) => handleChange('polyPharmacy', e.target.value)}
-                >
-                  {yesNoOptions.map(option => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-            
-            <div className="assessment-item">
-              <div className="item-label">INCONTINENCE:</div>
-              <div className="item-field">
-                <select value={formData.incontinence}
-                  onChange={(e) => handleChange('incontinence', e.target.value)}
-                >
-                  {yesNoOptions.map(option => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-            
-            <div className="assessment-item">
-              <div className="item-label">PAIN AFFECTING LEVEL OF FUNCTION:</div>
-              <div className="item-field">
-                <select 
-                  value={formData.painAffectingFunction}
-                  onChange={(e) => handleChange('painAffectingFunction', e.target.value)}
-                >
-                  {yesNoOptions.map(option => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-            
-            <div className="assessment-item">
-              <div className="item-label">VISUAL IMPAIRMENT:</div>
-              <div className="item-field">
-                <select 
-                  value={formData.visualImpairment}
-                  onChange={(e) => handleChange('visualImpairment', e.target.value)}
-                >
-                  {yesNoOptions.map(option => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-            
-            <div className="assessment-item">
-              <div className="item-label">COGNITIVE IMPAIRMENT:</div>
-              <div className="item-field">
-                <select 
-                  value={formData.cognitiveImpairment}
-                  onChange={(e) => handleChange('cognitiveImpairment', e.target.value)}
-                >
-                  {yesNoOptions.map(option => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
+            ))}
           </div>
           
-          <div className="total-score-section">
-            <div className={`score-card ${getRiskClass()}`}>
-              <div className="score-header">
-                <h3>TOTAL: {formData.totalScore} out of 10</h3>
-              </div>
-              <div className="score-content">
-                <div className="risk-indicator">
-                  <div className="indicator-label">Fall Risk Level:</div>
-                  <div className="indicator-value">{getRiskLevel()}</div>
-                </div>
-                <div className="risk-scale">
-                  <div className="scale-bar">
-                    <div className="scale-segments">
-                      <div className="segment low">0-3</div>
-                      <div className="segment high">4-10</div>
-                    </div>
-                    <div className="pointer" style={{ left: `${Math.min(100, (formData.totalScore / 10) * 100)}%` }}></div>
-                  </div>
-                </div>
-                <div className="interpretation">
-                  <ul>
-                    <li><strong>Score of 4 or more</strong> - Implement fall prevention interventions</li>
-                    <li><strong>Score of 0-3</strong> - Continue to monitor and reassess as needed</li>
-                  </ul>
-                  <div className="note">
-                    <i className="fas fa-info-circle"></i>
-                    <p>This tool is to be used in conjunction with your agency's fall prevention program and clinical judgment.</p>
-                  </div>
-                </div>
-              </div>
+          <div className="assessment-note">
+            <div className="note-icon">
+              <i className="fas fa-sticky-note"></i>
             </div>
+            <p>This tool is to be used in conjunction with your agency's fall prevention program and clinical judgment. Complete this assessment at the start of care and at recertification or following a significant change in condition.</p>
           </div>
         </div>
         
         <div className="modal-footer">
           <button className="cancel-btn" onClick={() => onClose()}>
-            CANCEL
+            <i className="fas fa-times"></i>
+            Cancel
           </button>
           <button className="submit-btn" onClick={handleSubmit}>
-            SUBMIT
+            <i className="fas fa-check"></i>
+            Submit
           </button>
         </div>
       </div>

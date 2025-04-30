@@ -830,6 +830,8 @@
   // Lista de visitas con efectos ultramodernos
   .visits-list-container {
     padding: 30px;
+    max-height: 100%;
+    min-height: 1100px;
     
     .visits-header {
       display: flex;
@@ -4054,3 +4056,998 @@
     --color-stop-2: #6366f1;
     --color-stop-3: #3b82f6;
   }
+
+
+  // Estilos adicionales para los nuevos componentes del modal de visita
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(15, 23, 42, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  
+  .modal-content {
+    width: 90%;
+    max-width: 900px;
+    max-height: 90vh;
+    background-color: #fff;
+    border-radius: 16px;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    animation: modalFadeIn 0.3s ease-out forwards;
+    
+    @keyframes modalFadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    &.modal-large {
+      width: 90%;
+      max-width: 1000px;
+    }
+    
+    &.delete-confirm-modal {
+      max-width: 500px;
+    }
+    
+    .modal-header {
+      padding: 16px 24px;
+      background-color: #1e293b;
+      color: #fff;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      
+      h3 {
+        margin: 0;
+        font-size: 18px;
+        font-weight: 600;
+      }
+      
+      &.delete-header {
+        background-color: #ef4444;
+      }
+      
+      .close-btn {
+        background: transparent;
+        border: none;
+        color: #fff;
+        font-size: 18px;
+        cursor: pointer;
+        width: 30px;
+        height: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        transition: all 0.2s ease;
+        
+        &:hover {
+          background-color: rgba(255, 255, 255, 0.1);
+        }
+      }
+    }
+    
+    .modal-body {
+      padding: 24px;
+      overflow-y: auto;
+      max-height: calc(90vh - 135px);
+      
+      .error-message {
+        background-color: rgba(254, 226, 226, 0.6);
+        border: 1px solid #fca5a5;
+        color: #dc2626;
+        padding: 12px 16px;
+        border-radius: 8px;
+        margin-bottom: 16px;
+        font-size: 14px;
+        display: flex;
+        align-items: center;
+        
+        &::before {
+          content: "\f06a";
+          font-family: "Font Awesome 5 Free";
+          font-weight: 900;
+          margin-right: 8px;
+        }
+      }
+      
+      .visit-tabs {
+        .tabs-header {
+          display: flex;
+          border-bottom: 1px solid #e2e8f0;
+          margin-bottom: 20px;
+          
+          .tab-button {
+            padding: 12px 20px;
+            background: transparent;
+            border: none;
+            border-bottom: 3px solid transparent;
+            color: #64748b;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            
+            i {
+              font-size: 16px;
+              opacity: 0.7;
+            }
+            
+            &:hover {
+              color: #334155;
+              background: rgba(241, 245, 249, 0.6);
+              
+              i {
+                opacity: 1;
+              }
+            }
+            
+            &.active {
+              color: #4361ee;
+              border-bottom: 3px solid #4361ee;
+              
+              i {
+                opacity: 1;
+              }
+            }
+          }
+        }
+      }
+      
+      .completed-visit-view {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 24px;
+        
+        @media (max-width: 768px) {
+          grid-template-columns: 1fr;
+        }
+        
+        h4 {
+          margin-top: 0;
+          margin-bottom: 16px;
+          font-size: 16px;
+          font-weight: 600;
+          color: #1e293b;
+          padding-bottom: 8px;
+          border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .visit-details-column {
+          .update-button {
+            margin-top: 20px;
+            width: 100%;
+            padding: 12px;
+            background-color: #4361ee;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            
+            &:hover:not(:disabled) {
+              background-color: #3730a3;
+            }
+            
+            &:disabled {
+              background-color: #a5b4fc;
+              cursor: not-allowed;
+            }
+          }
+        }
+        
+        .evaluation-column {
+          .evaluation-section {
+            background-color: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            overflow: hidden;
+            
+            .evaluation-header {
+              background-color: #1e293b;
+              color: #fff;
+              padding: 12px 16px;
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              
+              h4 {
+                color: #fff;
+                margin: 0;
+                border: none;
+                padding: 0;
+              }
+              
+              .status-badge {
+                font-size: 12px;
+                font-weight: 600;
+                padding: 4px 8px;
+                border-radius: 12px;
+                
+                &.incomplete {
+                  background-color: #fcd34d;
+                  color: #92400e;
+                }
+                
+                &.complete {
+                  background-color: #4ade80;
+                  color: #166534;
+                }
+              }
+            }
+            
+            .evaluation-info {
+              padding: 12px 16px;
+              border-bottom: 1px solid #e2e8f0;
+              
+              p {
+                margin: 0;
+                font-size: 14px;
+                color: #475569;
+              }
+            }
+            
+            .evaluation-actions {
+              padding: 12px 16px;
+              display: flex;
+              gap: 12px;
+              
+              button {
+                flex: 1;
+                padding: 8px 12px;
+                font-size: 14px;
+                font-weight: 600;
+                border: none;
+                border-radius: 8px;
+                cursor: pointer;
+                transition: all 0.2s ease;
+                
+                &.edit-button {
+                  background-color: #10b981;
+                  color: #fff;
+                  
+                  &:hover {
+                    background-color: #059669;
+                  }
+                }
+                
+                &.view-button {
+                  background-color: #3b82f6;
+                  color: #fff;
+                  
+                  &:hover {
+                    background-color: #2563eb;
+                  }
+                }
+              }
+            }
+          }
+          
+          .documents-section {
+            background-color: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            padding: 16px;
+            
+            .no-documents {
+              color: #64748b;
+              font-style: italic;
+              font-size: 14px;
+              text-align: center;
+              padding: 20px 0;
+            }
+            
+            .documents-list {
+              list-style: none;
+              padding: 0;
+              margin: 0 0 16px 0;
+              
+              .document-item {
+                display: flex;
+                align-items: center;
+                padding: 8px 12px;
+                background-color: #fff;
+                border: 1px solid #e2e8f0;
+                border-radius: 8px;
+                margin-bottom: 8px;
+                
+                &:last-child {
+                  margin-bottom: 0;
+                }
+                
+                .document-icon {
+                  margin-right: 12px;
+                  color: #475569;
+                  font-size: 18px;
+                }
+                
+                .document-info {
+                  flex: 1;
+                  
+                  .document-name {
+                    font-size: 14px;
+                    color: #334155;
+                    display: block;
+                  }
+                  
+                  .document-size {
+                    font-size: 12px;
+                    color: #64748b;
+                  }
+                }
+                
+                .remove-document {
+                  background: none;
+                  border: none;
+                  color: #94a3b8;
+                  cursor: pointer;
+                  padding: 4px;
+                  border-radius: 4px;
+                  
+                  &:hover {
+                    color: #ef4444;
+                    background-color: rgba(254, 226, 226, 0.4);
+                  }
+                }
+              }
+            }
+            
+            .upload-container {
+              display: flex;
+              gap: 8px;
+              
+              .file-input-container {
+                flex: 1;
+                position: relative;
+                display: flex;
+                
+                .hidden-file-input {
+                  position: absolute;
+                  width: 0.1px;
+                  height: 0.1px;
+                  opacity: 0;
+                  overflow: hidden;
+                  z-index: -1;
+                }
+                
+                .file-label {
+                  flex: 1;
+                  display: block;
+                  overflow: hidden;
+                  white-space: nowrap;
+                  text-overflow: ellipsis;
+                  padding: 8px 12px;
+                  font-size: 14px;
+                  color: #64748b;
+                  background-color: #fff;
+                  border: 1px solid #e2e8f0;
+                  border-radius: 8px 0 0 8px;
+                  border-right: none;
+                }
+                
+                .choose-file-btn {
+                  padding: 8px 12px;
+                  font-size: 13px;
+                  font-weight: 600;
+                  color: #475569;
+                  background-color: #f1f5f9;
+                  border: 1px solid #e2e8f0;
+                  border-radius: 0 8px 8px 0;
+                  cursor: pointer;
+                  
+                  &:hover {
+                    background-color: #e2e8f0;
+                  }
+                }
+              }
+              
+              .upload-btn {
+                padding: 8px 16px;
+                font-size: 14px;
+                font-weight: 600;
+                color: #fff;
+                background-color: #3b82f6;
+                border: none;
+                border-radius: 8px;
+                cursor: pointer;
+                
+                &:hover:not(:disabled) {
+                  background-color: #2563eb;
+                }
+                
+                &:disabled {
+                  background-color: #93c5fd;
+                  cursor: not-allowed;
+                }
+              }
+            }
+          }
+          
+          .forms-section {
+            background-color: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            padding: 16px;
+            
+            .forms-buttons {
+              display: grid;
+              grid-template-columns: 1fr 1fr;
+              gap: 8px;
+              
+              .form-btn {
+                padding: 8px 12px;
+                font-size: 13px;
+                font-weight: 600;
+                color: #fff;
+                background-color: #10b981;
+                border: none;
+                border-radius: 6px;
+                cursor: pointer;
+                transition: all 0.2s ease;
+                
+                &:hover {
+                  filter: brightness(0.9);
+                }
+                
+                &.other-forms {
+                  background-color: #3b82f6;
+                }
+                
+                &.sticky {
+                  background-color: #f59e0b;
+                }
+                
+                &.expense {
+                  background-color: #6366f1;
+                }
+              }
+            }
+          }
+          
+          .signatures-section {
+            background-color: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 16px;
+            
+            .signature-tabs {
+              display: flex;
+              border-bottom: 1px solid #e2e8f0;
+              margin-bottom: 16px;
+              
+              .signature-tab {
+                padding: 8px 16px;
+                background: transparent;
+                border: none;
+                border-bottom: 2px solid transparent;
+                color: #64748b;
+                font-size: 14px;
+                font-weight: 600;
+                cursor: pointer;
+                
+                &:hover {
+                  color: #334155;
+                }
+                
+                &.active {
+                  color: #4361ee;
+                  border-bottom: 2px solid #4361ee;
+                }
+              }
+            }
+            
+            .signature-content {
+              min-height: 200px;
+              
+              .signature-pad-container {
+                .outside-checkbox {
+                  margin-bottom: 12px;
+                  display: flex;
+                  align-items: center;
+                  
+                  input[type="checkbox"] {
+                    margin-right: 8px;
+                  }
+                  
+                  label {
+                    font-size: 14px;
+                    color: #64748b;
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+      
+      // Estilos para la pestaña de detalles regulares
+      .details-tab {
+        .action-buttons {
+          display: flex;
+          gap: 16px;
+          margin-top: 24px;
+          
+          .action-button {
+            flex: 1;
+            padding: 12px 16px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            
+            &.missed {
+              background-color: #fee2e2;
+              border: 1px solid #fca5a5;
+              color: #b91c1c;
+              
+              &:hover {
+                background-color: #fecaca;
+              }
+            }
+            
+            &.reschedule {
+              background-color: #dbeafe;
+              border: 1px solid #93c5fd;
+              color: #1e40af;
+              
+              &:hover {
+                background-color: #bfdbfe;
+              }
+            }
+          }
+        }
+      }
+      
+      // Estilos para la pestaña de visita perdida
+      .missed-visit-tab {
+        h4 {
+          margin-top: 0;
+          margin-bottom: 20px;
+          font-size: 18px;
+          font-weight: 600;
+          color: #1e293b;
+        }
+        
+        .form-check {
+          display: flex;
+          align-items: center;
+          margin-bottom: 12px;
+          
+          input[type="checkbox"] {
+            margin-right: 10px;
+            width: 18px;
+            height: 18px;
+          }
+          
+          label {
+            font-size: 14px;
+            color: #475569;
+          }
+        }
+      }
+      
+      // Estilos para la pestaña de reprogramación
+      .reschedule-tab {
+        .info-message {
+          background-color: #dbeafe;
+          border: 1px solid #93c5fd;
+          border-radius: 8px;
+          padding: 12px 16px;
+          margin-bottom: 20px;
+          display: flex;
+          align-items: flex-start;
+          gap: 10px;
+          
+          i {
+            color: #2563eb;
+            font-size: 16px;
+            margin-top: 2px;
+          }
+          
+          p {
+            margin: 0;
+            color: #1e40af;
+            font-size: 14px;
+            line-height: 1.5;
+          }
+        }
+        
+        .required {
+          color: #dc2626;
+        }
+        
+        .form-input.readonly {
+          background-color: #f8fafc;
+          cursor: not-allowed;
+        }
+      }
+      
+      // Estilos para inputs
+      .form-group {
+        margin-bottom: 16px;
+        
+        label {
+          display: block;
+          font-size: 14px;
+          font-weight: 600;
+          color: #475569;
+          margin-bottom: 8px;
+        }
+        
+        .form-input {
+          width: 100%;
+          padding: 12px 16px;
+          font-size: 14px;
+          border: 1px solid #cbd5e1;
+          border-radius: 8px;
+          transition: all 0.2s ease;
+          
+          &:focus {
+            outline: none;
+            border-color: #4361ee;
+            box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.1);
+          }
+          
+          &::placeholder {
+            color: #94a3b8;
+          }
+        }
+      }
+      
+      .form-row {
+        display: flex;
+        gap: 16px;
+        
+        .form-group {
+          flex: 1;
+        }
+        
+        &.time-row {
+          .time-group {
+            .time-inputs {
+              display: flex;
+              align-items: center;
+              gap: 5px;
+              
+              select {
+                flex: 1;
+                padding: 12px;
+                font-size: 14px;
+                border: 1px solid #cbd5e1;
+                border-radius: 8px;
+                
+                &:focus {
+                  outline: none;
+                  border-color: #4361ee;
+                }
+              }
+              
+              .time-separator {
+                font-weight: bold;
+                color: #64748b;
+                margin: 0 -2px;
+              }
+            }
+          }
+        }
+      }
+      
+      .checkbox-group {
+        display: flex;
+        align-items: center;
+        
+        label {
+          margin-bottom: 0;
+          margin-right: 8px;
+        }
+        
+        .checkbox-container {
+          position: relative;
+          width: 20px;
+          height: 20px;
+          
+          input[type="checkbox"] {
+            position: absolute;
+            opacity: 0;
+            cursor: pointer;
+            height: 0;
+            width: 0;
+          }
+          
+          .checkbox-label {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 20px;
+            width: 20px;
+            background-color: #fff;
+            border: 1px solid #cbd5e1;
+            border-radius: 4px;
+            
+            &::after {
+              content: "";
+              position: absolute;
+              display: none;
+              left: 7px;
+              top: 3px;
+              width: 5px;
+              height: 10px;
+              border: solid white;
+              border-width: 0 2px 2px 0;
+              transform: rotate(45deg);
+            }
+          }
+          
+          input[type="checkbox"]:checked ~ .checkbox-label {
+            background-color: #4361ee;
+            border-color: #4361ee;
+            
+            &::after {
+              display: block;
+            }
+          }
+        }
+      }
+    }
+    
+    .modal-footer {
+      padding: 16px 24px;
+      background-color: #f8fafc;
+      border-top: 1px solid #e2e8f0;
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+      
+      &.delete-footer {
+        display: flex;
+        justify-content: space-between;
+      }
+      
+      .cancel-btn {
+        padding: 10px 20px;
+        font-size: 14px;
+        font-weight: 600;
+        color: #475569;
+        background-color: #fff;
+        border: 1px solid #cbd5e1;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        
+        &:hover:not(:disabled) {
+          background-color: #f1f5f9;
+        }
+        
+        &:disabled {
+          opacity: 0.6;
+          cursor: not-allowed;
+        }
+      }
+      
+      .save-btn {
+        padding: 10px 20px;
+        font-size: 14px;
+        font-weight: 600;
+        color: #fff;
+        background-color: #4361ee;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        
+        &:hover:not(:disabled) {
+          background-color: #3730a3;
+        }
+        
+        &:disabled {
+          background-color: #a5b4fc;
+          cursor: not-allowed;
+        }
+        
+        .btn-loading {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+        }
+      }
+      
+      .delete-confirm-btn {
+        padding: 10px 20px;
+        font-size: 14px;
+        font-weight: 600;
+        color: #fff;
+        background-color: #ef4444;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        
+        &:hover:not(:disabled) {
+          background-color: #dc2626;
+        }
+        
+        &:disabled {
+          background-color: #fca5a5;
+          cursor: not-allowed;
+        }
+      }
+    }
+  }
+}
+
+// Estilos específicos para el modal de eliminación
+.delete-body {
+  display: flex;
+  padding: 20px;
+  
+  .delete-warning-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 60px;
+    height: 60px;
+    background-color: #fee2e2;
+    border-radius: 50%;
+    margin-right: 20px;
+    flex-shrink: 0;
+    
+    i {
+      font-size: 28px;
+      color: #dc2626;
+    }
+  }
+  
+  .delete-message {
+    h4 {
+      margin-top: 0;
+      margin-bottom: 12px;
+      font-size: 18px;
+      font-weight: 600;
+      color: #1e293b;
+    }
+    
+    p {
+      margin: 0 0 8px;
+      font-size: 14px;
+      color: #475569;
+      line-height: 1.5;
+      
+      &.delete-warning {
+        color: #dc2626;
+        font-weight: 600;
+        margin-top: 12px;
+      }
+    }
+  }
+}
+
+// Estilos para el componente de firma
+.signature-pad {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  
+  .signature-label {
+    font-size: 14px;
+    font-weight: 600;
+    color: #475569;
+    margin-bottom: 8px;
+  }
+  
+  canvas {
+    width: 100%;
+    height: 200px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    cursor: crosshair;
+    background-color: #fff;
+  }
+  
+  .signature-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 8px;
+    
+    .clear-btn {
+      padding: 6px 12px;
+      font-size: 13px;
+      font-weight: 600;
+      color: #475569;
+      background-color: #f1f5f9;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      
+      i {
+        font-size: 12px;
+      }
+      
+      &:hover {
+        background-color: #e2e8f0;
+      }
+      
+      &:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+    }
+  }
+  
+  &.disabled {
+    canvas {
+      background-color: #f8fafc;
+      cursor: not-allowed;
+    }
+  }
+}
+
+// Mejoras a los estilos existentes para visitas en el calendario
+.calendar-day {
+  .visit-status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+}
+
+// Responsividad
+@media (max-width: 768px) {
+  .modal-overlay {
+    .modal-content {
+      width: 95%;
+      
+      .modal-body {
+        .completed-visit-view {
+          grid-template-columns: 1fr;
+        }
+        
+        .form-row {
+          flex-direction: column;
+        }
+        
+        .action-buttons {
+          flex-direction: column;
+        }
+      }
+      
+      .modal-footer {
+        flex-direction: column;
+        
+        button {
+          width: 100%;
+        }
+      }
+    }
+  }
+}
