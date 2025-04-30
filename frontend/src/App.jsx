@@ -1,3 +1,4 @@
+// Modified App.jsx with Support Modal Implementation
 import React from 'react';
 import { HashRouter, Routes, Route, Navigate, Outlet } from 'react-router-dom';
 import { AuthProvider } from './components/login/AuthContext';
@@ -9,34 +10,40 @@ import ResetVerifyPage from './components/login/ResetVerifyPage';
 import GeoRestrictionProvider from './components/login/GeoRestrictionProvider';
 import SessionTimeoutContainer from './components/login/SessionTimeoutContainer';
 import ConcurrentSessionContainer from './components/login/ConcurrentSessionContainer';
-// Importar componentes para Developer
+
+// Import developer components
 import DevHomePage from './components/developer/welcome/Welcome';
-import DevSupportPage from './components/developer/support/SupportPage';
 import DevReferralsPage from './components/developer/referrals/ReferralsPage';
 import DevCreateNF from './components/developer/referrals/CreateNF/CreateNF';
 import DevPatientsPage from './components/developer/patients/PatientsPage';
-import DevPatientInfoPage from './components/developer/patients/Patients/InfoPaciente/PatientInfoPage'; // Nueva ruta actualizada
+import DevPatientInfoPage from './components/developer/patients/Patients/InfoPaciente/PatientInfoPage';
 import DevStaffingPage from './components/developer/patients/staffing/StaffingPage';
 import DevAccounting from './components/developer/accounting/Accounting';
 import DevUserProfile from './components/developer/profile/UserProfile';
 
+// Import administrator components
 import AdminHomePage from './components/admin/welcome/Welcome';
 import AdminSupportPage from './components/admin/support/SupportPage';
 import AdminReferralsPage from './components/admin/referrals/ReferralsPage';
 import AdminCreateNF from './components/admin/referrals/CreateNF/CreateNF';
 import AdminPatientsPage from './components/admin/patients/PatientsPage';
-import AdminPatientInfoPage from './components/admin/patients/Patients/InfoPaciente/PatientInfoPage'; // Nueva ruta actualizada
+import AdminPatientInfoPage from './components/admin/patients/Patients/InfoPaciente/PatientInfoPage';
 import AdminStaffingPage from './components/admin/patients/staffing/StaffingPage';
 import AdminAccounting from './components/admin/accounting/Accounting';
 import AdminUserProfile from './components/admin/profile/UserProfile';
 
+// Import therapist components
 import TBHomePage from './components/pt-ot-st/welcome/Welcome';
-import TBSupportPage from './components/pt-ot-st/support/SupportPage'; // No se usará por restricción
+import TBSupportPage from './components/pt-ot-st/support/SupportPage';
 import TBPatientsPage from './components/pt-ot-st/patients/PatientsPage';
-import TBPatientInfoPage from './components/pt-ot-st/patients/Patients/InfoPaciente/PatientInfoPage'; // Nueva ruta actualizada
+import TBPatientInfoPage from './components/pt-ot-st/patients/Patients/InfoPaciente/PatientInfoPage';
 import TBUserProfile from './components/pt-ot-st/profile/UserProfile';
-import TBReferralsPage from './components/pt-ot-st/referrals/ReferralsPage'; // Componente para referrals de terapeutas
-// Importar estilos para componentes nuevos
+import TBReferralsPage from './components/pt-ot-st/referrals/ReferralsPage';
+
+// Import new support modal components for Developer role
+import FloatingSupportButton from './components/developer/support/FloatingSupportButton';
+
+// Import styles
 import './styles/Login/Login.scss';
 import './styles/Login/AuthLoadingModal.scss';
 import './styles/Login/PremiumLoadingModal.scss'; 
@@ -45,25 +52,28 @@ import './styles/Login/SessionTimeoutWarning.scss';
 import './styles/Login/ConcurrentSessionModal.scss';
 import './styles/Login/GeoRestrictionModal.scss';
 import './styles/Login/ResetPassword.scss';
-// Importar Font Awesome
+
+// Import Font Awesome
 import '@fortawesome/fontawesome-free/css/all.min.css';
-// Define therapy roles para simplificar verificaciones
+
+// Define roles
 const THERAPY_ROLES = ['PT', 'OT', 'ST', 'PTA', 'COTA', 'STA'];
 const ADMIN_ROLES = ['Administrator', 'Developer'];
 const ALL_ROLES = [...THERAPY_ROLES, ...ADMIN_ROLES, 'Supportive', 'Support', 'Agency'];
+
 function App() {
   return (
     <GeoRestrictionProvider>
       <AuthProvider>
         <HashRouter>
           <Routes>
-            {/* Rutas públicas */}
+            {/* Public routes */}
             <Route path="/" element={<LoginCard />} />
             <Route path="/reset-password" element={<ResetVerifyPage />} />
             
-            {/* Rutas protegidas */}
+            {/* Protected routes */}
             <Route element={<ProtectedRoute />}>
-              {/* Componentes de sesión globales (timeout, concurrencia) */}
+              {/* Global session components */}
               <Route element={
                 <>
                   <SessionTimeoutContainer />
@@ -71,23 +81,62 @@ function App() {
                   <Outlet />
                 </>
               }>
-                {/* Ruta para redireccionar al home basado en el rol */}
+                {/* Role-based redirect route */}
                 <Route path="/home" element={<RoleRedirect />} />
                 
-                {/* Rutas específicas para Developer - con acceso completo */}
+                {/* Developer-specific routes with floating support button instead of support page */}
                 <Route element={<RoleBasedRoute allowedRoles={['Developer']} />}>
-                  <Route path="/developer/homePage" element={<DevHomePage />} />
-                  <Route path="/developer/support" element={<DevSupportPage />} />
-                  <Route path="/developer/referrals" element={<DevReferralsPage />} />
-                  <Route path="/developer/createNewReferral" element={<DevCreateNF />} />
-                  <Route path="/developer/patients" element={<DevPatientsPage />} />
-                  <Route path="/developer/paciente/:patientId" element={<DevPatientInfoPage />} />
-                  <Route path="/developer/staffing" element={<DevStaffingPage />} />
-                  <Route path="/developer/accounting" element={<DevAccounting />} />
-                  <Route path="/developer/profile" element={<DevUserProfile />} />
+                  <Route path="/developer/homePage" element={
+                    <>
+                      <DevHomePage />
+                      <FloatingSupportButton />
+                    </>
+                  } />
+                  <Route path="/developer/referrals" element={
+                    <>
+                      <DevReferralsPage />
+                      <FloatingSupportButton />
+                    </>
+                  } />
+                  <Route path="/developer/createNewReferral" element={
+                    <>
+                      <DevCreateNF />
+                      <FloatingSupportButton />
+                    </>
+                  } />
+                  <Route path="/developer/patients" element={
+                    <>
+                      <DevPatientsPage />
+                      <FloatingSupportButton />
+                    </>
+                  } />
+                  <Route path="/developer/paciente/:patientId" element={
+                    <>
+                      <DevPatientInfoPage />
+                      <FloatingSupportButton />
+                    </>
+                  } />
+                  <Route path="/developer/staffing" element={
+                    <>
+                      <DevStaffingPage />
+                      <FloatingSupportButton />
+                    </>
+                  } />
+                  <Route path="/developer/accounting" element={
+                    <>
+                      <DevAccounting />
+                      <FloatingSupportButton />
+                    </>
+                  } />
+                  <Route path="/developer/profile" element={
+                    <>
+                      <DevUserProfile />
+                      <FloatingSupportButton />
+                    </>
+                  } />
                 </Route>
                 
-                {/* Rutas específicas para Administrator - sin acceso a support */}
+                {/* Administrator-specific routes */}
                 <Route element={<RoleBasedRoute allowedRoles={['Administrator']} />}>
                   <Route path="/administrator/homePage" element={<AdminHomePage />} />
                   <Route path="/administrator/referrals" element={<AdminReferralsPage />} />
@@ -99,29 +148,44 @@ function App() {
                   <Route path="/administrator/profile" element={<AdminUserProfile />} />
                 </Route>
                 
-                {/* Support page - SOLO para Developers */}
-                <Route element={<RoleBasedRoute allowedRoles={['Developer']} />}>
-                  <Route path="/support" element={<DevSupportPage />} />
+                {/* Support page - For Admin and Therapy roles, but NOT for Developers */}
+                <Route element={<RoleBasedRoute allowedRoles={[...THERAPY_ROLES, 'Administrator']} />}>
+                  <Route path="/support" element={<RoleRedirect />} />
                 </Route>
                 
-                {/* Rutas de Accounting y System Management - SOLO para Admins y Developers */}
+                {/* Administrator's support page */}
+                <Route element={<RoleBasedRoute allowedRoles={['Administrator']} />}>
+                  <Route path="/administrator/support" element={<AdminSupportPage />} />
+                </Route>
+                
+                {/* Therapy roles support page */}
+                <Route element={<RoleBasedRoute allowedRoles={THERAPY_ROLES} />}>
+                  <Route path="/pt/support" element={<TBSupportPage />} />
+                  <Route path="/ot/support" element={<TBSupportPage />} />
+                  <Route path="/st/support" element={<TBSupportPage />} />
+                  <Route path="/pta/support" element={<TBSupportPage />} />
+                  <Route path="/cota/support" element={<TBSupportPage />} />
+                  <Route path="/sta/support" element={<TBSupportPage />} />
+                </Route>
+                
+                {/* Accounting and System Management - Only for Admins and Developers */}
                 <Route element={<RoleBasedRoute allowedRoles={['Administrator', 'Developer']} />}>
                   <Route path="/accounting" element={<RoleRedirect />} />
                   <Route path="/management" element={<RoleRedirect />} />
                 </Route>
                 
-                {/* Rutas de Referrals - para TODOS los roles */}
+                {/* Referrals - For all roles */}
                 <Route element={<RoleBasedRoute allowedRoles={ALL_ROLES} />}>
                   <Route path="/referrals" element={<RoleRedirect />} />
                 </Route>
                 
-                {/* Ruta de CreateNewReferral - SOLO para admins */}
+                {/* CreateNewReferral - Only for admin roles */}
                 <Route element={<RoleBasedRoute allowedRoles={ADMIN_ROLES} />}>
                   <Route path="/createNewReferral" element={<RoleRedirect />} />
                   <Route path="/staffing" element={<RoleRedirect />} />
                 </Route>
                 
-                {/* Rutas específicas para PT con acceso a referrals */}
+                {/* PT specific routes */}
                 <Route element={<RoleBasedRoute allowedRoles={['PT', 'PT - Administrator']} />}>
                   <Route path="/pt/homePage" element={<TBHomePage />} />
                   <Route path="/pt/patients" element={<TBPatientsPage />} />
@@ -130,7 +194,7 @@ function App() {
                   <Route path="/pt/referrals" element={<TBReferralsPage />} />
                 </Route>
                 
-                {/* Rutas específicas para OT con acceso a referrals */}
+                {/* OT specific routes */}
                 <Route element={<RoleBasedRoute allowedRoles={['OT', 'OT - Administrator']} />}>
                   <Route path="/ot/homePage" element={<TBHomePage />} />
                   <Route path="/ot/patients" element={<TBPatientsPage />} />
@@ -139,7 +203,7 @@ function App() {
                   <Route path="/ot/referrals" element={<TBReferralsPage />} />
                 </Route>
                 
-                {/* Rutas específicas para ST con acceso a referrals */}
+                {/* ST specific routes */}
                 <Route element={<RoleBasedRoute allowedRoles={['ST', 'ST - Administrator']} />}>
                   <Route path="/st/homePage" element={<TBHomePage />} />
                   <Route path="/st/patients" element={<TBPatientsPage />} />
@@ -148,7 +212,7 @@ function App() {
                   <Route path="/st/referrals" element={<TBReferralsPage />} />
                 </Route>
                 
-                {/* Rutas específicas para PTA con acceso a referrals */}
+                {/* PTA specific routes */}
                 <Route element={<RoleBasedRoute allowedRoles={['PTA']} />}>
                   <Route path="/pta/homePage" element={<TBHomePage />} />
                   <Route path="/pta/patients" element={<TBPatientsPage />} />
@@ -157,7 +221,7 @@ function App() {
                   <Route path="/pta/referrals" element={<TBReferralsPage />} />
                 </Route>
                 
-                {/* Rutas específicas para COTA con acceso a referrals */}
+                {/* COTA specific routes */}
                 <Route element={<RoleBasedRoute allowedRoles={['COTA']} />}>
                   <Route path="/cota/homePage" element={<TBHomePage />} />
                   <Route path="/cota/patients" element={<TBPatientsPage />} />
@@ -166,7 +230,7 @@ function App() {
                   <Route path="/cota/referrals" element={<TBReferralsPage />} />
                 </Route>
                 
-                {/* Rutas específicas para STA con acceso a referrals */}
+                {/* STA specific routes */}
                 <Route element={<RoleBasedRoute allowedRoles={['STA']} />}>
                   <Route path="/sta/homePage" element={<TBHomePage />} />
                   <Route path="/sta/patients" element={<TBPatientsPage />} />
@@ -175,7 +239,7 @@ function App() {
                   <Route path="/sta/referrals" element={<TBReferralsPage />} />
                 </Route>
                 
-                {/* Rutas específicas para Supportive/Support con acceso a referrals */}
+                {/* Supportive/Support specific routes */}
                 <Route element={<RoleBasedRoute allowedRoles={['Supportive', 'Support']} />}>
                   <Route path="/supportive/homePage" element={<TBHomePage />} />
                   <Route path="/supportive/patients" element={<TBPatientsPage />} />
@@ -184,7 +248,7 @@ function App() {
                   <Route path="/supportive/referrals" element={<TBReferralsPage />} />
                 </Route>
                 
-                {/* Rutas específicas para Agency con acceso a referrals */}
+                {/* Agency specific routes */}
                 <Route element={<RoleBasedRoute allowedRoles={['Agency']} />}>
                   <Route path="/agency/homePage" element={<TBHomePage />} />
                   <Route path="/agency/patients" element={<TBPatientsPage />} />
@@ -193,19 +257,19 @@ function App() {
                   <Route path="/agency/referrals" element={<TBReferralsPage />} />
                 </Route>
                 
-                {/* Ruta para pacientes - disponible para todos los roles */}
+                {/* Patient routes - available for all roles */}
                 <Route element={<RoleBasedRoute allowedRoles={ALL_ROLES} />}>
                   <Route path="/patients" element={<RoleRedirect />} />
                   <Route path="/paciente/:patientId" element={<RoleRedirect />} />
                   <Route path="/profile" element={<RoleRedirect />} />
                 </Route>
                 
-                {/* Ruta por defecto para homePage */}
+                {/* Default route for homePage */}
                 <Route path="/homePage" element={<RoleRedirect />} />
               </Route>
             </Route>
             
-            {/* Ruta por defecto - Redirige al login */}
+            {/* Default route - Redirects to login */}
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </HashRouter>
@@ -213,4 +277,5 @@ function App() {
     </GeoRestrictionProvider>
   );
 }
+
 export default App;

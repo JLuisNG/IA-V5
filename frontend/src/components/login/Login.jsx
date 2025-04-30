@@ -115,6 +115,17 @@ const Login = ({ onForgotPassword }) => {
       documents: "ID-54321",
       zip_code: "90211",
       birth_date: "1985-10-20"
+    },
+    {
+      username: "Supportive1*",
+      password: "Supportive1",
+      fullname: "Supportive Home Health",
+      email: "agency@example.com",
+      role: "Agency",
+      contact_number: "555-456-7890",
+      documents: "ID-67890",
+      zip_code: "90212",
+      birth_date: "1980-01-01"
     }
   ];
 

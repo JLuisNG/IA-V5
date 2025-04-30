@@ -2755,3 +2755,56 @@ $info-color: #3b82f6;
     }
   }
 }
+
+.form-grid {
+  .measurement-input {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+
+    input[type="number"] {
+      flex: 1;
+      width: 100%;
+      padding: 0.5rem;
+      border: 1px solid #d1d5db;
+      border-radius: 4px;
+      font-size: 1rem;
+      transition: border-color 0.2s;
+
+      &:focus {
+        outline: none;
+        border-color: #3b82f6;
+      }
+
+      &:disabled {
+        background-color: #f3f4f6;
+        cursor: not-allowed;
+      }
+    }
+
+    select {
+      padding: 0.5rem;
+      border: 1px solid #d1d5db;
+      border-radius: 4px;
+      font-size: 1rem;
+      background-color: #fff;
+      transition: border-color 0.2s;
+
+      &:focus {
+        outline: none;
+        border-color: #3b82f6;
+      }
+
+      &:disabled {
+        background-color: #f3f4f6;
+        cursor: not-allowed;
+      }
+    }
+  }
+
+  .form-text.text-muted {
+    margin-top: 0.25rem;
+    font-size: 0.85rem;
+    color: #6b7280;
+  }
+}
